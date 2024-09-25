@@ -14,28 +14,28 @@ public partial class RhRf69
     // Note that I have not had much success with FSK with Fd > ~5
     // You have to construct these by hand, using the data from the RF69 Datasheet :-(
     // or use the SX1231 starter kit software (Ctl-Alt-N to use that without a connected radio)
-    private const byte CONFIG_FSK = RhRf69.RH_RF69_DATAMODUL_DATAMODE_PACKET | RhRf69.RH_RF69_DATAMODUL_MODULATIONTYPE_FSK |
-                                    RhRf69.RH_RF69_DATAMODUL_MODULATIONSHAPING_FSK_NONE;
+    private const byte CONFIG_FSK = RhRf69.DATAMODUL_DATAMODE_PACKET | RhRf69.DATAMODUL_MODULATIONTYPE_FSK |
+                                    RhRf69.DATAMODUL_MODULATIONSHAPING_FSK_NONE;
 
-    private const byte CONFIG_GFSK = RhRf69.RH_RF69_DATAMODUL_DATAMODE_PACKET | RhRf69.RH_RF69_DATAMODUL_MODULATIONTYPE_FSK |
-                                     RhRf69.RH_RF69_DATAMODUL_MODULATIONSHAPING_FSK_BT1_0;
+    private const byte CONFIG_GFSK = RhRf69.DATAMODUL_DATAMODE_PACKET | RhRf69.DATAMODUL_MODULATIONTYPE_FSK |
+                                     RhRf69.DATAMODUL_MODULATIONSHAPING_FSK_BT1_0;
 
-    private const byte CONFIG_OOK = RhRf69.RH_RF69_DATAMODUL_DATAMODE_PACKET | RhRf69.RH_RF69_DATAMODUL_MODULATIONTYPE_OOK |
-                                    RhRf69.RH_RF69_DATAMODUL_MODULATIONSHAPING_OOK_NONE;
+    private const byte CONFIG_OOK = RhRf69.DATAMODUL_DATAMODE_PACKET | RhRf69.DATAMODUL_MODULATIONTYPE_OOK |
+                                    RhRf69.DATAMODUL_MODULATIONSHAPING_OOK_NONE;
 
     // Choices for RH_RF69_REG_37_PACKETCONFIG1:
-    private const byte CONFIG_NOWHITE = RhRf69.RH_RF69_PACKETCONFIG1_PACKETFORMAT_VARIABLE |
-                                        RhRf69.RH_RF69_PACKETCONFIG1_DCFREE_NONE | RhRf69.RH_RF69_PACKETCONFIG1_CRC_ON |
-                                        RhRf69.RH_RF69_PACKETCONFIG1_ADDRESSFILTERING_NONE;
+    private const byte CONFIG_NOWHITE = RhRf69.PACKETCONFIG1_PACKETFORMAT_VARIABLE |
+                                        RhRf69.PACKETCONFIG1_DCFREE_NONE | RhRf69.PACKETCONFIG1_CRC_ON |
+                                        RhRf69.PACKETCONFIG1_ADDRESSFILTERING_NONE;
 
-    private const byte CONFIG_WHITE = RhRf69.RH_RF69_PACKETCONFIG1_PACKETFORMAT_VARIABLE |
-                                      RhRf69.RH_RF69_PACKETCONFIG1_DCFREE_WHITENING | RhRf69.RH_RF69_PACKETCONFIG1_CRC_ON |
-                                      RhRf69.RH_RF69_PACKETCONFIG1_ADDRESSFILTERING_NONE;
+    private const byte CONFIG_WHITE = RhRf69.PACKETCONFIG1_PACKETFORMAT_VARIABLE |
+                                      RhRf69.PACKETCONFIG1_DCFREE_WHITENING | RhRf69.PACKETCONFIG1_CRC_ON |
+                                      RhRf69.PACKETCONFIG1_ADDRESSFILTERING_NONE;
 
-    private const byte CONFIG_MANCHESTER = RhRf69.RH_RF69_PACKETCONFIG1_PACKETFORMAT_VARIABLE |
-                                           RhRf69.RH_RF69_PACKETCONFIG1_DCFREE_MANCHESTER |
-                                           RhRf69.RH_RF69_PACKETCONFIG1_CRC_ON |
-                                           RhRf69.RH_RF69_PACKETCONFIG1_ADDRESSFILTERING_NONE;
+    private const byte CONFIG_MANCHESTER = RhRf69.PACKETCONFIG1_PACKETFORMAT_VARIABLE |
+                                           RhRf69.PACKETCONFIG1_DCFREE_MANCHESTER |
+                                           RhRf69.PACKETCONFIG1_CRC_ON |
+                                           RhRf69.PACKETCONFIG1_ADDRESSFILTERING_NONE;
 
 
     /// Defines register values for a set of modem configuration registers
