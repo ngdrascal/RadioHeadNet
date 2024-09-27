@@ -42,7 +42,7 @@ internal class SpiDeviceFake : SpiDevice
 
     public override void Write(ReadOnlySpan<byte> buffer)
     {
-        _logger.LogDebug("{0}.{1}: [{2}]", nameof(SpiDeviceFake), nameof(Write),
+        _logger.LogDebug("{0}.{1}([{2}])", nameof(SpiDeviceFake), nameof(Write),
             ByteSpanToString(buffer.ToArray()));
 
         EnableChipSelect();

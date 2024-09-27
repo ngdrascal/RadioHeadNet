@@ -5,13 +5,21 @@ namespace RadioHeadNet.Tests;
 
 internal class Rf69RegistersFake
 {
+    private class Register
+    {
+        public byte Value { get; set; }
+        public int ReadCount { get; set; }
+        public int WriteCount { get; set; }
+        public Action<int>? AfterReadAction { get; set; }
+        public Action<int>? AfterWriteAction { get; set; }
+    }
+
     private readonly GpioPin _chipSelectPin;
 
     private enum States { Waiting, Ready, Reading, Writing }
 
     private readonly ILogger _logger;
 
-    private readonly byte[] _registerValues;
     private readonly byte[] _initialRegValues =
     [
         //         0     1     2     3     4     5     6     7     8     9     A     B     C     D     E     F
@@ -20,8 +28,14 @@ internal class Rf69RegistersFake
         /* 2 */ 0x00, 0x00, 0x00, 0x02, 0xFF, 0x00, 0x05, 0x80, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x03, 0x98, 0x00,
         /* 3 */ 0x10, 0x40, 0x00, 0x00, 0x00, 0x0F, 0x02, 0x00, 0x01, 0x00, 0x1B, 0x55, 0x70, 0x00, 0x00
     ];
-    public readonly byte[] RegisterReadCount = new byte[byte.MaxValue];
-    public readonly byte[] RegisterWriteCount = new byte[byte.MaxValue];
+    // private readonly byte[] _registerValues;
+
+    // private readonly byte[] _registerReadCount = new byte[byte.MaxValue];
+    // private readonly byte[] _registerWriteCount = new byte[byte.MaxValue];
+    // private readonly Action<int>?[] _afterReadActions = new Action<int>[byte.MaxValue];
+    // private readonly Action<int>?[] _afterWriteActions = new Action<int>[byte.MaxValue];
+
+    private readonly Register[] _registers = new Register[byte.MaxValue];
 
     private byte _registerIndex;
 
@@ -31,7 +45,7 @@ internal class Rf69RegistersFake
         get => _internalState;
         set
         {
-            _logger.LogDebug("state: {0}->{1}",_internalState, value);
+            _logger.LogDebug("state: {0}->{1}", _internalState, value);
             _internalState = value;
         }
     }
@@ -53,11 +67,14 @@ internal class Rf69RegistersFake
             }
         };
 
-        _registerValues = new byte[byte.MaxValue];
+        for (var i = 0; i < _registers.Length; i++)
+        {
+            _registers[i] = new Register();
+        }
 
         for (var i = 0; i < _initialRegValues.Length; i++)
         {
-            _registerValues[i] = _initialRegValues[i];
+            _registers[i].Value = _initialRegValues[i];
         }
     }
 
@@ -70,9 +87,14 @@ internal class Rf69RegistersFake
             return result;
         }
 
-        result = _registerValues[_registerIndex];
+        var targetReg = _registers[_registerIndex];
+        result = targetReg.Value;
+
         _logger.LogDebug("reg[{0}] == {1}", _registerIndex.ToString("X2"), result.ToString("X2"));
-        RegisterReadCount[_registerIndex]++;
+
+        targetReg.ReadCount++;
+
+        targetReg.AfterReadAction?.Invoke(targetReg.ReadCount);
 
         // if targeting the FIFO register, do not auto-increment the register index
         // NOTE: the register index can roll over from 255 to 0
@@ -92,8 +114,12 @@ internal class Rf69RegistersFake
         else if (State == States.Writing)
         {
             _logger.LogDebug("reg[{0}] <- {1}", _registerIndex.ToString("X2"), value.ToString("X2"));
-            _registerValues[_registerIndex] = value;
-            RegisterWriteCount[_registerIndex]++;
+
+            var targetReg = _registers[_registerIndex];
+            targetReg.Value = value;
+            targetReg.WriteCount++;
+
+            targetReg.AfterWriteAction?.Invoke(targetReg.WriteCount);
 
             // if targeting the FIFO register, do not auto-increment the register index
             // NOTE: the register index can roll over from 255 to 0
@@ -110,11 +136,31 @@ internal class Rf69RegistersFake
 
     public byte Peek(byte regIndex)
     {
-        return _registerValues[regIndex];
+        return _registers[regIndex].Value;
     }
 
     public void Poke(byte regIndex, byte value)
     {
-        _registerValues[regIndex] = value;
+        _registers[regIndex].Value = value;
+    }
+
+    public void DoAfterRead(byte regIndex, Action<int> action)
+    {
+        _registers[regIndex].AfterReadAction = action;
+    }
+
+    public void DoAfterWrite(byte regIndex, Action<int> action)
+    {
+        _registers[regIndex].AfterWriteAction = action;
+    }
+
+    public int ReadCount(byte regIndex)
+    {
+        return _registers[regIndex].ReadCount;
+    }
+
+    public int WriteCount(byte regIndex)
+    {
+        return _registers[regIndex].WriteCount;
     }
 }

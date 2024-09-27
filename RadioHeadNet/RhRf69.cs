@@ -78,14 +78,19 @@ public partial class RhRf69 : RhSpiDriver
 
         // thresh 15 is default
         SpiWrite(REG_3C_FIFOTHRESH, FIFOTHRESH_TXSTARTCONDITION_NOTEMPTY | 0x0F);
+        
         // RSSITHRESH is default
-        //    SpiWrite(REG_29_RSSITHRESH, 220); // -110 dbM
+        // SpiWrite(REG_29_RSSITHRESH, 220); // -110 dbM
+
         // SYNCCONFIG is default. SyncSize is set later by setSyncWords()
-        //    SpiWrite(REG_2E_SYNCCONFIG, SYNCCONFIG_SYNCON); // auto, tolerance 0
+        // SpiWrite(REG_2E_SYNCCONFIG, SYNCCONFIG_SYNCON); // auto, tolerance 0
+        
         // PAYLOADLENGTH is default
-        //    SpiWrite(REG_38_PAYLOADLENGTH, RH_RF69_FIFO_SIZE); // max size only for RX
+        // SpiWrite(REG_38_PAYLOADLENGTH, RH_RF69_FIFO_SIZE); // max size only for RX
+        
         // PACKETCONFIG 2 is default
         SpiWrite(REG_6F_TESTDAGC, TESTDAGC_CONTINUOUSDAGC_IMPROVED_LOWBETAOFF);
+        
         // If high power boost set previously, disable it
         SpiWrite(REG_5A_TESTPA1, TESTPA1_NORMAL);
         SpiWrite(REG_5C_TESTPA2, TESTPA2_NORMAL);
@@ -115,7 +120,6 @@ public partial class RhRf69 : RhSpiDriver
 
     // Interrupt handler for this instance
     // RH_RF69 is unusual in that it has several interrupt lines, and not a single, combined one.
-    // On Moteino, only one of the several interrupt lines (DI0) from the RH_RF69 is connected to the processor.
     // We use the single interrupt line to get PACKETSENT and PAYLOADREADY interrupts.
     public void HandleInterrupt(object sender, PinValueChangedEventArgs arg)
     {
@@ -130,17 +134,17 @@ public partial class RhRf69 : RhSpiDriver
 
         // Must look for PAYLOADREADY, not CRCOK, since only PAYLOADREADY occurs _after_ AES decryption
         // has been done
-        if (_mode == RhMode.Rx && (irqFlags2 & IRQFLAGS2_PAYLOADREADY) != 0)
-        {
-            // A complete message has been received with good CRC
-            _lastRssi = (short)-(SpiRead(REG_24_RSSIVALUE) >> 1);
-            LastPreambleTime = DateTime.Now.Millisecond;
+        if (_mode != RhMode.Rx || (irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0)
+            return;
 
-            SetModeIdle();
+        // A complete message has been received with good CRC
+        _lastRssi = (short)-(SpiRead(REG_24_RSSIVALUE) >> 1);
+        LastPreambleTime = DateTime.Now.Millisecond;
 
-            // Save it in our buffer
-            ReadFifo();
-        }
+        SetModeIdle();
+
+        // Save it in our buffer
+        ReadFifo();
     }
 
     // Low level function reads the FIFO and checks the address
@@ -194,7 +198,11 @@ public partial class RhRf69 : RhSpiDriver
         SpiWrite(REG_4E_TEMP1, TEMP1_TEMPMEASSTART); // Start the measurement
 
         // Wait for the measurement to complete
-        while ((SpiRead(REG_4E_TEMP1) & TEMP1_TEMPMEASRUNNING) != 1) { }
+        var reg4E = SpiRead(REG_4E_TEMP1);
+        while ((reg4E & TEMP1_TEMPMEASRUNNING) != 0)  // wait for bit 4 to equal 0
+        {
+            reg4E = SpiRead(REG_4E_TEMP1);
+        }
 
         return (sbyte)(166 - SpiRead(REG_4F_TEMP2)); // Very approximate, based on observation
     }
@@ -210,10 +218,10 @@ public partial class RhRf69 : RhSpiDriver
     public bool SetFrequency(float centre, float afcPullInRange = 0)
     {
         // Frf = FRF / FSTEP
-        uint frf = (uint)((centre * 1000000.0) / RH_RF69_FSTEP);
-        SpiWrite(REG_07_FRFMSB, (byte)((frf >> 16) & 0xff));
-        SpiWrite(REG_08_FRFMID, (byte)((frf >> 8) & 0xff));
-        SpiWrite(REG_09_FRFLSB, (byte)(frf & 0xff));
+        var frf = (uint)((centre * 1000000.0) / RH_RF69_FSTEP);
+        SpiWrite(REG_07_FRFMSB, (byte)((frf >> 16) & 0xFF));
+        SpiWrite(REG_08_FRFMID, (byte)((frf >> 8) & 0xFF));
+        SpiWrite(REG_09_FRFLSB, (byte)(frf & 0xFF));
 
         // afcPullInRange is not used
         // (void)afcPullInRange;
