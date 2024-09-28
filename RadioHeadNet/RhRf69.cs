@@ -113,7 +113,7 @@ public partial class RhRf69 : RhSpiDriver
         SetEncryptionKey([]);
 
         // +13dBm, same as power-on default
-        SetTxPower(13);
+        SetTxPower(13, false);
 
         return true;
     }
@@ -349,9 +349,9 @@ public partial class RhRf69 : RhSpiDriver
     /// For RF69HW (isHighPowerModule = true), valid values are from -2 to +20.
     /// Caution: at +20dBm, duty cycle is limited to 1% and a 
     /// maximum VSWR of 3:1 at the antenna port.</param>
-    /// <param name="isHighPowerModule">isHighPowerModule Set to true if the connected module is a high
+    /// <param name="isHighPowerModule">Set to true if the connected module is a high
     /// power module RFM69HW</param>
-    public void SetTxPower(sbyte power, bool isHighPowerModule = true)
+    public void SetTxPower(sbyte power, bool isHighPowerModule)
     {
         _power = power;
         byte paLevel;
@@ -359,6 +359,8 @@ public partial class RhRf69 : RhSpiDriver
         {
             if (_power < -2)
                 _power = -2; // RFM69HW only works down to -2.
+            else if (_power > 20)
+                _power = 20;
 
             if (_power <= 13)
             {

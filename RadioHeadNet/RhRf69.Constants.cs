@@ -1,6 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local
 // ReSharper disable IdentifierTypo
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
 
 #define RFM69_HW
 
@@ -158,7 +160,7 @@ public partial class RhRf69
     private const byte PALEVEL_PA0ON = 0x80;
     private const byte PALEVEL_PA1ON = 0x40;
     private const byte PALEVEL_PA2ON = 0x20;
-    private const byte PALEVEL_OUTPUTPOWER = 0x1f;
+    private const byte PALEVEL_OUTPUTPOWER = 0x1F;
 
     // REG_23_RSSICONFIG                                           
     private const byte RH_RF69_RSSICONFIG_RSSIDONE = 0x02;
