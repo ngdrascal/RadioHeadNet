@@ -577,12 +577,11 @@ public partial class RhRf69 : RhSpiDriver
         {
             SpiBurstWrite(REG_3E_AESKEY1, key);
 
-            SpiWrite(REG_3D_PACKETCONFIG2, SpiRead(REG_3D_PACKETCONFIG2 | PACKETCONFIG2_AESON));
+            SpiWrite(REG_3D_PACKETCONFIG2, (byte)(SpiRead(REG_3D_PACKETCONFIG2) | PACKETCONFIG2_AESON));
         }
         else if (key.Length == 0)
         {
-            SpiWrite(REG_3D_PACKETCONFIG2,
-                SpiRead(REG_3D_PACKETCONFIG2 & ~PACKETCONFIG2_AESON));
+            SpiWrite(REG_3D_PACKETCONFIG2, (byte)(SpiRead(REG_3D_PACKETCONFIG2) & ~PACKETCONFIG2_AESON));
         }
         else
         {

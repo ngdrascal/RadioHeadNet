@@ -115,7 +115,7 @@ public partial class RhRf69
     internal const byte REG_3B_AUTOMODES = 0x3B;
     internal const byte REG_3C_FIFOTHRESH = 0x3C;
     internal const byte REG_3D_PACKETCONFIG2 = 0x3D;
-    internal const byte REG_3E_AESKEY1 = 0x3e;
+    internal const byte REG_3E_AESKEY1 = 0x3E;
     // Another 15 AES key bytes follow
     internal const byte REG_4E_TEMP1 = 0x4E;
     internal const byte REG_4F_TEMP2 = 0x4F;

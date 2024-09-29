@@ -37,7 +37,7 @@ public class RhRf69Tests
         _loggerFactory.Dispose();
     }
 
-    // GIVEN: an instance of RhRf69Tests
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: TemperatureRead() is called
     // THEN: the temperature registers are read
     [Test]
@@ -66,7 +66,7 @@ public class RhRf69Tests
     }
 
 
-    // GIVEN: an instance of RhRf69Tests who's idle-mode has not been set
+    // GIVEN: an instance of the RhRf69 class who's idle-mode has not been set
     // WHEN: SetModeIdle() is called
     // THEN: the OpMode register's mode bits should be set to standby
     [Test]
@@ -84,7 +84,7 @@ public class RhRf69Tests
         Assert.That(_registers.ReadCount(RhRf69.REG_27_IRQFLAGS1), Is.GreaterThan(0));
     }
 
-    // GIVEN: an instance of RhRf69Tests who's idle-mode has been set
+    // GIVEN: an instance of the RhRf69 class who's idle-mode has been set
     // WHEN: SetModeIdle() is called
     // THEN: the OpMode register's mode bits should be set according to the idle-mode
     [TestCase(RhRf69.OPMODE_MODE_SLEEP)]
@@ -104,7 +104,7 @@ public class RhRf69Tests
         Assert.That(_registers.ReadCount(RhRf69.REG_27_IRQFLAGS1), Is.GreaterThan(0));
     }
 
-    // GIVEN: an instance of RhRf69Tests
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: SetModeRx() is called
     // THEN: the OpMode register's mode bits should be set correctly
     [Test]
@@ -126,7 +126,7 @@ public class RhRf69Tests
         Assert.That(_registers.Peek(RhRf69.REG_25_DIOMAPPING1), Is.EqualTo(RhRf69.DIOMAPPING1_DIO0MAPPING_01));
     }
 
-    // GIVEN: an instance of RhRf69Tests
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: SetModeTx() is called
     // THEN: the OpMode register's mode bits should be set correctly
     [Test]
@@ -144,7 +144,7 @@ public class RhRf69Tests
         Assert.That(_registers.ReadCount(RhRf69.REG_27_IRQFLAGS1), Is.GreaterThan(0));
     }
 
-    // GIVEN: an instance of RhRf69Tests
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: SetFrequency() is called
     // THEN: the 3 RF Carrier Frequency registers should be set correctly
     [Test]
@@ -169,7 +169,7 @@ public class RhRf69Tests
         Assert.That(_registers.Peek(RhRf69.REG_09_FRFLSB), Is.EqualTo(0x00));
     }
 
-    // GIVEN: an instance of RhRf69Tests
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: SetTxPower() is called with the high-powered flag set to true
     // THEN: the Tx Power register should be set correctly
     //
@@ -195,7 +195,7 @@ public class RhRf69Tests
         Assert.That(_registers.Peek(RhRf69.REG_11_PALEVEL), Is.EqualTo(expected));
     }
 
-    // GIVEN: an instance of RhRf69Tests
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: SetTxPower() is called with the high-powered flag set to false
     // THEN: the Tx Power register should be set correctly
     //
@@ -217,7 +217,7 @@ public class RhRf69Tests
         Assert.That(_registers.Peek(RhRf69.REG_11_PALEVEL), Is.EqualTo(expected));
     }
 
-    // GIVEN: an instance of RhRf69Tests
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: SetSyncWords() is called with a 1 to 4 byte long sync word
     // THEN: the SyncOn bit is set
     //       AND the SyncSize bits are set
@@ -255,7 +255,7 @@ public class RhRf69Tests
         }
     }
 
-    // GIVEN: an instance of RhRf69Tests
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: SetSyncWords() is called with a 1 to 4 byte long sync word
     // THEN: an ArgumentException is thrown
     [Test]
@@ -271,7 +271,7 @@ public class RhRf69Tests
         Assert.Throws<ArgumentException>(Lambda);
     }
 
-    // GIVEN: an instance of RhRf69Tests
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: SetSyncWords() is called with a 0 byte long sync word
     // THEN: sync word generation is turned off
     [Test]
@@ -287,7 +287,7 @@ public class RhRf69Tests
         Assert.That(_registers.Peek((RhRf69.REG_2E_SYNCCONFIG & 0x80)) >> 7, Is.EqualTo(0));
     }
 
-    // GIVEN: an instance of RhRf69Tests
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: SetPreambleLength() is called
     // THEN: the Preamble Length registers should be set correctly
     [Test]
@@ -305,6 +305,62 @@ public class RhRf69Tests
         // ASSERT:
         Assert.That(_registers.Peek(RhRf69.REG_2C_PREAMBLEMSB), Is.EqualTo((byte)(length >> 8)));
         Assert.That(_registers.Peek(RhRf69.REG_2D_PREAMBLELSB), Is.EqualTo((byte)(length & 0xFF)));
-        Assert.Pass();
+    }
+
+    // GIVEN: an instance of the RhRf69 class
+    // WHEN: SetEncryptionKey() is called with a 16 byte key
+    // THEN: the AES-On flag is set
+    //       AND the Encryption Key registers should be set correctly
+    [Test]
+    public void SetEncryptionKeyLength16()
+    {
+        // ARRANGE:
+        _registers.Poke(RhRf69.REG_3D_PACKETCONFIG2, 0x00);
+        for (var i = 0; i < 16; i++)
+            _registers.Poke((byte)(RhRf69.REG_3E_AESKEY1 + i), 0xFF);
+
+        byte[] key = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+
+        // ACT:
+        _radio.SetEncryptionKey(key);
+
+        // ASSERT:
+        Assert.That(_registers.Peek(RhRf69.REG_3D_PACKETCONFIG2) & 0x01, Is.EqualTo(1));
+        for (var i = 0; i < 16; i++)
+            Assert.That(_registers.Peek((byte)(RhRf69.REG_3E_AESKEY1 + i)), Is.EqualTo(key[i]));
+    }
+
+    // GIVEN: an instance of the RhRf69 class
+    // WHEN: SetEncryptionKey() is called with a 0 byte key
+    // THEN: the AES-On flag is cleared
+    [Test]
+    public void SetEncryptionKeyLength0()
+    {
+        // ARRANGE:
+        _registers.Poke(RhRf69.REG_3D_PACKETCONFIG2, 0xFF);
+
+        byte[] key = [];
+
+        // ACT:
+        _radio.SetEncryptionKey(key);
+
+        // ASSERT:
+        Assert.That(_registers.Peek(RhRf69.REG_3D_PACKETCONFIG2) & 0x01, Is.EqualTo(0));
+    }
+
+    // GIVEN: an instance of the RhRf69 class
+    // WHEN: SetEncryptionKey() is called with a key whose length is not 0 or 16
+    // THEN: an ArgumentException is thrown
+    [Test]
+    public void SetEncryptionKeyLengthNot0Or16()
+    {
+        // ARRANGE:
+        byte[] key = [1, 2, 3, 4];
+
+        // ACT:
+        void Lambda() => _radio.SetEncryptionKey(key);
+
+        // ASSERT:
+        Assert.Throws<ArgumentException>(Lambda);
     }
 }
