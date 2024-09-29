@@ -69,12 +69,12 @@ public partial class RhRf69
     internal const byte REG_07_FRFMSB = 0x07;
     internal const byte REG_08_FRFMID = 0x08;
     internal const byte REG_09_FRFLSB = 0x09;
-    internal const byte REG_0A_OSC1 = 0x0a;
-    internal const byte REG_0B_AFCCTRL = 0x0b;
-    internal const byte REG_0C_RESERVED = 0x0c;
-    internal const byte REG_0D_LISTEN1 = 0x0d;
-    internal const byte REG_0E_LISTEN2 = 0x0e;
-    internal const byte REG_0F_LISTEN3 = 0x0f;
+    internal const byte REG_0A_OSC1 = 0x0A;
+    internal const byte REG_0B_AFCCTRL = 0x0B;
+    internal const byte REG_0C_RESERVED = 0x0C;
+    internal const byte REG_0D_LISTEN1 = 0x0D;
+    internal const byte REG_0E_LISTEN2 = 0x0E;
+    internal const byte REG_0F_LISTEN3 = 0x0F;
     internal const byte REG_10_VERSION = 0x10;
     internal const byte REG_11_PALEVEL = 0x11;
     internal const byte REG_12_PARAMP = 0x12;
@@ -85,12 +85,12 @@ public partial class RhRf69
     internal const byte REG_17_RESERVED = 0x17;
     internal const byte REG_18_LNA = 0x18;
     internal const byte REG_19_RXBW = 0x19;
-    internal const byte REG_1A_AFCBW = 0x1a;
-    internal const byte REG_1B_OOKPEAK = 0x1b;
-    internal const byte REG_1C_OOKAVG = 0x1c;
-    internal const byte REG_1D_OOKFIX = 0x1d;
-    internal const byte REG_1E_AFCFEI = 0x1e;
-    internal const byte REG_1F_AFCMSB = 0x1f;
+    internal const byte REG_1A_AFCBW = 0x1A;
+    internal const byte REG_1B_OOKPEAK = 0x1B;
+    internal const byte REG_1C_OOKAVG = 0x1C;
+    internal const byte REG_1D_OOKFIX = 0x1D;
+    internal const byte REG_1E_AFCFEI = 0x1E;
+    internal const byte REG_1F_AFCMSB = 0x1F;
     internal const byte REG_20_AFCLSB = 0x20;
     internal const byte REG_21_FEIMSB = 0x21;
     internal const byte REG_22_FEILSB = 0x22;
@@ -101,28 +101,28 @@ public partial class RhRf69
     internal const byte REG_27_IRQFLAGS1 = 0x27;
     internal const byte REG_28_IRQFLAGS2 = 0x28;
     internal const byte REG_29_RSSITHRESH = 0x29;
-    internal const byte REG_2A_RXTIMEOUT1 = 0x2a;
-    internal const byte REG_2B_RXTIMEOUT2 = 0x2b;
-    internal const byte REG_2C_PREAMBLEMSB = 0x2c;
-    internal const byte REG_2D_PREAMBLELSB = 0x2d;
-    internal const byte REG_2E_SYNCCONFIG = 0x2e;
-    internal const byte REG_2F_SYNCVALUE1 = 0x2f;
+    internal const byte REG_2A_RXTIMEOUT1 = 0x2A;
+    internal const byte REG_2B_RXTIMEOUT2 = 0x2B;
+    internal const byte REG_2C_PREAMBLEMSB = 0x2C;
+    internal const byte REG_2D_PREAMBLELSB = 0x2D;
+    internal const byte REG_2E_SYNCCONFIG = 0x2E;
+    internal const byte REG_2F_SYNCVALUE1 = 0x2F;
     // another 7 sync word bytes follow, 30 through 36 inclusive
     internal const byte REG_37_PACKETCONFIG1 = 0x37;
     internal const byte REG_38_PAYLOADLENGTH = 0x38;
     internal const byte REG_39_NODEADRS = 0x39;
-    internal const byte REG_3A_BROADCASTADRS = 0x3a;
-    internal const byte REG_3B_AUTOMODES = 0x3b;
-    internal const byte REG_3C_FIFOTHRESH = 0x3c;
-    internal const byte REG_3D_PACKETCONFIG2 = 0x3d;
+    internal const byte REG_3A_BROADCASTADRS = 0x3A;
+    internal const byte REG_3B_AUTOMODES = 0x3B;
+    internal const byte REG_3C_FIFOTHRESH = 0x3C;
+    internal const byte REG_3D_PACKETCONFIG2 = 0x3D;
     internal const byte REG_3E_AESKEY1 = 0x3e;
     // Another 15 AES key bytes follow
-    internal const byte REG_4E_TEMP1 = 0x4e;
-    internal const byte REG_4F_TEMP2 = 0x4f;
+    internal const byte REG_4E_TEMP1 = 0x4E;
+    internal const byte REG_4F_TEMP2 = 0x4F;
     internal const byte REG_58_TESTLNA = 0x58;
-    internal const byte REG_5A_TESTPA1 = 0x5a;
-    internal const byte REG_5C_TESTPA2 = 0x5c;
-    internal const byte REG_6F_TESTDAGC = 0x6f;
+    internal const byte REG_5A_TESTPA1 = 0x5A;
+    internal const byte REG_5C_TESTPA2 = 0x5C;
+    internal const byte REG_6F_TESTDAGC = 0x6F;
     internal const byte REG_71_TESTAFC = 0x71;
 
     // These register masks etc. are named wherever possible
@@ -136,7 +136,7 @@ public partial class RhRf69
     internal const byte OPMODE_MODE_SLEEP = 0x00;
     internal const byte OPMODE_MODE_STDBY = 0x04;
     internal const byte OPMODE_MODE_FS = 0x08;
-    internal const byte OPMODE_MODE_TX = 0x0c;
+    internal const byte OPMODE_MODE_TX = 0x0C;
     internal const byte OPMODE_MODE_RX = 0x10;
 
     // REG_02_DATAMODUL                                            
@@ -167,7 +167,7 @@ public partial class RhRf69
     private const byte RH_RF69_RSSICONFIG_RSSISTART = 0x01;
 
     // REG_25_DIOMAPPING1                                          
-    private const byte DIOMAPPING1_DIO0MAPPING = 0xc0;
+    private const byte DIOMAPPING1_DIO0MAPPING = 0xC0;
     private const byte DIOMAPPING1_DIO0MAPPING_00 = 0x00;
     internal const byte DIOMAPPING1_DIO0MAPPING_01 = 0x40;
     private const byte DIOMAPPING1_DIO0MAPPING_10 = 0x80;
@@ -179,7 +179,7 @@ public partial class RhRf69
     private const byte DIOMAPPING1_DIO1MAPPING_10 = 0x20;
     private const byte DIOMAPPING1_DIO1MAPPING_11 = 0x30;
 
-    private const byte DIOMAPPING1_DIO2MAPPING = 0x0c;
+    private const byte DIOMAPPING1_DIO2MAPPING = 0x0C;
     private const byte DIOMAPPING1_DIO2MAPPING_00 = 0x00;
     private const byte DIOMAPPING1_DIO2MAPPING_01 = 0x04;
     private const byte DIOMAPPING1_DIO2MAPPING_10 = 0x08;
@@ -192,7 +192,7 @@ public partial class RhRf69
     private const byte DIOMAPPING1_DIO3MAPPING_11 = 0x03;
 
     // REG_26_DIOMAPPING2                                          
-    private const byte DIOMAPPING2_DIO4MAPPING = 0xc0;
+    private const byte DIOMAPPING2_DIO4MAPPING = 0xC0;
     private const byte DIOMAPPING2_DIO4MAPPING_00 = 0x00;
     private const byte DIOMAPPING2_DIO4MAPPING_01 = 0x40;
     private const byte DIOMAPPING2_DIO4MAPPING_10 = 0x80;
@@ -268,18 +268,18 @@ public partial class RhRf69
     private const byte AUTOMODE_ENTER_COND_FIFO_LEVEL = 0x40;
     private const byte AUTOMODE_ENTER_COND_CRC_OK = 0x60;
     private const byte AUTOMODE_ENTER_COND_PAYLOAD_READY = 0x80;
-    private const byte AUTOMODE_ENTER_COND_SYNC_ADDRESS = 0xa0;
-    private const byte AUTOMODE_ENTER_COND_PACKET_SENT = 0xc0;
-    private const byte AUTOMODE_ENTER_COND_FIFO_EMPTY = 0xe0;
+    private const byte AUTOMODE_ENTER_COND_SYNC_ADDRESS = 0xA0;
+    private const byte AUTOMODE_ENTER_COND_PACKET_SENT = 0xC0;
+    private const byte AUTOMODE_ENTER_COND_FIFO_EMPTY = 0xE0;
 
     private const byte AUTOMODE_EXIT_COND_NONE = 0x00;
     private const byte AUTOMODE_EXIT_COND_FIFO_EMPTY = 0x04;
     private const byte AUTOMODE_EXIT_COND_FIFO_LEVEL = 0x08;
-    private const byte AUTOMODE_EXIT_COND_CRC_OK = 0x0c;
+    private const byte AUTOMODE_EXIT_COND_CRC_OK = 0x0C;
     private const byte AUTOMODE_EXIT_COND_PAYLOAD_READY = 0x10;
     private const byte AUTOMODE_EXIT_COND_SYNC_ADDRESS = 0x14;
     private const byte AUTOMODE_EXIT_COND_PACKET_SENT = 0x18;
-    private const byte AUTOMODE_EXIT_COND_TIMEOUT = 0x1c;
+    private const byte AUTOMODE_EXIT_COND_TIMEOUT = 0x1C;
 
     private const byte AUTOMODE_INTERMEDIATE_MODE_SLEEP = 0x00;
     private const byte AUTOMODE_INTERMEDIATE_MODE_STDBY = 0x01;
@@ -288,10 +288,10 @@ public partial class RhRf69
 
     // REG_3C_FIFOTHRESH                                           
     private const byte FIFOTHRESH_TXSTARTCONDITION_NOTEMPTY = 0x80;
-    private const byte FIFOTHRESH_FIFOTHRESHOLD = 0x7f;
+    private const byte FIFOTHRESH_FIFOTHRESHOLD = 0x7F;
 
     // REG_3D_PACKETCONFIG2                                        
-    private const byte PACKETCONFIG2_INTERPACKETRXDELAY = 0xf0;
+    private const byte PACKETCONFIG2_INTERPACKETRXDELAY = 0xF0;
     private const byte PACKETCONFIG2_RESTARTRX = 0x04;
     private const byte PACKETCONFIG2_AUTORXRESTARTON = 0x02;
     private const byte PACKETCONFIG2_AESON = 0x01;
@@ -302,11 +302,11 @@ public partial class RhRf69
 
     // REG_5A_TESTPA1                                              
     private const byte TESTPA1_NORMAL = 0x55;
-    private const byte TESTPA1_BOOST = 0x5d;
+    private const byte TESTPA1_BOOST = 0x5D;
 
     // REG_5C_TESTPA2                                              
     private const byte TESTPA2_NORMAL = 0x70;
-    private const byte TESTPA2_BOOST = 0x7c;
+    private const byte TESTPA2_BOOST = 0x7C;
 
     // REG_6F_TESTDAGC                                             
     private const byte TESTDAGC_CONTINUOUSDAGC_NORMAL = 0x00;
