@@ -217,4 +217,73 @@ public class RhRf69Tests
         Assert.That(_registers.Peek(RhRf69.REG_11_PALEVEL), Is.EqualTo(expected));
     }
 
+    // GIVEN: an instance of RhRf69Tests
+    // WHEN: SetSyncWords() is called with a 1 to 4 byte long sync word
+    // THEN: the SyncOn bit is set
+    //       AND the SyncSize bits are set
+    //       AND the SyncValue bits are set
+    [TestCase(1, null, null, null, 0b1_0_000_000)]
+    [TestCase(1, 2, null, null, 0b1_0_001_000)]
+    [TestCase(1, 2, 3, null, 0b1_0_010_000)]
+    [TestCase(1, 2, 3, 4, 0b1_0_011_000)]
+    public void SetSyncWordsLength1To4(byte byte1, byte? byte2, byte? byte3, byte? byte4, byte expected)
+    {
+        // ARRANGE:
+        _registers.Poke(RhRf69.REG_2E_SYNCCONFIG, 0x00);
+        _registers.Poke(RhRf69.REG_2F_SYNCVALUE1 + 0, 0xFF);
+        _registers.Poke(RhRf69.REG_2F_SYNCVALUE1 + 1, 0xFF);
+        _registers.Poke(RhRf69.REG_2F_SYNCVALUE1 + 2, 0xFF);
+        _registers.Poke(RhRf69.REG_2F_SYNCVALUE1 + 3, 0xFF);
+
+        var syncWordList = new List<byte> { byte1 };
+        if (byte2 != null) syncWordList.Add(byte2.Value);
+        if (byte3 != null) syncWordList.Add(byte3.Value);
+        if (byte4 != null) syncWordList.Add(byte4.Value);
+        var syncWords = syncWordList.ToArray();
+
+        // ACT:
+        _radio.SetSyncWords(syncWords);
+
+        // ASSERT:
+        Assert.That(_registers.WriteCount(RhRf69.REG_2E_SYNCCONFIG), Is.EqualTo(1));
+        Assert.That(_registers.Peek(RhRf69.REG_2E_SYNCCONFIG), Is.EqualTo(expected));
+
+        for (var i = 0; i < syncWords.Length; i++)
+        {
+            Assert.That(_registers.WriteCount((byte)(RhRf69.REG_2F_SYNCVALUE1 + i)), Is.EqualTo(1));
+            Assert.That(_registers.Peek((byte)(RhRf69.REG_2F_SYNCVALUE1 + i)), Is.EqualTo(syncWords[i]));
+        }
+    }
+
+    // GIVEN: an instance of RhRf69Tests
+    // WHEN: SetSyncWords() is called with a 1 to 4 byte long sync word
+    // THEN: an ArgumentException is thrown
+    [Test]
+    public void SetSyncWordsLength5()
+    {
+        // ARRANGE:
+        byte[] syncWords = [0x01, 0x02, 0x03, 0x04, 0x05];
+
+        // ACT:
+        void Lambda() => _radio.SetSyncWords(syncWords);
+
+        // ASSERT:
+        Assert.Throws<ArgumentException>(Lambda);
+    }
+
+    // GIVEN: an instance of RhRf69Tests
+    // WHEN: SetSyncWords() is called with a 0 byte long sync word
+    // THEN: sync word generation is turned off
+    [Test]
+    public void SetSyncWordsLength0()
+    {
+        // ARRANGE:
+        byte[] syncWords = [];
+
+        // ACT:
+        _radio.SetSyncWords(syncWords);
+
+        // ASSERT:
+        Assert.That(_registers.Peek((RhRf69.REG_2E_SYNCCONFIG & 0x80)) >> 7, Is.EqualTo(0));
+    }
 }

@@ -535,20 +535,24 @@ public partial class RhRf69 : RhSpiDriver
 
     /// <summary>
     /// Sets the sync words for transmit and receive 
-    /// Caution: SyncWords should be set to the same 
-    /// value on all nodes in your network. Nodes with different SyncWords set will never receive
-    /// each others messages, so different SyncWords can be used to isolate different
-    /// networks from each other. Default is { 0x2d, 0xd4 }.
-    /// Caution: tests here show that with a single sync word (ie where len == 1), 
-    /// RFM69 reception can be unreliable.
-    /// To disable sync word generation and detection, call with the defaults: setSyncWords();
+    /// Caution: SyncWords should be set to the same value on all nodes in your network.
+    /// Nodes with different SyncWords set will never receive  each others messages, so
+    /// different SyncWords can be used to isolate different networks from each other.
+    /// Default is { 0x2d, 0xd4 }.
+    /// Caution: tests here show that with a single sync word (ie where len == 1), RFM69
+    /// reception can be unreliable.
+    /// To disable sync word generation and detection, call with a zero length array:
+    /// setSyncWords([]);
     /// </summary>
     /// <param name="syncWords">Byte array of sync words, 1 to 4 octets long. 0 length
     /// if no sync words to be used.</param>
     public void SetSyncWords(byte[] syncWords)
     {
+        if (syncWords.Length > 4)
+            throw new ArgumentException($"{nameof(SetSyncWords)}: syncWords must be 1 to 4 octets long.");
+
         var syncConfig = SpiRead(REG_2E_SYNCCONFIG);
-        if (syncWords.Length <= 4)
+        if (syncWords.Length is >= 1 and <= 4)
         {
             SpiBurstWrite(REG_2F_SYNCVALUE1, syncWords);
             syncConfig |= SYNCCONFIG_SYNCON;
