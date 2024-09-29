@@ -524,13 +524,12 @@ public partial class RhRf69 : RhSpiDriver
     /// Sets the length of the preamble in bytes. 
     /// Caution: this should be set to the same value on all nodes in your network.
     /// Default is 4.
-    /// Sets the message preamble length in REG_0?_PREAMBLE?SB
     /// </summary>
     /// <param name="length">bytes Preamble length in bytes.</param>
     public void SetPreambleLength(ushort length)
     {
         SpiWrite(REG_2C_PREAMBLEMSB, (byte)(length >> 8));
-        SpiWrite(REG_2D_PREAMBLELSB, (byte)(length & 0xff));
+        SpiWrite(REG_2D_PREAMBLELSB, (byte)(length & 0xFF));
     }
 
     /// <summary>

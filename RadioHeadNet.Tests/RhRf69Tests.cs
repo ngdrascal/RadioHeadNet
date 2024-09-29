@@ -286,4 +286,25 @@ public class RhRf69Tests
         // ASSERT:
         Assert.That(_registers.Peek((RhRf69.REG_2E_SYNCCONFIG & 0x80)) >> 7, Is.EqualTo(0));
     }
+
+    // GIVEN: an instance of RhRf69Tests
+    // WHEN: SetPreambleLength() is called
+    // THEN: the Preamble Length registers should be set correctly
+    [Test]
+    public void SetPreambleLength()
+    {
+        // ARRANGE:
+        _registers.Poke(RhRf69.REG_2C_PREAMBLEMSB, 0xFF);
+        _registers.Poke(RhRf69.REG_2D_PREAMBLELSB, 0xFF);
+
+        const ushort length = 257;
+
+        // ACT:
+        _radio.SetPreambleLength(length);
+
+        // ASSERT:
+        Assert.That(_registers.Peek(RhRf69.REG_2C_PREAMBLEMSB), Is.EqualTo((byte)(length >> 8)));
+        Assert.That(_registers.Peek(RhRf69.REG_2D_PREAMBLELSB), Is.EqualTo((byte)(length & 0xFF)));
+        Assert.Pass();
+    }
 }
