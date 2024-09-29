@@ -631,9 +631,9 @@ public partial class RhRf69 : RhSpiDriver
     }
 
     /// <summary>
-    /// Puts the radio into low-power Sleep Mode.
-    /// If successful, the transport will stay in Sleep Mode until woken by 
-    /// changing Mode to idle, transmit or receive (e.g. - by calling Send(), Receive(), Available(),  etc.)
+    /// Puts the radio into low-power Sleep Mode.  If successful, the transport will stay
+    /// in Sleep Mode until woken by changing Mode to idle, transmit or receive
+    /// (e.g. - by calling Send(), Receive(), Available(),  etc.)
     /// Caution: there is a time penalty as the radio takes time to wake from Sleep Mode.
     /// </summary>
     /// <returns>true if Sleep Mode was successfully entered</returns>

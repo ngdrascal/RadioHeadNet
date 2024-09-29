@@ -145,6 +145,22 @@ public class RhRf69Tests
     }
 
     // GIVEN: an instance of the RhRf69 class
+    // WHEN: Sleep() is called
+    // THEN: the OpMode register's mode bits should be set correctly
+    [Test]
+    public void Sleep()
+    {
+        // ARRANGE:
+        _registers.Poke(RhRf69.REG_01_OPMODE, 0xFF);
+
+        // ACT:
+        _radio.Sleep();
+
+        // ASSERT:
+        Assert.That(_registers.Peek(RhRf69.REG_01_OPMODE) & 0b00011100, Is.EqualTo(RhRf69.OPMODE_MODE_SLEEP));
+    }
+
+    // GIVEN: an instance of the RhRf69 class
     // WHEN: SetFrequency() is called
     // THEN: the 3 RF Carrier Frequency registers should be set correctly
     [Test]
