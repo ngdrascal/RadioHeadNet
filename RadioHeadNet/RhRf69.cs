@@ -167,7 +167,6 @@ public partial class RhRf69 : RhSpiDriver
             var payloadLen = Spi.ReadByte(); // First byte is payload len (counting the headers)
             if (payloadLen is <= RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN and >= RH_RF69_HEADER_LEN)
             {
-                Spi.WriteByte(0);
                 _rxHeaderTo = Spi.ReadByte();
                 // Check addressing
                 if (_promiscuous ||

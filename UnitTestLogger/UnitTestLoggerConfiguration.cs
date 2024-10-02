@@ -1,7 +1,9 @@
-﻿namespace UnitTestLogger
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace UnitTestLogger;
+
+[ExcludeFromCodeCoverage]
+public class UnitTestLoggerConfiguration
 {
-    public class UnitTestLoggerConfiguration
-    {
-        public bool ShowLogLevel { get; set; } = true;
-    }
+    public bool ShowLogLevel { get; set; } = true;
 }

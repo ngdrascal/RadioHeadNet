@@ -1,8 +1,10 @@
 ﻿using System.Device.Gpio;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
 namespace RadioHeadNet.Tests;
 
+[ExcludeFromCodeCoverage]
 internal class Rf69RegistersFake
 {
     private class Register

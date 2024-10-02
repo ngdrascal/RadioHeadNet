@@ -1,11 +1,13 @@
 ﻿using System.Device;
 using System.Device.Gpio;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadioHeadNet.Tests;
 
 /// <summary>
 /// GPIO driver for the unit testing
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal class GpioDriverFake : GpioDriver
 {
     private class PinState(int pinNumber)

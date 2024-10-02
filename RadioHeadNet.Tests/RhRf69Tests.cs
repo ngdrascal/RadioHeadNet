@@ -1,11 +1,12 @@
 using System.Device.Gpio;
 using System.Device.Spi;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using UnitTestLogger;
 
 namespace RadioHeadNet.Tests;
 
-[TestFixture]
+[TestFixture, ExcludeFromCodeCoverage]
 public class RhRf69Tests
 {
     private ILoggerFactory _loggerFactory;

@@ -1,9 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Device.Gpio;
 using System.Device.Spi;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RadioHeadNet.Tests;
 
+[ExcludeFromCodeCoverage]
 internal class SpiDeviceFake : SpiDevice
 {
     private readonly SpiConnectionSettings _connectionSettings;
@@ -11,6 +13,7 @@ internal class SpiDeviceFake : SpiDevice
     private readonly GpioPin? _chipSelectPin;
     private readonly ILogger _logger;
 
+    [ExcludeFromCodeCoverage]
     public SpiDeviceFake(SpiConnectionSettings connectionSettings, GpioController gpioController,
         Rf69RegistersFake rf69Registers, ILoggerFactory loggerFactory)
     {

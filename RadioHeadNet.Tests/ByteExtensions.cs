@@ -1,5 +1,8 @@
-﻿namespace RadioHeadNet.Tests;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace RadioHeadNet.Tests;
+
+[ExcludeFromCodeCoverage]
 internal static class ByteExtensions
 {
     public static bool IsSet(this byte b, int pos)

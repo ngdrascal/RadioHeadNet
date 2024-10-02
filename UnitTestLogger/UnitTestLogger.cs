@@ -1,8 +1,10 @@
-﻿using System.Runtime.InteropServices.Marshalling;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices.Marshalling;
 using Microsoft.Extensions.Logging;
 
 namespace UnitTestLogger;
 
+[ExcludeFromCodeCoverage]
 public class UnitTestLogger : ILogger
 {
     private readonly string _name;

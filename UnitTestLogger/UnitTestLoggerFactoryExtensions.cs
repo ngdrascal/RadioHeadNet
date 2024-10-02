@@ -2,9 +2,11 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
+using System.Diagnostics.CodeAnalysis;
 
 namespace UnitTestLogger;
 
+[ExcludeFromCodeCoverage]
 public static class UnitTestLoggerFactoryExtensions
 {
     public static ILoggingBuilder AddUnitTestLogger(this ILoggingBuilder builder)

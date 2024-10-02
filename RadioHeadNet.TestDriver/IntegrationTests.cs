@@ -1,5 +1,6 @@
 using System.Device.Gpio;
 using System.Device.Spi;
+using System.Diagnostics.CodeAnalysis;
 using Iot.Device.Board;
 using Iot.Device.FtCommon;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,7 @@ using UnitTestLogger;
 
 namespace RadioHeadNet.TestDriver;
 
+[ExcludeFromCodeCoverage]
 public class IntegrationTests
 {
     private ILoggerFactory _loggerFactory;

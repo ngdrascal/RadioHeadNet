@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace UnitTestLogger;
 
+[ExcludeFromCodeCoverage]
 public class UnitTestLoggerProvider : ILoggerProvider
 {
     private readonly UnitTestLoggerConfiguration _currentConfig;
