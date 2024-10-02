@@ -18,7 +18,8 @@ internal class Rf69RegistersFake
 
     private enum States { Waiting, Ready, Reading, Writing }
 
-    private readonly ILogger _logger;
+    private readonly ILogger _regLogger;
+    private readonly ILogger _stateLogger;
 
     private readonly byte[] _initialRegValues =
     [
@@ -45,7 +46,7 @@ internal class Rf69RegistersFake
         get => _internalState;
         set
         {
-            _logger.LogDebug("state: {0}->{1}", _internalState, value);
+            _stateLogger.LogDebug("state: {0}->{1}", _internalState, value);
             _internalState = value;
         }
     }
@@ -53,7 +54,8 @@ internal class Rf69RegistersFake
     public Rf69RegistersFake(GpioPin chipSelectPin, ILoggerFactory loggerFactory)
     {
         _chipSelectPin = chipSelectPin;
-        _logger = loggerFactory.CreateLogger("RegFile");
+        _regLogger = loggerFactory.CreateLogger(nameof(Rf69RegistersFake) + ".registers");
+        _stateLogger = loggerFactory.CreateLogger(nameof(Rf69RegistersFake) + ".states");
 
         _chipSelectPin.ValueChanged += (_, args) =>
         {
@@ -90,7 +92,7 @@ internal class Rf69RegistersFake
         var targetReg = _registers[_registerIndex];
         result = targetReg.Value;
 
-        _logger.LogDebug("reg[{0}] == {1}", _registerIndex.ToString("X2"), result.ToString("X2"));
+        _regLogger.LogDebug("reg[{0}] == {1}", _registerIndex.ToString("X2"), result.ToString("X2"));
 
         targetReg.ReadCount++;
 
@@ -113,7 +115,7 @@ internal class Rf69RegistersFake
         }
         else if (State == States.Writing)
         {
-            _logger.LogDebug("reg[{0}] <- {1}", _registerIndex.ToString("X2"), value.ToString("X2"));
+            _regLogger.LogDebug("reg[{0}] <- {1}", _registerIndex.ToString("X2"), value.ToString("X2"));
 
             var targetReg = _registers[_registerIndex];
             targetReg.Value = value;

@@ -161,21 +161,26 @@ public abstract class RhGenericDriver
     }
 
     // Bent G Christensen (bentor@gmail.com), 08/15/2016
+    /// <summary>
     /// Channel Activity Detection (CAD).
-    /// Blocks until channel activity is finished or CAD timeout occurs.
-    /// Uses the radio's CAD function (if supported) to detect channel activity.
-    /// Implements random delays of 100 to 1000ms while activity is detected and until timeout.
-    /// Caution: the random() function is not seeded. If you want non-deterministic behaviour, consider
-    /// using something like randomSeed(analogRead(A0)); in your sketch.
+    /// Blocks until channel activity is finished or CAD timeout occurs.  Uses the
+    /// radio's CAD function (if supported) to detect channel activity.  Implements
+    /// random delays of 100 to 1000ms while activity is detected and until timeout.
+    /// Caution: the random() function is not seeded. If you want non-deterministic
+    /// behaviour, consider using something like randomSeed(analogRead(A0)); in your
+    /// sketch.
     /// Permits the implementation of listen-before-talk mechanism (Collision Avoidance).
-    /// Calls the IsChannelActive() member function for the radio (if supported) 
-    /// to determine if the channel is active. If the radio does not support IsChannelActive(),
-    /// always returns true immediately
-    /// \return true if the radio-specific CAD (as returned by IsChannelActive())
-    /// shows the channel is clear within the timeout period (or the timeout period is 0), else returns false.
+    /// Calls the IsChannelActive() member function for the radio (if supported) to
+    /// determine if the channel is active. If the radio does not support
+    /// IsChannelActive(), always returns true immediately.
+    /// </summary>
+    /// <returns>true if the radio-specific CAD (as returned by IsChannelActive()) shows
+    /// the channel is clear within the timeout period (or the timeout period is 0), else
+    /// returns false.
+    /// </returns>
     public virtual bool WaitCAD()
     {
-        if (_cad_timeout != 0)
+        if (_cad_timeout == 0)
             return true;
 
         // Wait for any channel activity to finish or timeout
@@ -225,15 +230,15 @@ public abstract class RhGenericDriver
 
     /// Sets the TO header to be sent in all subsequent messages
     /// \param[in] to The new TO header value
-    public virtual void SetHeaderTo(byte to) { _txHeaderTo = to; }
+    public virtual void SetHeaderTo(byte to) { _txHeaderTo = to; } // TODO: convert to property
 
     /// Sets the FROM header to be sent in all subsequent messages
     /// \param[in] from The new FROM header value
-    public virtual void SetHeaderFrom(byte from) { _txHeaderFrom = from; }
+    public virtual void SetHeaderFrom(byte from) { _txHeaderFrom = from; } // TODO: convert to property
 
     /// Sets the ID header to be sent in all subsequent messages
     /// \param[in] id The new ID header value
-    public virtual void SetHeaderId(byte id) { _txHeaderId = id; }
+    public virtual void SetHeaderId(byte id) { _txHeaderId = id; } // TODO: convert to property
 
     /// Sets and clears bits in the FLAGS header to be sent in all subsequent messages
     /// First it clears he FLAGS according to the clear argument, then sets the flags according to the 
@@ -242,7 +247,7 @@ public abstract class RhGenericDriver
     /// \param[in] clear bitmask of flags to clear. Defaults to RH_FLAGS_APPLICATION_SPECIFIC
     ///            which clears the application specific flags, resulting in new application specific flags
     ///            identical to the set.
-    public virtual void SetHeaderFlags(byte set, byte clear = RH_FLAGS_APPLICATION_SPECIFIC)
+    public virtual void SetHeaderFlags(byte set, byte clear = RH_FLAGS_APPLICATION_SPECIFIC) // TODO: convert to property
     {
         _txHeaderFlags &= (byte)~clear;
         _txHeaderFlags |= set;
@@ -251,23 +256,23 @@ public abstract class RhGenericDriver
     /// Tells the receiver to accept messages with any TO address, not just messages
     /// addressed to thisAddress or the broadcast address
     /// \param[in] promiscuous true if you wish to receive messages with any TO address
-    public virtual void SetPromiscuous(bool promiscuous) { _promiscuous = promiscuous; }
+    public virtual void SetPromiscuous(bool promiscuous) { _promiscuous = promiscuous; } // TODO: convert to property
 
     /// Returns the TO header of the last received message
     /// \return The TO header
-    public virtual byte HeaderTo() { return _rxHeaderTo; }
+    public virtual byte HeaderTo() { return _rxHeaderTo; } // TODO: convert to property
 
     /// Returns the FROM header of the last received message
     /// \return The FROM header
-    public virtual byte HeaderFrom() { return _rxHeaderTo; }
+    public virtual byte HeaderFrom() { return _rxHeaderFrom; } // TODO: convert to property
 
     /// Returns the ID header of the last received message
     /// \return The ID header
-    public virtual byte headerId() { return _rxHeaderId; }
+    public virtual byte headerId() { return _rxHeaderId; } // TODO: convert to property
 
     /// Returns the FLAGS header of the last received message
     /// \return The FLAGS header
-    public virtual byte HeaderFlags() { return _rxHeaderFlags; }
+    public virtual byte HeaderFlags() { return _rxHeaderFlags; } // TODO: convert to property
 
     /// Returns the most recent RSSI (Receiver Signal Strength Indicator).
     /// Usually it is the RSSI of the last received message, which is measured when the preamble is received.

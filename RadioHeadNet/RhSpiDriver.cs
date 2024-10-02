@@ -61,7 +61,7 @@ public class RhSpiDriver : RhGenericDriver
     /// <returns>true if initialisation succeeded.</returns>
     public override bool Init()
     {
-        DeselectSlave();
+        DeselectDevice();
 
         return true;
     }
@@ -96,11 +96,11 @@ public class RhSpiDriver : RhGenericDriver
         byte val;
         lock (CriticalSection)
         {
-            SelectSlave();
+            SelectDevice();
             // Send the address with the write mask off
             Spi.WriteByte((byte)(reg & ~RhSpiWriteMask));
             val = Spi.ReadByte(); // The written value is ignored, reg value is read
-            DeselectSlave();
+            DeselectDevice();
         }
         return val;
     }
@@ -119,11 +119,11 @@ public class RhSpiDriver : RhGenericDriver
         byte status = 0;
         lock (CriticalSection)
         {
-            SelectSlave();
+            SelectDevice();
             // Send the address with the write mask on
             Spi.WriteByte((byte)(reg | RhSpiWriteMask));
             Spi.WriteByte(val); // New value follows
-            DeselectSlave();
+            DeselectDevice();
         }
 
         return status;
@@ -146,11 +146,11 @@ public class RhSpiDriver : RhGenericDriver
         dest = new byte[len];
         lock (CriticalSection)
         {
-            SelectSlave();
+            SelectDevice();
             // Send the start address with the write mask off
             Spi.WriteByte((byte)(reg & ~RhSpiWriteMask));
             Spi.Read(dest);
-            DeselectSlave();
+            DeselectDevice();
         }
 
         return status;
@@ -170,11 +170,11 @@ public class RhSpiDriver : RhGenericDriver
         byte status = 0;
         lock (CriticalSection)
         {
-            SelectSlave();
+            SelectDevice();
             // Send the start address with the write mask on
             Spi.WriteByte((byte)(reg | RhSpiWriteMask));
             Spi.Write(src);
-            DeselectSlave();
+            DeselectDevice();
         }
 
         return status;
@@ -205,7 +205,7 @@ public class RhSpiDriver : RhGenericDriver
     /// Override this if you need an unusual way of selecting the slave before SPI
     /// transactions.  The default uses digitalWrite(_slaveSelectPin, LOW) 
     /// </summary>
-    protected virtual void SelectSlave()
+    protected virtual void SelectDevice()
     {
         SlaveSelectPin.Write(PinValue.Low);
     }
@@ -214,7 +214,7 @@ public class RhSpiDriver : RhGenericDriver
     /// Override this if you need an unusual way of selecting the slave before SPI
     /// transactions. The default uses digitalWrite(_slaveSelectPin, HIGH)
     /// </summary>
-    protected virtual void DeselectSlave()
+    protected virtual void DeselectDevice()
     {
         SlaveSelectPin.Write(PinValue.High);
     }

@@ -30,7 +30,7 @@ public partial class RhRf69
 
     // The length of the headers we add.
     // The headers are inside the RF69's payload and are therefore encrypted if encryption is enabled
-    private const byte RH_RF69_HEADER_LEN = 4;
+    internal const byte RH_RF69_HEADER_LEN = 4;
 
     // This is the maximum message length that can be supported by this driver. Limited by
     // the size of the FIFO, since we are unable to support on-the-fly filling and emptying 

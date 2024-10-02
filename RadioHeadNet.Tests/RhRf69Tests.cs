@@ -20,6 +20,7 @@ public class RhRf69Tests
             {
                 builder.AddUnitTestLogger(config => config.ShowLogLevel = false);
                 builder.SetMinimumLevel(LogLevel.Trace);
+                builder.AddFilter(nameof(Rf69RegistersFake) + ".states", LogLevel.None);
             });
 
         var driver = new GpioDriverFake();
@@ -46,7 +47,7 @@ public class RhRf69Tests
         // ARRANGE:
         _registers.Poke(RhRf69.REG_4E_TEMP1, 0xFF);
         _registers.DoAfterWrite(RhRf69.REG_4E_TEMP1,
-            (_) => { _registers.Poke(RhRf69.REG_4E_TEMP1, 0x04); });
+            _ => { _registers.Poke(RhRf69.REG_4E_TEMP1, 0x04); });
         _registers.DoAfterRead(RhRf69.REG_4E_TEMP1,
             (count) =>
             {
@@ -378,5 +379,48 @@ public class RhRf69Tests
 
         // ASSERT:
         Assert.Throws<ArgumentException>(Lambda);
+    }
+
+    // GIVEN: an instance of the RhRf69 class
+    //        AND using the default settings for preamble length, sync words, CAD timeout
+    //            and encryption
+    //        AND the radio is in Rx mode
+    // WHEN: send() is called
+    // THEN: a data packet is constructed with the correct length preamble
+    //       AND the correct sync words
+    //       AND if encryption is enabled, is encrypted with the correct key
+    //       AND is broadcast by the radio
+    [Test]
+    public void MyTestMethod()
+    {
+        // ARRANGE:
+        _radio.Init();
+
+        byte[] data = [1, 2, 3, 4];
+        var expected = new List<byte>()
+        {
+            (byte)(data.Length + RhRf69.RH_RF69_HEADER_LEN),
+            RadioHead.RH_BROADCAST_ADDRESS, // _radio._txHeaderFrom,
+            RadioHead.RH_BROADCAST_ADDRESS, // _radio.HeaderTo(), 
+            _radio.headerId(), 
+            _radio.HeaderFlags()
+        };
+        expected.AddRange(data);
+
+        var actual = new List<byte>();
+
+        _registers.DoAfterWrite(RhRf69.REG_00_FIFO,
+            _ =>
+            {
+                actual.Add(_registers.Peek(RhRf69.REG_00_FIFO));
+            });
+
+        // ACT:
+        var result = _radio.Send(data);
+
+        // ASSERT:
+        Assert.That(result, Is.True);
+        Assert.That(actual, Is.EqualTo(expected));
+        Assert.That(_registers.Peek(RhRf69.REG_01_OPMODE), Is.EqualTo(RhRf69.OPMODE_MODE_TX));
     }
 }

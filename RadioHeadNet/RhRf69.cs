@@ -20,14 +20,14 @@ public partial class RhRf69 : RhSpiDriver
     private byte _bufLen;
 
     /// Array of octets of the last received message or the next to transmit message
-    private byte[] _buf = new byte[RH_RF69_MAX_MESSAGE_LEN];
+    private readonly byte[] _buf = new byte[RH_RF69_MAX_MESSAGE_LEN];
 
     /// True when there is a valid message in the Rx buffer
     private bool _rxBufValid;
 
     /// Time in millis since the last preamble was received (and the last time the RSSI was measured)
-
     protected int LastPreambleTime;
+    
     /// <summary>
     /// Constructor. You can have multiple instances, but each instance must have its own
     /// interrupt and slave select pin. After constructing, you must call Init() to
@@ -476,12 +476,13 @@ public partial class RhRf69 : RhSpiDriver
     }
 
     /// <summary>
-    /// Waits until any previous transmit packet is finished being transmitted with WaitPacketSent().
-    /// Then loads a message into the transmitter and starts the transmitter. Note that a message length
-    /// of 0 is NOT permitted. 
+    /// Waits until any previous transmit packet is finished being transmitted with
+    /// WaitPacketSent().  Then loads a message into the transmitter and starts the
+    /// transmitter. Note that a message length of 0 is NOT permitted. 
     /// </summary>
     /// <param name="data">array of byte data to be sent</param>
-    /// <returns>true if the message length was valid and it was correctly queued for transmit</returns>
+    /// <returns>true if the message length was valid and it was correctly queued for
+    /// transmit</returns>
     public override bool Send(byte[] data)
     {
         if (data.Length > RH_RF69_MAX_MESSAGE_LEN)
@@ -498,7 +499,7 @@ public partial class RhRf69 : RhSpiDriver
             SlaveSelectPin.Write(PinValue.Low);
 
             // Send the start address with the write mask on
-            Spi.WriteByte((REG_00_FIFO | RH_RF69_SPI_WRITE_MASK));
+            Spi.WriteByte(REG_00_FIFO | RH_RF69_SPI_WRITE_MASK);
 
             // Include length of headers
             Spi.WriteByte((byte)(data.Length + RH_RF69_HEADER_LEN));
