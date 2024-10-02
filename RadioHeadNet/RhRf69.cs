@@ -1,10 +1,12 @@
 ﻿using System.Device.Gpio;
 using System.Device.Spi;
+using Microsoft.Extensions.Logging;
 
 namespace RadioHeadNet;
 
 public partial class RhRf69 : RhSpiDriver
 {
+    private readonly ILogger _logger;
     private static readonly object CriticalSection = new();
 
     /// The radio OP Mode to use when Mode is RHMode.Idle
@@ -27,7 +29,7 @@ public partial class RhRf69 : RhSpiDriver
 
     /// Time in millis since the last preamble was received (and the last time the RSSI was measured)
     protected int LastPreambleTime;
-    
+
     /// <summary>
     /// Constructor. You can have multiple instances, but each instance must have its own
     /// interrupt and slave select pin. After constructing, you must call Init() to
@@ -35,12 +37,13 @@ public partial class RhRf69 : RhSpiDriver
     /// co-exist on one processor, provided there are sufficient distinct interrupt lines,
     /// one for each instance.
     /// </summary>
-    /// <param name="slaveSelectPin"></param>
+    /// <param name="deviceSelectPin"></param>
     /// <param name="spi"></param>
-    public RhRf69(GpioPin slaveSelectPin, SpiDevice spi)
-        : base(slaveSelectPin, spi)
+    /// <param name="loggerFactory"></param>
+    public RhRf69(GpioPin deviceSelectPin, SpiDevice spi, ILoggerFactory loggerFactory)
+        : base(deviceSelectPin, spi)
     {
-       Spi = spi;
+        _logger = loggerFactory.CreateLogger<RhRf69>();
         _idleMode = OPMODE_MODE_STDBY;
     }
 
@@ -57,6 +60,8 @@ public partial class RhRf69 : RhSpiDriver
     /// <returns>true if everything was successful</returns>
     public override bool Init()
     {
+        _logger.LogTrace("---> {0}()", nameof(Init));
+
         // Get the device type and check it. This also tests whether we are really
         // connected to a device.  My test devices return 0x24.
         _deviceType = SpiRead(REG_10_VERSION);
@@ -78,19 +83,19 @@ public partial class RhRf69 : RhSpiDriver
 
         // thresh 15 is default
         SpiWrite(REG_3C_FIFOTHRESH, FIFOTHRESH_TXSTARTCONDITION_NOTEMPTY | 0x0F);
-        
+
         // RSSITHRESH is default
         // SpiWrite(REG_29_RSSITHRESH, 220); // -110 dbM
 
         // SYNCCONFIG is default. SyncSize is set later by setSyncWords()
         // SpiWrite(REG_2E_SYNCCONFIG, SYNCCONFIG_SYNCON); // auto, tolerance 0
-        
+
         // PAYLOADLENGTH is default
         // SpiWrite(REG_38_PAYLOADLENGTH, RH_RF69_FIFO_SIZE); // max size only for RX
-        
+
         // PACKETCONFIG 2 is default
         SpiWrite(REG_6F_TESTDAGC, TESTDAGC_CONTINUOUSDAGC_IMPROVED_LOWBETAOFF);
-        
+
         // If high power boost set previously, disable it
         SpiWrite(REG_5A_TESTPA1, TESTPA1_NORMAL);
         SpiWrite(REG_5C_TESTPA2, TESTPA2_NORMAL);
@@ -115,6 +120,8 @@ public partial class RhRf69 : RhSpiDriver
         // +13dBm, same as power-on default
         SetTxPower(13, false);
 
+        _logger.LogTrace("<--- {0}()", nameof(Init));
+
         return true;
     }
 
@@ -132,19 +139,19 @@ public partial class RhRf69 : RhSpiDriver
             _txGood++;
         }
 
-        // Must look for PAYLOADREADY, not CRCOK, since only PAYLOADREADY occurs _after_ AES decryption
-        // has been done
-        if (_mode != RhMode.Rx || (irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0)
-            return;
+        // Must look for PAYLOADREADY, not CRCOK, since only PAYLOADREADY occurs _after_
+        // AES decryption has been done
+        if (_mode == RhMode.Rx && (irqFlags2 & IRQFLAGS2_PAYLOADREADY) != 0)
+        {
+            // A complete message has been received with good CRC
+            _lastRssi = (short)-(SpiRead(REG_24_RSSIVALUE) >> 1);
+            LastPreambleTime = DateTime.Now.Millisecond;
 
-        // A complete message has been received with good CRC
-        _lastRssi = (short)-(SpiRead(REG_24_RSSIVALUE) >> 1);
-        LastPreambleTime = DateTime.Now.Millisecond;
+            SetModeIdle();
 
-        SetModeIdle();
-
-        // Save it in our buffer
-        ReadFifo();
+            // Save it in our buffer
+            ReadFifo();
+        }
     }
 
     // Low level function reads the FIFO and checks the address
@@ -155,31 +162,32 @@ public partial class RhRf69 : RhSpiDriver
     {
         lock (CriticalSection)
         {
-            SlaveSelectPin.Write(PinValue.Low);
+            DeviceSelectPin.Write(PinValue.Low);
             Spi.WriteByte(REG_00_FIFO); // Send the start address with the write mask off
             var payloadLen = Spi.ReadByte(); // First byte is payload len (counting the headers)
             if (payloadLen is <= RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN and >= RH_RF69_HEADER_LEN)
             {
-                Spi.TransferFullDuplex([0], [_rxHeaderTo]);
+                Spi.WriteByte(0);
+                _rxHeaderTo = Spi.ReadByte();
                 // Check addressing
                 if (_promiscuous ||
                     _rxHeaderTo == _thisAddress ||
                     _rxHeaderTo == RadioHead.RH_BROADCAST_ADDRESS)
                 {
                     // Get the rest of the headers
-                    Spi.TransferFullDuplex([0], [_rxHeaderFrom]);
-                    Spi.TransferFullDuplex([0], [_rxHeaderId]);
-                    Spi.TransferFullDuplex([0], [_rxHeaderFlags]);
+                    _rxHeaderFrom = Spi.ReadByte();
+                    _rxHeaderId = Spi.ReadByte();
+                    _rxHeaderFlags = Spi.ReadByte();
 
                     // And now the real payload
                     for (_bufLen = 0; _bufLen < (payloadLen - RH_RF69_HEADER_LEN); _bufLen++)
-                        Spi.TransferFullDuplex([0], [_buf[_bufLen]]);
+                        _buf[_bufLen] = Spi.ReadByte();
                     _rxGood++;
                     _rxBufValid = true;
                 }
             }
 
-            SlaveSelectPin.Write(PinValue.High);
+            DeviceSelectPin.Write(PinValue.High);
         }
         // Any junk remaining in the FIFO will be cleared next time we go to receive Mode.
     }
@@ -457,14 +465,18 @@ public partial class RhRf69 : RhSpiDriver
     /// <param name="target">buffer to copy the received message</param>
     /// <returns>true if a valid message was copied to buf</returns>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    public override bool Receive(byte[] target)
+    public override bool Receive(out byte[] target)
     {
         if (!Available())
+        {
+            target = Array.Empty<byte>();
             return false;
+        }
 
-        if (target.Length < _buf.Length)
-            throw new IndexOutOfRangeException($"{nameof(Receive)}: target array too small.");
+        // if (target.Length < _buf.Length)
+        //     throw new IndexOutOfRangeException($"{nameof(Receive)}: target array too small.");
 
+        target = new byte[_bufLen];
         lock (CriticalSection)
         {
             Array.Copy(_buf, target, _bufLen);
@@ -496,7 +508,7 @@ public partial class RhRf69 : RhSpiDriver
 
         lock (CriticalSection)
         {
-            SlaveSelectPin.Write(PinValue.Low);
+            DeviceSelectPin.Write(PinValue.Low);
 
             // Send the start address with the write mask on
             Spi.WriteByte(REG_00_FIFO | RH_RF69_SPI_WRITE_MASK);
@@ -514,7 +526,7 @@ public partial class RhRf69 : RhSpiDriver
             foreach (var d in data)
                 Spi.WriteByte(d);
 
-            SlaveSelectPin.Write(PinValue.High);
+            DeviceSelectPin.Write(PinValue.High);
         }
 
         SetModeTx(); // Start the transmitter

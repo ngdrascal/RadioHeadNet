@@ -54,7 +54,7 @@ public class IntegrationTests
         _resetPin = _gpioController.OpenPin(6);
         _resetPin.SetPinMode(PinMode.Output);
 
-        _radio = new RhRf69(_deviceSelectPin, _spiDevice);
+        _radio = new RhRf69(_deviceSelectPin, _spiDevice, _loggerFactory);
 
         // run reset sequence
         _resetPin.Write(PinValue.Low);

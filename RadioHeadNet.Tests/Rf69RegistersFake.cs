@@ -10,6 +10,7 @@ internal class Rf69RegistersFake
         public byte Value { get; set; }
         public int ReadCount { get; set; }
         public int WriteCount { get; set; }
+        public Action<int>? OnReadAction { get; set; }
         public Action<int>? AfterReadAction { get; set; }
         public Action<int>? AfterWriteAction { get; set; }
     }
@@ -90,6 +91,9 @@ internal class Rf69RegistersFake
         }
 
         var targetReg = _registers[_registerIndex];
+
+        targetReg.OnReadAction?.Invoke(targetReg.ReadCount);
+
         result = targetReg.Value;
 
         _regLogger.LogDebug("reg[{0}] == {1}", _registerIndex.ToString("X2"), result.ToString("X2"));
@@ -146,6 +150,10 @@ internal class Rf69RegistersFake
         _registers[regIndex].Value = value;
     }
 
+    public void DoOnRead(byte regIndex, Action<int> action)
+    {
+        _registers[regIndex].OnReadAction = action;
+    }
     public void DoAfterRead(byte regIndex, Action<int> action)
     {
         _registers[regIndex].AfterReadAction = action;

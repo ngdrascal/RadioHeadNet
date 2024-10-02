@@ -26,7 +26,7 @@ public partial class RhRf69
     private const byte RH_RF69_FIFO_SIZE = 66;
 
     // Maximum encrypt-able payload length the RF69 can support
-    private const byte RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN = 64;
+    internal const byte RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN = 64;
 
     // The length of the headers we add.
     // The headers are inside the RF69's payload and are therefore encrypted if encryption is enabled
@@ -225,13 +225,13 @@ public partial class RhRf69
     private const byte IRQFLAGS1_SYNADDRESSMATCH = 0x01;
 
     // REG_28_IRQFLAGS2                                            
-    private const byte IRQFLAGS2_FIFOFULL = 0x80;
-    private const byte IRQFLAGS2_FIFONOTEMPTY = 0x40;
-    private const byte IRQFLAGS2_FIFOLEVEL = 0x20;
-    private const byte IRQFLAGS2_FIFOOVERRUN = 0x10;
-    private const byte IRQFLAGS2_PACKETSENT = 0x08;
-    private const byte IRQFLAGS2_PAYLOADREADY = 0x04;
-    private const byte IRQFLAGS2_CRCOK = 0x02;
+    internal const byte IRQFLAGS2_FIFOFULL = 0x80;
+    internal const byte IRQFLAGS2_FIFONOTEMPTY = 0x40;
+    internal const byte IRQFLAGS2_FIFOLEVEL = 0x20;
+    internal const byte IRQFLAGS2_FIFOOVERRUN = 0x10;
+    internal const byte IRQFLAGS2_PACKETSENT = 0x08;
+    internal const byte IRQFLAGS2_PAYLOADREADY = 0x04;
+    internal const byte IRQFLAGS2_CRCOK = 0x02;
 
     // REG_2E_SYNCCONFIG                                           
     private const byte SYNCCONFIG_SYNCON = 0x80;

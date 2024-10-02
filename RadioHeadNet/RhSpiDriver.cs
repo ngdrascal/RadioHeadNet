@@ -30,7 +30,7 @@ public class RhSpiDriver : RhGenericDriver
 {
     private static readonly object CriticalSection = new();
 
-    protected GpioPin SlaveSelectPin;
+    protected GpioPin DeviceSelectPin;
     protected SpiDevice Spi;
 
     /// <summary>
@@ -41,16 +41,16 @@ public class RhSpiDriver : RhGenericDriver
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="slaveSelectPin"> The controller pin to use to select the desired SPI
+    /// <param name="deviceSelectPin"> The controller pin to use to select the desired SPI
     /// device. This pin will be driven LOW during SPI communications with the SPI device
     /// that is used by this Driver.
     /// </param>
     /// <param name="spi">Reference to the SPI interface to use. The default is to use a
     /// default built-in Hardware interface.
     /// </param>
-    public RhSpiDriver(GpioPin slaveSelectPin, SpiDevice spi)
+    public RhSpiDriver(GpioPin deviceSelectPin, SpiDevice spi)
     {
-        SlaveSelectPin = slaveSelectPin;
+        DeviceSelectPin = deviceSelectPin;
         Spi = spi;
     }
 
@@ -71,7 +71,7 @@ public class RhSpiDriver : RhGenericDriver
         throw new NotImplementedException();
     }
 
-    public override bool Receive(byte[] buf)
+    public override bool Receive(out byte[] buf)
     {
         throw new NotImplementedException();
     }
@@ -188,7 +188,7 @@ public class RhSpiDriver : RhGenericDriver
     /// <param name="slaveSelectPin">The pin to use</param>
     public void SetSlaveSelectPin(GpioPin slaveSelectPin)
     {
-        SlaveSelectPin = slaveSelectPin;
+        DeviceSelectPin = slaveSelectPin;
     }
 
     /// <summary>
@@ -207,7 +207,7 @@ public class RhSpiDriver : RhGenericDriver
     /// </summary>
     protected virtual void SelectDevice()
     {
-        SlaveSelectPin.Write(PinValue.Low);
+        DeviceSelectPin.Write(PinValue.Low);
     }
 
     /// <summary>
@@ -216,6 +216,6 @@ public class RhSpiDriver : RhGenericDriver
     /// </summary>
     protected virtual void DeselectDevice()
     {
-        SlaveSelectPin.Write(PinValue.High);
+        DeviceSelectPin.Write(PinValue.High);
     }
 }

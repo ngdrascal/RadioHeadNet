@@ -57,7 +57,7 @@ internal class SpiDeviceFake : SpiDevice
 
     public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
     {
-        throw new NotImplementedException();
+        
     }
 
     public override SpiConnectionSettings ConnectionSettings => _connectionSettings;

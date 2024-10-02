@@ -29,7 +29,7 @@ public class RhRf69Tests
         _registers = new Rf69RegistersFake(deviceSelectPin, _loggerFactory);
         var spiConnSetting = new SpiConnectionSettings(0);
         var spiDevice = new SpiDeviceFake(spiConnSetting, controller, _registers, _loggerFactory);
-        _radio = new RhRf69(deviceSelectPin, spiDevice);
+        _radio = new RhRf69(deviceSelectPin, spiDevice, _loggerFactory);
     }
 
     [TearDown]
@@ -382,30 +382,21 @@ public class RhRf69Tests
     }
 
     // GIVEN: an instance of the RhRf69 class
-    //        AND using the default settings for preamble length, sync words, CAD timeout
-    //            and encryption
+    //        AND using the default settings
     //        AND the radio is in Rx mode
-    // WHEN: send() is called
+    // WHEN: Send() is called
     // THEN: a data packet is constructed with the correct length preamble
     //       AND the correct sync words
     //       AND if encryption is enabled, is encrypted with the correct key
     //       AND is broadcast by the radio
     [Test]
-    public void MyTestMethod()
+    public void Send()
     {
         // ARRANGE:
         _radio.Init();
 
         byte[] data = [1, 2, 3, 4];
-        var expected = new List<byte>()
-        {
-            (byte)(data.Length + RhRf69.RH_RF69_HEADER_LEN),
-            RadioHead.RH_BROADCAST_ADDRESS, // _radio._txHeaderFrom,
-            RadioHead.RH_BROADCAST_ADDRESS, // _radio.HeaderTo(), 
-            _radio.headerId(), 
-            _radio.HeaderFlags()
-        };
-        expected.AddRange(data);
+        var expected = BuildPacketWithDefaults([1, 2, 3, 4]);
 
         var actual = new List<byte>();
 
@@ -422,5 +413,101 @@ public class RhRf69Tests
         Assert.That(result, Is.True);
         Assert.That(actual, Is.EqualTo(expected));
         Assert.That(_registers.Peek(RhRf69.REG_01_OPMODE), Is.EqualTo(RhRf69.OPMODE_MODE_TX));
+    }
+
+    // GIVEN: an instance of the RhRf69 class
+    //        AND the radio is not in Rx mode
+    //        AND no data was received
+    // WHEN: Available() is called
+    // THEN: false is returned
+    [Test]
+    public void AvailableNoData()
+    {
+        // ARRANGE:
+        _radio.Init();
+
+        // ACT:
+        var result = _radio.Available();
+
+        // ASSERT:
+        Assert.That(result, Is.False);
+
+    }
+
+    // GIVEN: an instance of the RhRf69 class
+    //        AND the radio is not in Rx mode
+    //        AND data was received
+    // WHEN: Available() is called
+    // THEN: true is returned
+    [Test]
+    public void AvailableHasData()
+    {
+        // ARRANGE:
+        byte[] expected = [1, 2, 3, 4];
+        
+        _radio.Init();
+        MockSendData(expected);
+        _radio.SetModeRx();
+        _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
+
+        // ACT:
+        var result = _radio.Available();
+
+        // ASSERT:
+        Assert.That(result, Is.True);
+    }
+
+
+    // GIVEN: an instance of the RhRf69 class
+    //        AND IRQFLAGS2.PAYLOADREADY flag is set
+    // WHEN: Receive() is called
+    // THEN: the data received matches the data sent
+    //       AND the RSSI value is correct
+    [Test]
+    public void Receive()
+    {
+        // ARRANGE:
+        byte[] expected = [1, 2, 3, 4];
+
+        _radio.Init();
+        MockSendData(expected);
+        _radio.SetModeRx();
+        _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
+        
+        // ACT:
+        var result = _radio.Receive(out var actual);
+
+        // ASSERT:
+        Assert.That(result, Is.True);
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    private void MockSendData(byte[] data)
+    {
+        var dataPacket = BuildPacketWithDefaults(data);
+
+        var pkgIdx = 0;
+        _registers.DoOnRead(RhRf69.REG_00_FIFO, _ =>
+        {
+            _registers.Poke(RhRf69.REG_00_FIFO, dataPacket[pkgIdx++]);
+        });
+
+        _registers.Poke(RhRf69.REG_28_IRQFLAGS2, RhRf69.IRQFLAGS2_PAYLOADREADY);
+    }
+
+
+    private byte[] BuildPacketWithDefaults(byte[] data)
+    {
+        var result = new List<byte>()
+        {
+            (byte)(data.Length + RhRf69.RH_RF69_HEADER_LEN),
+            RadioHead.RH_BROADCAST_ADDRESS, // _radio._txHeaderFrom,
+            RadioHead.RH_BROADCAST_ADDRESS, // _radio.HeaderTo(), 
+            _radio.headerId(),
+            _radio.HeaderFlags()
+        };
+        result.AddRange(data);
+
+        return result.ToArray();
     }
 }
