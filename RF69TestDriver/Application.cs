@@ -1,8 +1,10 @@
 ﻿using System.Device.Gpio;
+using System.Diagnostics.CodeAnalysis;
 using RadioHeadNet;
 
 namespace RF69TestDriver;
 
+[ExcludeFromCodeCoverage]
 internal class Application
 {
     private readonly GpioPin _resetPin;

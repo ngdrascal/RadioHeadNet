@@ -7,9 +7,11 @@ using Iot.Device.Board;
 using Iot.Device.Common;
 using Microsoft.Extensions.Configuration;
 using RadioHeadNet;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RF69TestDriver;
 
+[ExcludeFromCodeCoverage]
 internal static class Program
 {
     private enum SupportedBoards { Ftx232H, RPi }
@@ -21,7 +23,11 @@ internal static class Program
         _targetBoard = SupportedBoards.Ftx232H;
 
         var builder = Host.CreateApplicationBuilder(args);
+        builder.Configuration.Sources.Clear();
         BuildDefaultConfiguration(builder.Configuration);
+        builder.Configuration.AddJsonFile("appsettings.json");
+        builder.Configuration.AddCommandLine(args);
+
         ConfigureServices(builder.Services, builder.Configuration);
         var host = builder.Build();
 
@@ -36,8 +42,9 @@ internal static class Program
             ["HostDevice"] = "Ftx232H",
             ["DeviceSelectPin"] = "5",
             ["ResetPin"] = "6",
+            ["InterruptPin"] = "7",
             ["Frequency"] = "915.0",
-            ["Power"] = "20",
+            ["PowerLevel"] = "20",
         });
     }
 
@@ -107,7 +114,7 @@ internal static class Program
             var resetPin = provider.GetRequiredKeyedService<GpioPin>("ResetPin");
             var radio = provider.GetRequiredService<RhRf69>();
             var frequency = config.GetValue<float>("Frequency");
-            var power = config.GetValue<sbyte>("Power");
+            var power = config.GetValue<sbyte>("PowerLevel");
             var app = new Application(resetPin, radio, frequency, power);
             return app;
         });

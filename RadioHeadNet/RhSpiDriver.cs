@@ -31,7 +31,7 @@ public class RhSpiDriver : RhGenericDriver
     private static readonly object CriticalSection = new();
 
     protected GpioPin DeviceSelectPin;
-    protected SpiDevice Spi;
+    protected readonly SpiDevice Spi;
 
     /// <summary>
     /// This is the bit in the SPI address that marks it as a write operation
