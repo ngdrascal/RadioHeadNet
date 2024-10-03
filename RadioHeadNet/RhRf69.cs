@@ -28,7 +28,7 @@ public partial class RhRf69 : RhSpiDriver
     private bool _rxBufValid;
 
     /// Time in millis since the last preamble was received (and the last time the RSSI was measured)
-    protected int LastPreambleTime;
+    protected long LastPreambleTime;
 
     /// <summary>
     /// Constructor. You can have multiple instances, but each instance must have its own
@@ -61,6 +61,9 @@ public partial class RhRf69 : RhSpiDriver
     public override bool Init()
     {
         _logger.LogTrace("---> {0}()", nameof(Init));
+
+        if (!base.Init())
+            return false;
 
         // Get the device type and check it. This also tests whether we are really
         // connected to a device.  My test devices return 0x24.
@@ -144,8 +147,10 @@ public partial class RhRf69 : RhSpiDriver
         if (_mode == RhMode.Rx && (irqFlags2 & IRQFLAGS2_PAYLOADREADY) != 0)
         {
             // A complete message has been received with good CRC
+            // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
             _lastRssi = (short)-(SpiRead(REG_24_RSSIVALUE) >> 1);
-            LastPreambleTime = DateTime.Now.Millisecond;
+
+            LastPreambleTime = DateTime.Now.Ticks;
 
             SetModeIdle();
 
@@ -449,7 +454,9 @@ public partial class RhRf69 : RhSpiDriver
         if (_mode == RhMode.Tx)
             return false;
 
-        SetModeRx(); // Make sure we are receiving
+        // Make sure we are receiving
+        SetModeRx(); 
+
         return _rxBufValid;
     }
 
@@ -472,9 +479,6 @@ public partial class RhRf69 : RhSpiDriver
             return false;
         }
 
-        // if (target.Length < _buf.Length)
-        //     throw new IndexOutOfRangeException($"{nameof(Receive)}: target array too small.");
-
         target = new byte[_bufLen];
         lock (CriticalSection)
         {
@@ -482,7 +486,7 @@ public partial class RhRf69 : RhSpiDriver
         }
 
         _rxBufValid = false; // Got the most recent message
-        //    PrintBuffer("Receive:", target, *len);
+
         return true;
     }
 

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadioHeadNet.Tests", "Radio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTestLogger", "UnitTestLogger\UnitTestLogger.csproj", "{AD5B9CAD-5C2E-4320-B0AE-1347C7A970F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadNet.TestDriver", "RadioHeadNet.TestDriver\RadioHeadNet.TestDriver.csproj", "{B676C56C-8439-44C2-9C57-F90C2DA9B653}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RF69TestDriver", "RF69TestDriver\RF69TestDriver.csproj", "{CF3C23A9-C157-4A8B-8F05-4B3412A80891}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{AD5B9CAD-5C2E-4320-B0AE-1347C7A970F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD5B9CAD-5C2E-4320-B0AE-1347C7A970F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD5B9CAD-5C2E-4320-B0AE-1347C7A970F7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B676C56C-8439-44C2-9C57-F90C2DA9B653}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B676C56C-8439-44C2-9C57-F90C2DA9B653}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B676C56C-8439-44C2-9C57-F90C2DA9B653}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B676C56C-8439-44C2-9C57-F90C2DA9B653}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF3C23A9-C157-4A8B-8F05-4B3412A80891}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF3C23A9-C157-4A8B-8F05-4B3412A80891}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF3C23A9-C157-4A8B-8F05-4B3412A80891}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF3C23A9-C157-4A8B-8F05-4B3412A80891}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -67,7 +67,6 @@ public class RhRf69Tests
         Assert.That(actual, Is.EqualTo(1));
     }
 
-
     // GIVEN: an instance of the RhRf69 class who's idle-mode has not been set
     // WHEN: SetModeIdle() is called
     // THEN: the OpMode register's mode bits should be set to standby
@@ -458,7 +457,6 @@ public class RhRf69Tests
         Assert.That(result, Is.True);
     }
 
-
     // GIVEN: an instance of the RhRf69 class
     //        AND IRQFLAGS2.PAYLOADREADY flag is set
     // WHEN: Receive() is called
@@ -468,6 +466,9 @@ public class RhRf69Tests
     public void Receive()
     {
         // ARRANGE:
+        // RSSI value is -(170/2) = -85 dBm
+        _registers.Poke(RhRf69.REG_24_RSSIVALUE, 170);
+
         byte[] expected = [1, 2, 3, 4];
 
         _radio.Init();
@@ -481,6 +482,7 @@ public class RhRf69Tests
         // ASSERT:
         Assert.That(result, Is.True);
         Assert.That(actual, Is.EqualTo(expected));
+        Assert.That(_radio.LastRssi(), Is.EqualTo(-85));
     }
 
     private void MockSendData(byte[] data)
@@ -495,7 +497,6 @@ public class RhRf69Tests
 
         _registers.Poke(RhRf69.REG_28_IRQFLAGS2, RhRf69.IRQFLAGS2_PAYLOADREADY);
     }
-
 
     private byte[] BuildPacketWithDefaults(byte[] data)
     {
