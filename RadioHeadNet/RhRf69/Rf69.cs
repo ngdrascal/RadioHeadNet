@@ -546,10 +546,10 @@ public partial class Rf69 : RhSpiDriver
             Spi.WriteByte((byte)(data.Length + RH_RF69_HEADER_LEN));
 
             // First the 4 headers
-            Spi.WriteByte(_txHeaderTo);
-            Spi.WriteByte(_txHeaderFrom);
-            Spi.WriteByte(_txHeaderId);
-            Spi.WriteByte(_txHeaderFlags);
+            Spi.WriteByte(TxHeaderTo);
+            Spi.WriteByte(TxHeaderFrom);
+            Spi.WriteByte(TxHeaderId);
+            Spi.WriteByte(TxHeaderFlags);
 
             // Now the payload
             foreach (var d in data)

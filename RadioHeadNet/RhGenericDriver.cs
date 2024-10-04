@@ -43,10 +43,10 @@ public abstract class RhGenericDriver
     {
         Mode = Rh69Modes.Initialising;
         _thisAddress = RadioHead.RH_BROADCAST_ADDRESS;
-        _txHeaderTo = RadioHead.RH_BROADCAST_ADDRESS;
-        _txHeaderFrom = RadioHead.RH_BROADCAST_ADDRESS;
-        _txHeaderId = 0;
-        _txHeaderFlags = 0;
+        TxHeaderTo = RadioHead.RH_BROADCAST_ADDRESS;
+        TxHeaderFrom = RadioHead.RH_BROADCAST_ADDRESS;
+        TxHeaderId = 0;
+        TxHeaderFlags = 0;
         _rxBad = 0;
         _rxGood = 0;
         _txGood = 0;
@@ -228,30 +228,17 @@ public abstract class RhGenericDriver
     /// \param[in] thisAddress The address of this node.
     public virtual void SetThisAddress(byte thisAddress) { _thisAddress = thisAddress; }
 
-    /// Sets the TO header to be sent in all subsequent messages
-    /// \param[in] to The new TO header value
-    public virtual void SetHeaderTo(byte to) { _txHeaderTo = to; } // TODO: convert to property
+    /// <summary>TO header sent in all messages</summary>
+    public byte TxHeaderTo { get; set; }
 
-    /// Sets the FROM header to be sent in all subsequent messages
-    /// \param[in] from The new FROM header value
-    public virtual void SetHeaderFrom(byte from) { _txHeaderFrom = from; } // TODO: convert to property
+    /// <summary>FROM header sent in all messages</summary>
+    public byte TxHeaderFrom { get; set; }
 
-    /// Sets the ID header to be sent in all subsequent messages
-    /// \param[in] id The new ID header value
-    public virtual void SetHeaderId(byte id) { _txHeaderId = id; } // TODO: convert to property
+    /// <summary>ID header sent in all messages</summary>
+    public byte TxHeaderId { get; set; }
 
-    /// Sets and clears bits in the FLAGS header to be sent in all subsequent messages
-    /// First it clears he FLAGS according to the clear argument, then sets the flags according to the 
-    /// set argument. The default for clear always clears the application specific flags.
-    /// \param[in] set bitmask of bits to be set. Flags are cleared with the clear mask before being set.
-    /// \param[in] clear bitmask of flags to clear. Defaults to RH_FLAGS_APPLICATION_SPECIFIC
-    ///            which clears the application specific flags, resulting in new application specific flags
-    ///            identical to the set.
-    public virtual void SetHeaderFlags(byte set, byte clear = RH_FLAGS_APPLICATION_SPECIFIC) // TODO: convert to property
-    {
-        _txHeaderFlags &= (byte)~clear;
-        _txHeaderFlags |= set;
-    }
+    /// <summary>FLAGS header sent in all messages</summary>
+    public byte TxHeaderFlags { get; set; }
 
     /// Tells the receiver to accept messages with any TO address, not just messages
     /// addressed to thisAddress or the broadcast address
@@ -319,17 +306,6 @@ public abstract class RhGenericDriver
     protected bool _promiscuous;
 
 
-    /// TO header to Send in all messages
-    protected byte _txHeaderTo;
-
-    /// FROM header to Send in all messages
-    protected byte _txHeaderFrom;
-
-    /// ID header to Send in all messages
-    protected byte _txHeaderId;
-
-    /// FLAGS header to Send in all messages
-    protected byte _txHeaderFlags;
 
     /// Count of the number of bad messages (e.g. - bad checksum etc.) received
     protected ushort _rxBad;
