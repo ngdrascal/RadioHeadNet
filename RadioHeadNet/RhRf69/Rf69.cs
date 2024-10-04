@@ -3,9 +3,9 @@ using System.Device.Spi;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace RadioHeadNet;
+namespace RadioHeadNet.RhRf69;
 
-public partial class RhRf69 : RhSpiDriver
+public partial class Rf69 : RhSpiDriver
 {
     private readonly ILogger _logger;
     private static readonly object CriticalSection = new();
@@ -41,10 +41,10 @@ public partial class RhRf69 : RhSpiDriver
     /// <param name="deviceSelectPin"></param>
     /// <param name="spi"></param>
     /// <param name="loggerFactory"></param>
-    public RhRf69(GpioPin deviceSelectPin, SpiDevice spi, ILoggerFactory loggerFactory)
+    public Rf69(GpioPin deviceSelectPin, SpiDevice spi, ILoggerFactory loggerFactory)
         : base(deviceSelectPin, spi)
     {
-        _logger = loggerFactory.CreateLogger<RhRf69>();
+        _logger = loggerFactory.CreateLogger<Rf69>();
         _idleMode = OPMODE_MODE_STDBY;
     }
 
@@ -136,7 +136,7 @@ public partial class RhRf69 : RhSpiDriver
     {
         // Get the interrupt cause
         var irqFlags2 = SpiRead(REG_28_IRQFLAGS2);
-        if (_mode == RhMode.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
+        if (_mode == Rh69Modes.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
         {
             // A transmitter message has been fully sent
             SetModeIdle(); // Clears FIFO
@@ -145,7 +145,7 @@ public partial class RhRf69 : RhSpiDriver
 
         // Must look for PAYLOADREADY, not CRCOK, since only PAYLOADREADY occurs _after_
         // AES decryption has been done
-        if (_mode == RhMode.Rx && (irqFlags2 & IRQFLAGS2_PAYLOADREADY) != 0)
+        if (_mode == Rh69Modes.Rx && (irqFlags2 & IRQFLAGS2_PAYLOADREADY) != 0)
         {
             // A complete message has been received with good CRC
             // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
@@ -291,7 +291,7 @@ public partial class RhRf69 : RhSpiDriver
     /// </summary>
     public void SetModeIdle()
     {
-        if (_mode != RhMode.Idle)
+        if (_mode != Rh69Modes.Idle)
         {
             if (_power >= 18)
             {
@@ -301,7 +301,7 @@ public partial class RhRf69 : RhSpiDriver
             }
 
             SetOpMode(_idleMode);
-            _mode = RhMode.Idle;
+            _mode = Rh69Modes.Idle;
         }
     }
 
@@ -310,7 +310,7 @@ public partial class RhRf69 : RhSpiDriver
     /// </summary>
     public void SetModeRx()
     {
-        if (_mode != RhMode.Rx)
+        if (_mode != Rh69Modes.Rx)
         {
             if (_power >= 18)
             {
@@ -322,7 +322,7 @@ public partial class RhRf69 : RhSpiDriver
             // Set interrupt line 0 PayloadReady
             SpiWrite(REG_25_DIOMAPPING1, DIOMAPPING1_DIO0MAPPING_01);
             SetOpMode(OPMODE_MODE_RX); // Clears FIFO
-            _mode = RhMode.Rx;
+            _mode = Rh69Modes.Rx;
         }
     }
 
@@ -331,7 +331,7 @@ public partial class RhRf69 : RhSpiDriver
     /// </summary>
     public void SetModeTx()
     {
-        if (_mode != RhMode.Tx)
+        if (_mode != Rh69Modes.Tx)
         {
             if (_power >= 18)
             {
@@ -343,7 +343,7 @@ public partial class RhRf69 : RhSpiDriver
 
             SpiWrite(REG_25_DIOMAPPING1, DIOMAPPING1_DIO0MAPPING_00); // Set interrupt line 0 PacketSent
             SetOpMode(OPMODE_MODE_TX); // Clears FIFO
-            _mode = RhMode.Tx;
+            _mode = Rh69Modes.Tx;
         }
     }
 
@@ -452,7 +452,7 @@ public partial class RhRf69 : RhSpiDriver
     /// </returns>
     public override bool Available()
     {
-        if (_mode == RhMode.Tx)
+        if (_mode == Rh69Modes.Tx)
             return false;
 
         // Make sure we are receiving
@@ -492,7 +492,7 @@ public partial class RhRf69 : RhSpiDriver
 
     public bool PoleReceiver(int timeout)
     {
-        if (_mode == RhMode.Tx)
+        if (_mode == Rh69Modes.Tx)
             return false;
 
         SetModeRx();
@@ -681,10 +681,10 @@ public partial class RhRf69 : RhSpiDriver
     /// <returns>true if Sleep Mode was successfully entered</returns>
     public override bool Sleep()
     {
-        if (_mode != RhMode.Sleep)
+        if (_mode != Rh69Modes.Sleep)
         {
             SpiWrite(REG_01_OPMODE, OPMODE_MODE_SLEEP);
-            _mode = RhMode.Sleep;
+            _mode = Rh69Modes.Sleep;
         }
 
         return true;

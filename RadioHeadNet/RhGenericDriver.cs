@@ -41,7 +41,7 @@ public abstract class RhGenericDriver
     /// Constructor
     protected RhGenericDriver()
     {
-        _mode = RhMode.Initialising;
+        _mode = Rh69Modes.Initialising;
         _thisAddress = RadioHead.RH_BROADCAST_ADDRESS;
         _txHeaderTo = RadioHead.RH_BROADCAST_ADDRESS;
         _txHeaderFrom = RadioHead.RH_BROADCAST_ADDRESS;
@@ -64,8 +64,8 @@ public abstract class RhGenericDriver
     /// Tests whether a new message is Available
     /// from the Driver. 
     /// On most drivers, if there is an uncollected received message, and there is no message
-    /// currently bing transmitted, this will also put the Driver into RHMode.Rx Mode until
-    /// a message is actually received by the transport, when it will be returned to RHMode.Idle.
+    /// currently bing transmitted, this will also put the Driver into Rh69Modes.Rx Mode until
+    /// a message is actually received by the transport, when it will be returned to Rh69Modes.Idle.
     /// This can be called multiple times in a timeout loop.
     /// \return true if a new, complete, error-free uncollected message is Available to be
     /// retrieved by Receive().
@@ -120,7 +120,7 @@ public abstract class RhGenericDriver
     /// is no longer transmitting.
     public virtual bool WaitPacketSent()
     {
-        while (_mode == RhMode.Tx)
+        while (_mode == Rh69Modes.Tx)
             Thread.Yield(); // Wait for any previous transmit to finish
         return true;
     }
@@ -131,7 +131,7 @@ public abstract class RhGenericDriver
     /// \return true if the radio completed transmission within the timeout period. False if it timed out.
     public virtual bool WaitPacketSent(ushort timeout)
     {
-        while (_mode == RhMode.Tx)
+        while (_mode == Rh69Modes.Tx)
             Thread.Yield(); // Wait for any previous transmit to finish
         return true;
     }
@@ -282,10 +282,10 @@ public abstract class RhGenericDriver
 
     /// Returns the operating Mode of the library.
     /// \return the current Mode, one of RF69_MODE_*
-    public virtual RhMode Mode() { return _mode; }
+    public virtual Rh69Modes Mode() { return _mode; }
 
     /// Sets the operating Mode of the transport.
-    public virtual void SetMode(RhMode mode) { _mode = mode; }
+    public virtual void SetMode(Rh69Modes mode) { _mode = mode; }
 
     /// Sets the transport hardware into low-power Sleep Mode
     /// (if supported). May be overridden by specific drivers to initiate Sleep Mode.
@@ -320,7 +320,7 @@ public abstract class RhGenericDriver
     public virtual ushort TxGood() { return _txGood; }
 
     /// The current transport operating Mode
-    protected RhMode _mode;
+    protected Rh69Modes _mode;
 
     /// This node id
     protected byte _thisAddress;

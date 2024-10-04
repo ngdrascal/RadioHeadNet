@@ -61,6 +61,9 @@ public class RhSpiDriver : RhGenericDriver
     /// <returns>true if initialisation succeeded.</returns>
     public override bool Init()
     {
+        if (!base.Init())
+            return false;
+
         DeselectDevice();
 
         return true;

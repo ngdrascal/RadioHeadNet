@@ -6,9 +6,9 @@
 
 #define RFM69_HW
 
-namespace RadioHeadNet;
+namespace RadioHeadNet.RhRf69;
 
-public partial class RhRf69
+public partial class Rf69
 {
     // The crystal oscillator frequency of the RF69 module
     private const float RH_RF69_FXOSC = 32000000.0f;

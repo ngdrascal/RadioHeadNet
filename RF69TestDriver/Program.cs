@@ -8,6 +8,7 @@ using Iot.Device.Common;
 using Microsoft.Extensions.Configuration;
 using RadioHeadNet;
 using System.Diagnostics.CodeAnalysis;
+using Rf69 = RadioHeadNet.RhRf69.Rf69;
 
 namespace RF69TestDriver;
 
@@ -101,18 +102,18 @@ internal static class Program
             return spiDevice;
         });
 
-        services.AddSingleton<RhRf69>(provider =>
+        services.AddSingleton<Rf69>(provider =>
         {
             var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
             var spiDevice = provider.GetRequiredService<SpiDevice>();
-            var radio = new RhRf69(deviceSelectPin, spiDevice, new SimpleConsoleLoggerFactory());
+            var radio = new Rf69(deviceSelectPin, spiDevice, new SimpleConsoleLoggerFactory());
             return radio;
         });
 
         services.AddSingleton<Application>(provider =>
         {
             var resetPin = provider.GetRequiredKeyedService<GpioPin>("ResetPin");
-            var radio = provider.GetRequiredService<RhRf69>();
+            var radio = provider.GetRequiredService<Rf69>();
             var frequency = config.GetValue<float>("Frequency");
             var power = config.GetValue<sbyte>("PowerLevel");
             var app = new Application(resetPin, radio, frequency, power);

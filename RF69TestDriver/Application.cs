@@ -1,6 +1,7 @@
 ﻿using System.Device.Gpio;
 using System.Diagnostics.CodeAnalysis;
 using RadioHeadNet;
+using Rf69 = RadioHeadNet.RhRf69.Rf69;
 
 namespace RF69TestDriver;
 
@@ -8,11 +9,11 @@ namespace RF69TestDriver;
 internal class Application
 {
     private readonly GpioPin _resetPin;
-    private readonly RhRf69 _radio;
+    private readonly Rf69 _radio;
     private readonly float _frequency;
     private readonly sbyte _power;
 
-    public Application(GpioPin resetPin, RhRf69 radio, float frequency, sbyte power)
+    public Application(GpioPin resetPin, Rf69 radio, float frequency, sbyte power)
     {
         _resetPin = resetPin;
         _radio = radio;

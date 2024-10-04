@@ -4,7 +4,7 @@
 /// These are the different values that can be adopted by the _mode variable and 
 /// returned by the Mode() function.
 /// /// </summary>
-public enum RhMode : byte
+public enum Rh69Modes : byte
 {
     /// <summary>
     /// Transport is initialising. Initial default value until Init() is called.
