@@ -6,7 +6,6 @@ namespace RadioHeadNet;
 
 public abstract class RhGenericDriver
 {
-
     // Defines bits of the FLAGS header reserved for use by the RadioHead library and 
     // the flags Available for use by applications
     protected const byte RH_FLAGS_RESERVED = 0xf0;
@@ -42,15 +41,16 @@ public abstract class RhGenericDriver
     protected RhGenericDriver()
     {
         Mode = Rh69Modes.Initialising;
-        _thisAddress = RadioHead.RH_BROADCAST_ADDRESS;
+        ThisAddress = RadioHead.RH_BROADCAST_ADDRESS;
         TxHeaderTo = RadioHead.RH_BROADCAST_ADDRESS;
         TxHeaderFrom = RadioHead.RH_BROADCAST_ADDRESS;
         TxHeaderId = 0;
         TxHeaderFlags = 0;
-        _rxBad = 0;
-        _rxGood = 0;
-        _txGood = 0;
-        _cad_timeout = 0;
+        Promiscuous = false;
+        RxBad = 0;
+        RxGood = 0;
+        RxGood = 0;
+        CadTimeout = 0;
     }
 
     /// Initialise the Driver transport hardware and software.
@@ -180,7 +180,7 @@ public abstract class RhGenericDriver
     /// </returns>
     public virtual bool WaitCAD()
     {
-        if (_cad_timeout == 0)
+        if (CadTimeout == 0)
             return true;
 
         // Wait for any channel activity to finish or timeout
@@ -193,7 +193,7 @@ public abstract class RhGenericDriver
         stopwatch.Start();
         while (IsChannelActive())
         {
-            if (stopwatch.ElapsedMilliseconds > _cad_timeout)
+            if (stopwatch.ElapsedMilliseconds > CadTimeout)
                 return false;
             Thread.Sleep(random.Next(1, 10) * 100); // Should these values be configurable? Macros?
         }
@@ -201,10 +201,12 @@ public abstract class RhGenericDriver
         return true;
     }
 
-    /// Sets the Channel Activity Detection timeout in milliseconds to be used by WaitCAD().
-    /// The default is 0, which means do not wait for CAD detection.
+    /// <summary>
+    /// Sets the Channel Activity Detection timeout in milliseconds to be used by
+    /// WaitCAD().  The default is 0, which means do not wait for CAD detection.
     /// CAD detection depends on support for IsChannelActive() by your particular radio.
-    public void SetCADTimeout(uint cad_timeout) { _cad_timeout = cad_timeout; }
+    /// </summary>
+    public uint CadTimeout { get; set; }
 
     /// Determine if the currently selected radio channel is active.
     /// This is expected to be subclassed by specific radios to implement their Channel Activity Detection
@@ -226,7 +228,7 @@ public abstract class RhGenericDriver
     /// You would normally set the header FROM address to be the same as thisAddress (though you dont have to, 
     /// allowing the possibility of address spoofing).
     /// \param[in] thisAddress The address of this node.
-    public virtual void SetThisAddress(byte thisAddress) { _thisAddress = thisAddress; }
+    public byte ThisAddress { get; set; }
 
     /// <summary>TO header sent in all messages</summary>
     public byte TxHeaderTo { get; set; }
@@ -262,9 +264,7 @@ public abstract class RhGenericDriver
     /// </summary>
     public short LastRssi { get; protected set; }
 
-    /// <summary>
-    /// The current transport operating Mode
-    /// </summary>
+    /// <summary>The current transport operating Mode</summary>
     protected Rh69Modes Mode { get; set; }
 
     /// Sets the transport hardware into low-power Sleep Mode
@@ -282,39 +282,20 @@ public abstract class RhGenericDriver
     /// \param[in] len Length of the buffer in octets.
     public static void PrintBuffer(string prompt, byte[] buf) { }
 
-    /// Returns the count of the number of bad received packets (ie packets with bad lengths, checksum etc)
-    /// which were rejected and not delivered to the application.
-    /// Caution: not all drivers can correctly report this count. Some underlying hardware only report
-    /// good packets.
-    /// \return The number of bad packets received.
-    public virtual ushort RxBad() { return _rxBad; }
+    /// <summary>
+    /// The count of the number of bad received packets (ie packets with bad lengths,
+    /// checksum etc.) which were rejected and not delivered to the application.
+    /// Caution: not all drivers can correctly report this count. Some underlying
+    /// hardware only report good packets.
+    /// </summary>
+    public ushort RxBad { get; protected set; }
 
-    /// Returns the count of the number of 
-    /// good received packets
-    /// \return The number of good packets received.
-    public virtual ushort RxGood() { return _rxGood; }
+    /// <summary>The count of the number of good received packets</summary>
+    public ushort RxGood { get; protected set; }
 
-    /// Returns the count of the number of 
-    /// packets successfully transmitted (though not necessarily received by the destination)
-    /// \return The number of packets successfully transmitted
-    public virtual ushort TxGood() { return _txGood; }
-
-    /// This node id
-    protected byte _thisAddress;
-
-
-    /// Count of the number of bad messages (e.g. - bad checksum etc.) received
-    protected ushort _rxBad;
-
-    /// Count of the number of successfully transmitted messaged
-    protected ushort _rxGood;
-
-    /// Count of the number of bad messages (correct checksum etc.) received
-    protected ushort _txGood;
-
-    /// Channel activity detected
-    protected bool _cad;
-
-    /// Channel activity timeout in ms
-    protected uint _cad_timeout;
+    /// <summary>
+    /// The count of the number of packets successfully transmitted (though not
+    /// necessarily received by the destination)
+    /// </summary>
+    public ushort TxGood { get; protected set; }
 }

@@ -26,17 +26,17 @@ namespace RadioHeadNet;
 /// Application developers are not expected to instantiate this class directly: 
 /// it is for the use of Driver developers.
 /// </summary>
-public class RhSpiDriver : RhGenericDriver
+public abstract class RhSpiDriver : RhGenericDriver
 {
     private static readonly object CriticalSection = new();
 
-    protected GpioPin DeviceSelectPin;
+    private readonly GpioPin _deviceSelectPin;
     protected readonly SpiDevice Spi;
 
     /// <summary>
     /// This is the bit in the SPI address that marks it as a write operation
     /// </summary>
-    public const byte RhSpiWriteMask = 0x80;
+    private const byte RhSpiWriteMask = 0x80;
 
     /// <summary>
     /// Constructor
@@ -48,9 +48,9 @@ public class RhSpiDriver : RhGenericDriver
     /// <param name="spi">Reference to the SPI interface to use. The default is to use a
     /// default built-in Hardware interface.
     /// </param>
-    public RhSpiDriver(GpioPin deviceSelectPin, SpiDevice spi)
+    protected RhSpiDriver(GpioPin deviceSelectPin, SpiDevice spi)
     {
-        DeviceSelectPin = deviceSelectPin;
+        _deviceSelectPin = deviceSelectPin;
         Spi = spi;
     }
 
@@ -69,32 +69,12 @@ public class RhSpiDriver : RhGenericDriver
         return true;
     }
 
-    public override bool Available()
-    {
-        throw new NotImplementedException();
-    }
-
-    public override bool Receive(out byte[] buffer)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override bool Send(byte[] data)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override byte maxMessageLength()
-    {
-        throw new NotImplementedException();
-    }
-
     /// <summary>
     /// Reads a single register from the SPI device
     /// </summary>
     /// <param name="reg">Register number</param>
     /// <returns>The value of the register</returns>
-    public byte SpiRead(byte reg)
+    protected byte SpiRead(byte reg)
     {
         byte val;
         lock (CriticalSection)
@@ -117,9 +97,9 @@ public class RhSpiDriver : RhGenericDriver
     /// byte is returned.  It may or may not be meaningful depending on the type of
     /// device being accessed.
     /// </returns>
-    public byte SpiWrite(byte reg, byte val)
+    protected byte SpiWrite(byte reg, byte val)
     {
-        byte status = 0;
+        const byte status = 0;
         lock (CriticalSection)
         {
             SelectDevice();
@@ -145,12 +125,12 @@ public class RhSpiDriver : RhGenericDriver
     /// </returns>
     public byte SpiBurstRead(byte reg, out byte[] dest, byte len)
     {
-        byte status = 0;
+        const byte status = 0;
         dest = new byte[len];
         lock (CriticalSection)
         {
             SelectDevice();
-            // Send the start address with the write mask off
+            // send the start address with the write mask off
             Spi.WriteByte((byte)(reg & ~RhSpiWriteMask));
             Spi.Read(dest);
             DeselectDevice();
@@ -163,35 +143,24 @@ public class RhSpiDriver : RhGenericDriver
     /// Write a number of consecutive registers using burst write Mode
     /// </summary>
     /// <param name="reg">Register number of the first register</param>
-    /// <param name="src">Array of new register values to write.</param>
+    /// <param name="buffer">Array of new register values to write.</param>
     /// <returns>Some devices return a status byte during the first data transfer. This
     /// byte is returned.  It may or may not be meaningful depending on the type of
     /// device being accessed.
     /// </returns>
-    public byte SpiBurstWrite(byte reg, byte[] src)
+    protected byte SpiBurstWrite(byte reg, byte[] buffer)
     {
-        byte status = 0;
+        const byte status = 0;
         lock (CriticalSection)
         {
             SelectDevice();
             // Send the start address with the write mask on
             Spi.WriteByte((byte)(reg | RhSpiWriteMask));
-            Spi.Write(src);
+            Spi.Write(buffer);
             DeselectDevice();
         }
 
         return status;
-    }
-
-    /// <summary>
-    /// Set or change the pin to be used for SPI slave select.  This can be called at any
-    /// time to change the pin that will be used for slave select in subsequent SPI
-    /// operations.
-    /// </summary>
-    /// <param name="slaveSelectPin">The pin to use</param>
-    public void SetSlaveSelectPin(GpioPin slaveSelectPin)
-    {
-        DeviceSelectPin = slaveSelectPin;
     }
 
     /// <summary>
@@ -208,9 +177,9 @@ public class RhSpiDriver : RhGenericDriver
     /// Override this if you need an unusual way of selecting the slave before SPI
     /// transactions.  The default uses digitalWrite(_slaveSelectPin, LOW) 
     /// </summary>
-    protected virtual void SelectDevice()
+    protected void SelectDevice()
     {
-        DeviceSelectPin.Write(PinValue.Low);
+        _deviceSelectPin.Write(PinValue.Low);
     }
 
     /// <summary>
@@ -219,6 +188,6 @@ public class RhSpiDriver : RhGenericDriver
     /// </summary>
     protected virtual void DeselectDevice()
     {
-        DeviceSelectPin.Write(PinValue.High);
+        _deviceSelectPin.Write(PinValue.High);
     }
 }

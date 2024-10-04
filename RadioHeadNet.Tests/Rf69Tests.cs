@@ -445,7 +445,7 @@ public class Rf69Tests
     {
         // ARRANGE:
         byte[] expected = [1, 2, 3, 4];
-        
+
         _radio.Init();
         MockSendData(expected);
         _radio.SetModeRx();
@@ -463,6 +463,8 @@ public class Rf69Tests
     // WHEN: Receive() is called
     // THEN: the data received matches the data sent
     //       AND the RSSI value is correct
+    //       AND the count of good packets is 1
+    //       AND the count of bad packets is 0
     [Test]
     public void Receive()
     {
@@ -473,10 +475,12 @@ public class Rf69Tests
         byte[] expected = [1, 2, 3, 4];
 
         _radio.Init();
+        _radio.ThisAddress = 0xAA;
+        _radio.Promiscuous = true;
         MockSendData(expected);
         _radio.SetModeRx();
         _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
-        
+
         // ACT:
         var result = _radio.Receive(out var actual);
 
@@ -484,11 +488,42 @@ public class Rf69Tests
         Assert.That(result, Is.True);
         Assert.That(actual, Is.EqualTo(expected));
         Assert.That(_radio.LastRssi, Is.EqualTo(-85));
+        Assert.That(_radio.RxGood, Is.EqualTo(1));
+        Assert.That(_radio.RxBad, Is.EqualTo(0));
     }
 
-    private void MockSendData(byte[] data)
+    // GIVEN: an instance of the Rf69 class
+    // WHEN: Receive() is called
+    //       AND the incoming TO address does not match the radio's address
+    // THEN: the data received is accepted or discarded based on the Promiscuous flag
+    [TestCase(true)]
+    [TestCase(false)]
+    public void Promiscuous(bool promiscuous)
+    {
+        // ARRANGE:
+        byte[] expected = [1, 2, 3, 4];
+        byte toAddress = 0xBB;
+
+        _radio.Init();
+        _radio.Promiscuous = promiscuous;
+        MockSendData(expected, toAddress);
+        _radio.SetModeRx();
+        _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
+
+        // ACT:
+        var result = _radio.Receive(out _);
+
+        // ASSERT:
+        Assert.That(result, Is.EqualTo(promiscuous));
+    }
+
+    private void MockSendData(byte[] data,
+        byte toAddress = RadioHead.RH_BROADCAST_ADDRESS,
+        byte fromAddress = RadioHead.RH_BROADCAST_ADDRESS)
     {
         var dataPacket = BuildPacketWithDefaults(data);
+        dataPacket[1] = toAddress;
+        dataPacket[2] = fromAddress;
 
         var pkgIdx = 0;
         _registers.DoOnRead(Rf69.REG_00_FIFO, _ =>
@@ -504,8 +539,8 @@ public class Rf69Tests
         var result = new List<byte>()
         {
             (byte)(data.Length + Rf69.RH_RF69_HEADER_LEN),
-            RadioHead.RH_BROADCAST_ADDRESS, // _radio._txHeaderFrom,
-            RadioHead.RH_BROADCAST_ADDRESS, // _radio.HeaderTo(), 
+            RadioHead.RH_BROADCAST_ADDRESS, // _radio.TxHeaderFrom,
+            RadioHead.RH_BROADCAST_ADDRESS, // _radio.TxHeaderTo(), 
             _radio.RxHeaderId,
             _radio.RxHeaderFlags
         };

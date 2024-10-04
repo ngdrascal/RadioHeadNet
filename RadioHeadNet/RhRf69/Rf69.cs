@@ -140,7 +140,7 @@ public partial class Rf69 : RhSpiDriver
         {
             // A transmitter message has been fully sent
             SetModeIdle(); // Clears FIFO
-            _txGood++;
+            TxGood++;
         }
 
         // Must look for PAYLOADREADY, not CRCOK, since only PAYLOADREADY occurs _after_
@@ -168,33 +168,36 @@ public partial class Rf69 : RhSpiDriver
     {
         lock (CriticalSection)
         {
-            DeviceSelectPin.Write(PinValue.Low);
+            SelectDevice();
             Spi.WriteByte(REG_00_FIFO); // Send the start address with the write mask off
             var payloadLen = Spi.ReadByte(); // First byte is payload len (counting the headers)
             if (payloadLen is <= RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN and >= RH_RF69_HEADER_LEN)
             {
                 RxHeaderTo = Spi.ReadByte();
-                // Check addressing
+                // check the address
                 if (Promiscuous ||
-                    RxHeaderTo == _thisAddress ||
+                    RxHeaderTo == ThisAddress ||
                     RxHeaderTo == RadioHead.RH_BROADCAST_ADDRESS)
                 {
-                    // Get the rest of the headers
+                    // get the rest of the headers
                     RxHeaderFrom = Spi.ReadByte();
                     RxHeaderId = Spi.ReadByte();
                     RxHeaderFlags = Spi.ReadByte();
 
-                    // And now the real payload
+                    // and now the real payload
                     for (_bufLen = 0; _bufLen < (payloadLen - RH_RF69_HEADER_LEN); _bufLen++)
                         _buf[_bufLen] = Spi.ReadByte();
-                    _rxGood++;
+
+                    RxGood++;
                     _rxBufValid = true;
                 }
             }
 
-            DeviceSelectPin.Write(PinValue.High);
+            DeselectDevice();
         }
-        // Any junk remaining in the FIFO will be cleared next time we go to receive Mode.
+
+        // NOTE: Any junk remaining in the FIFO will be cleared next time we go to
+        //       receive Mode.
     }
 
     /// <summary>
@@ -490,7 +493,13 @@ public partial class Rf69 : RhSpiDriver
         return true;
     }
 
-    public bool PoleReceiver(int timeout)
+    /// <summary>
+    /// For use with devices that don't support interrupts. Polls the device to determine
+    /// if a packet is available.
+    /// </summary>
+    /// <param name="timeout">milliseconds to wait before a packet before return false</param>
+    /// <returns></returns>
+    public bool PollReceiver(int timeout)
     {
         if (Mode == Rh69Modes.Tx)
             return false;
@@ -515,7 +524,6 @@ public partial class Rf69 : RhSpiDriver
         return true;
     }
 
-
     /// <summary>
     /// Waits until any previous transmit packet is finished being transmitted with
     /// WaitPacketSent().  Then loads a message into the transmitter and starts the
@@ -537,7 +545,7 @@ public partial class Rf69 : RhSpiDriver
 
         lock (CriticalSection)
         {
-            DeviceSelectPin.Write(PinValue.Low);
+            SelectDevice();
 
             // Send the start address with the write mask on
             Spi.WriteByte(REG_00_FIFO | RH_RF69_SPI_WRITE_MASK);
@@ -555,7 +563,7 @@ public partial class Rf69 : RhSpiDriver
             foreach (var d in data)
                 Spi.WriteByte(d);
 
-            DeviceSelectPin.Write(PinValue.High);
+            DeselectDevice();
         }
 
         SetModeTx(); // Start the transmitter
@@ -567,7 +575,7 @@ public partial class Rf69 : RhSpiDriver
     /// Caution: this should be set to the same value on all nodes in your network.
     /// Default is 4.
     /// </summary>
-    /// <param name="length">bytes Preamble length in bytes.</param>
+    /// <param name="length">Preamble length in bytes</param>
     public void SetPreambleLength(ushort length)
     {
         SpiWrite(REG_2C_PREAMBLEMSB, (byte)(length >> 8));

@@ -33,7 +33,7 @@ internal class Application
         _radio.Send(message);
         _radio.SetModeIdle();
 
-        if (_radio.PoleReceiver(5000))
+        if (_radio.PollReceiver(5000))
         {
             _radio.Receive(out var receivedData);
             var temp = BitConverter.ToSingle(receivedData, 0);
