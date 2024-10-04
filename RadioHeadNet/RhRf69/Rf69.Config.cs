@@ -60,9 +60,9 @@ public partial class Rf69
     /// use the register calculator.  and call setModemRegisters() with your
     /// desired settings.  
     /// These are indexes into MODEM_CONFIG_TABLE. We strongly recommend you use these symbolic
-    /// definitions and not their integer equivalents: its possible that new values will be
+    /// definitions and not their integer equivalents: it's possible that new values will be
     /// introduced in later versions (though we will try to avoid it).
-    /// CAUTION: some of these configurations do not work corectly and are marked as such.
+    /// CAUTION: some of these configurations do not work correctly and are marked as such.
     public enum ModemConfigChoice : byte
     {
         FSK_Rb2Fd5 = 0,    // FSK, Whitening, Rb = 2kbs,    Fd = 5kHz
@@ -94,58 +94,56 @@ public partial class Rf69
         OOK_Rb9_6Bw19_2,    // OOK, Whitening, Rb = 9.6kbs,  Rx Bandwidth = 19.2kHz. 
         OOK_Rb19_2Bw38_4,   // OOK, Whitening, Rb = 19.2kbs, Rx Bandwidth = 38.4kHz. 
         OOK_Rb32Bw64,       // OOK, Whitening, Rb = 32kbs,   Rx Bandwidth = 64kHz. 
-
     };
 
+    private readonly ModemConfig[] MODEM_CONFIG_TABLE =
+    [
+        // FSK, No Manchester, no shaping, whitening, CRC, no address filtering
+        // AFC BW == RX BW == 2 x bit rate
+        new() { reg_02 = CONFIG_FSK,  reg_03 = 0x3e, reg_04 = 0x80, reg_05 = 0x00, reg_06 = 0x52, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE }, // FSK_Rb2Fd5      
+        new() { reg_02 = CONFIG_FSK,  reg_03 = 0x34, reg_04 = 0x15, reg_05 = 0x00, reg_06 = 0x4f, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // FSK_Rb2_4Fd4_8
+        new() { reg_02 = CONFIG_FSK,  reg_03 = 0x1a, reg_04 = 0x0b, reg_05 = 0x00, reg_06 = 0x9d, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // FSK_Rb4_8Fd9_6
 
-    private ModemConfig[] MODEM_CONFIG_TABLE =
-    {
-    // FSK, No Manchester, no shaping, whitening, CRC, no address filtering
-    // AFC BW == RX BW == 2 x bit rate
-    new() { reg_02 = CONFIG_FSK,  reg_03 = 0x3e, reg_04 = 0x80, reg_05 = 0x00, reg_06 = 0x52, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE }, // FSK_Rb2Fd5      
-    new() { reg_02 = CONFIG_FSK,  reg_03 = 0x34, reg_04 = 0x15, reg_05 = 0x00, reg_06 = 0x4f, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // FSK_Rb2_4Fd4_8
-    new() { reg_02 = CONFIG_FSK,  reg_03 = 0x1a, reg_04 = 0x0b, reg_05 = 0x00, reg_06 = 0x9d, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // FSK_Rb4_8Fd9_6
+        new() { reg_02 = CONFIG_FSK,  reg_03 = 0x0d, reg_04 = 0x05, reg_05 = 0x01, reg_06 = 0x3b, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // FSK_Rb9_6Fd19_2
+        new() { reg_02 = CONFIG_FSK,  reg_03 = 0x06, reg_04 = 0x83, reg_05 = 0x02, reg_06 = 0x75, reg_19 = 0xf3, reg_1a = 0xf3, reg_37 = CONFIG_WHITE}, // FSK_Rb19_2Fd38_4
+        new() { reg_02 = CONFIG_FSK,  reg_03 = 0x03, reg_04 = 0x41, reg_05 = 0x04, reg_06 = 0xea, reg_19 = 0xf2, reg_1a = 0xf2, reg_37 = CONFIG_WHITE}, // FSK_Rb38_4Fd76_8
 
-    new() { reg_02 = CONFIG_FSK,  reg_03 = 0x0d, reg_04 = 0x05, reg_05 = 0x01, reg_06 = 0x3b, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // FSK_Rb9_6Fd19_2
-    new() { reg_02 = CONFIG_FSK,  reg_03 = 0x06, reg_04 = 0x83, reg_05 = 0x02, reg_06 = 0x75, reg_19 = 0xf3, reg_1a = 0xf3, reg_37 = CONFIG_WHITE}, // FSK_Rb19_2Fd38_4
-    new() { reg_02 = CONFIG_FSK,  reg_03 = 0x03, reg_04 = 0x41, reg_05 = 0x04, reg_06 = 0xea, reg_19 = 0xf2, reg_1a = 0xf2, reg_37 = CONFIG_WHITE}, // FSK_Rb38_4Fd76_8
+        new() { reg_02 = CONFIG_FSK,  reg_03 = 0x02, reg_04 = 0x2c, reg_05 = 0x07, reg_06 = 0xae, reg_19 = 0xe2, reg_1a = 0xe2, reg_37 = CONFIG_WHITE}, // FSK_Rb57_6Fd120
+        new() { reg_02 = CONFIG_FSK,  reg_03 = 0x01, reg_04 = 0x00, reg_05 = 0x08, reg_06 = 0x00, reg_19 = 0xe1, reg_1a = 0xe1, reg_37 = CONFIG_WHITE}, // FSK_Rb125Fd125
+        new() { reg_02 = CONFIG_FSK,  reg_03 = 0x00, reg_04 = 0x80, reg_05 = 0x10, reg_06 = 0x00, reg_19 = 0xe0, reg_1a = 0xe0, reg_37 = CONFIG_WHITE}, // FSK_Rb250Fd250
+        new() { reg_02 = CONFIG_FSK,  reg_03 = 0x02, reg_04 = 0x40, reg_05 = 0x03, reg_06 = 0x33, reg_19 = 0x42, reg_1a = 0x42, reg_37 = CONFIG_WHITE}, // FSK_Rb55555Fd50 
 
-    new() { reg_02 = CONFIG_FSK,  reg_03 = 0x02, reg_04 = 0x2c, reg_05 = 0x07, reg_06 = 0xae, reg_19 = 0xe2, reg_1a = 0xe2, reg_37 = CONFIG_WHITE}, // FSK_Rb57_6Fd120
-    new() { reg_02 = CONFIG_FSK,  reg_03 = 0x01, reg_04 = 0x00, reg_05 = 0x08, reg_06 = 0x00, reg_19 = 0xe1, reg_1a = 0xe1, reg_37 = CONFIG_WHITE}, // FSK_Rb125Fd125
-    new() { reg_02 = CONFIG_FSK,  reg_03 = 0x00, reg_04 = 0x80, reg_05 = 0x10, reg_06 = 0x00, reg_19 = 0xe0, reg_1a = 0xe0, reg_37 = CONFIG_WHITE}, // FSK_Rb250Fd250
-    new() { reg_02 = CONFIG_FSK,  reg_03 = 0x02, reg_04 = 0x40, reg_05 = 0x03, reg_06 = 0x33, reg_19 = 0x42, reg_1a = 0x42, reg_37 = CONFIG_WHITE}, // FSK_Rb55555Fd50 
+        //  02,        03,   04,   05,   06,   19,   1a,  37
+        // GFSK (BT=1.0), No Manchester, whitening, CRC, no address filtering
+        // AFC BW == RX BW == 2 x bit rate
+        new() { reg_02 = CONFIG_GFSK, reg_03 = 0x3e, reg_04 = 0x80, reg_05 = 0x00, reg_06 = 0x52, reg_19 = 0xf4, reg_1a = 0xf5, reg_37 = CONFIG_WHITE}, // GFSK_Rb2Fd5
+        new() { reg_02 = CONFIG_GFSK, reg_03 = 0x34, reg_04 = 0x15, reg_05 = 0x00, reg_06 = 0x4f, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // GFSK_Rb2_4Fd4_8
+        new() { reg_02 = CONFIG_GFSK, reg_03 = 0x1a, reg_04 = 0x0b, reg_05 = 0x00, reg_06 = 0x9d, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // GFSK_Rb4_8Fd9_6
 
-    //  02,        03,   04,   05,   06,   19,   1a,  37
-    // GFSK (BT=1.0), No Manchester, whitening, CRC, no address filtering
-    // AFC BW == RX BW == 2 x bit rate
-    new() { reg_02 = CONFIG_GFSK, reg_03 = 0x3e, reg_04 = 0x80, reg_05 = 0x00, reg_06 = 0x52, reg_19 = 0xf4, reg_1a = 0xf5, reg_37 = CONFIG_WHITE}, // GFSK_Rb2Fd5
-    new() { reg_02 = CONFIG_GFSK, reg_03 = 0x34, reg_04 = 0x15, reg_05 = 0x00, reg_06 = 0x4f, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // GFSK_Rb2_4Fd4_8
-    new() { reg_02 = CONFIG_GFSK, reg_03 = 0x1a, reg_04 = 0x0b, reg_05 = 0x00, reg_06 = 0x9d, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // GFSK_Rb4_8Fd9_6
+        new() { reg_02 = CONFIG_GFSK, reg_03 = 0x0d, reg_04 = 0x05, reg_05 = 0x01, reg_06 = 0x3b, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // GFSK_Rb9_6Fd19_2
+        new() { reg_02 = CONFIG_GFSK, reg_03 = 0x06, reg_04 = 0x83, reg_05 = 0x02, reg_06 = 0x75, reg_19 = 0xf3, reg_1a = 0xf3, reg_37 = CONFIG_WHITE}, // GFSK_Rb19_2Fd38_4
+        new() { reg_02 = CONFIG_GFSK, reg_03 = 0x03, reg_04 = 0x41, reg_05 = 0x04, reg_06 = 0xea, reg_19 = 0xf2, reg_1a = 0xf2, reg_37 = CONFIG_WHITE}, // GFSK_Rb38_4Fd76_8
 
-    new() { reg_02 = CONFIG_GFSK, reg_03 = 0x0d, reg_04 = 0x05, reg_05 = 0x01, reg_06 = 0x3b, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // GFSK_Rb9_6Fd19_2
-    new() { reg_02 = CONFIG_GFSK, reg_03 = 0x06, reg_04 = 0x83, reg_05 = 0x02, reg_06 = 0x75, reg_19 = 0xf3, reg_1a = 0xf3, reg_37 = CONFIG_WHITE}, // GFSK_Rb19_2Fd38_4
-    new() { reg_02 = CONFIG_GFSK, reg_03 = 0x03, reg_04 = 0x41, reg_05 = 0x04, reg_06 = 0xea, reg_19 = 0xf2, reg_1a = 0xf2, reg_37 = CONFIG_WHITE}, // GFSK_Rb38_4Fd76_8
+        new() { reg_02 = CONFIG_GFSK, reg_03 = 0x02, reg_04 = 0x2c, reg_05 = 0x07, reg_06 = 0xae, reg_19 = 0xe2, reg_1a = 0xe2, reg_37 = CONFIG_WHITE}, // GFSK_Rb57_6Fd120
+        new() { reg_02 = CONFIG_GFSK, reg_03 = 0x01, reg_04 = 0x00, reg_05 = 0x08, reg_06 = 0x00, reg_19 = 0xe1, reg_1a = 0xe1, reg_37 = CONFIG_WHITE}, // GFSK_Rb125Fd125
+        new() { reg_02 = CONFIG_GFSK, reg_03 = 0x00, reg_04 = 0x80, reg_05 = 0x10, reg_06 = 0x00, reg_19 = 0xe0, reg_1a = 0xe0, reg_37 = CONFIG_WHITE}, // GFSK_Rb250Fd250
+        new() { reg_02 = CONFIG_GFSK, reg_03 = 0x02, reg_04 = 0x40, reg_05 = 0x03, reg_06 = 0x33, reg_19 = 0x42, reg_1a = 0x42, reg_37 = CONFIG_WHITE}, // GFSK_Rb55555Fd50 
 
-    new() { reg_02 = CONFIG_GFSK, reg_03 = 0x02, reg_04 = 0x2c, reg_05 = 0x07, reg_06 = 0xae, reg_19 = 0xe2, reg_1a = 0xe2, reg_37 = CONFIG_WHITE}, // GFSK_Rb57_6Fd120
-    new() { reg_02 = CONFIG_GFSK, reg_03 = 0x01, reg_04 = 0x00, reg_05 = 0x08, reg_06 = 0x00, reg_19 = 0xe1, reg_1a = 0xe1, reg_37 = CONFIG_WHITE}, // GFSK_Rb125Fd125
-    new() { reg_02 = CONFIG_GFSK, reg_03 = 0x00, reg_04 = 0x80, reg_05 = 0x10, reg_06 = 0x00, reg_19 = 0xe0, reg_1a = 0xe0, reg_37 = CONFIG_WHITE}, // GFSK_Rb250Fd250
-    new() { reg_02 = CONFIG_GFSK, reg_03 = 0x02, reg_04 = 0x40, reg_05 = 0x03, reg_06 = 0x33, reg_19 = 0x42, reg_1a = 0x42, reg_37 = CONFIG_WHITE}, // GFSK_Rb55555Fd50 
-
-    //  02,        03,   04,   05,   06,   19,   1a,  37
-    // OOK, No Manchester, no shaping, whitening, CRC, no address filtering
-    // with the help of the SX1231 configuration program
-    // AFC BW == RX BW
-    // All OOK configs have the default:
-    // Threshold Type: Peak
-    // Peak Threshold Step: 0.5dB
-    // Peak threshiold dec: ONce per chip
-    // Fixed threshold: 6dB
-    new() { reg_02 = CONFIG_OOK,  reg_03 = 0x7d, reg_04 = 0x00, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0x88, reg_1a = 0x88, reg_37 = CONFIG_WHITE}, // OOK_Rb1Bw1
-    new() { reg_02 = CONFIG_OOK,  reg_03 = 0x68, reg_04 = 0x2b, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xf1, reg_1a = 0xf1, reg_37 = CONFIG_WHITE}, // OOK_Rb1_2Bw75
-    new() { reg_02 = CONFIG_OOK,  reg_03 = 0x34, reg_04 = 0x15, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xf5, reg_1a = 0xf5, reg_37 = CONFIG_WHITE}, // OOK_Rb2_4Bw4_8
-    new() { reg_02 = CONFIG_OOK,  reg_03 = 0x1a, reg_04 = 0x0b, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // OOK_Rb4_8Bw9_6
-    new() { reg_02 = CONFIG_OOK,  reg_03 = 0x0d, reg_04 = 0x05, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xf3, reg_1a = 0xf3, reg_37 = CONFIG_WHITE}, // OOK_Rb9_6Bw19_2
-    new() { reg_02 = CONFIG_OOK,  reg_03 = 0x06, reg_04 = 0x83, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xf2, reg_1a = 0xf2, reg_37 = CONFIG_WHITE}, // OOK_Rb19_2Bw38_4
-    new() { reg_02 = CONFIG_OOK,  reg_03 = 0x03, reg_04 = 0xe8, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xe2, reg_1a = 0xe2, reg_37 = CONFIG_WHITE}  // OOK_Rb32Bw64
-    };
+        //  02,        03,   04,   05,   06,   19,   1a,  37
+        // OOK, No Manchester, no shaping, whitening, CRC, no address filtering
+        // with the help of the SX1231 configuration program
+        // AFC BW == RX BW
+        // All OOK configs have the default:
+        // Threshold Type: Peak
+        // Peak Threshold Step: 0.5dB
+        // Peak threshold dec: ONce per chip
+        // Fixed threshold: 6dB
+        new() { reg_02 = CONFIG_OOK,  reg_03 = 0x7d, reg_04 = 0x00, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0x88, reg_1a = 0x88, reg_37 = CONFIG_WHITE}, // OOK_Rb1Bw1
+        new() { reg_02 = CONFIG_OOK,  reg_03 = 0x68, reg_04 = 0x2b, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xf1, reg_1a = 0xf1, reg_37 = CONFIG_WHITE}, // OOK_Rb1_2Bw75
+        new() { reg_02 = CONFIG_OOK,  reg_03 = 0x34, reg_04 = 0x15, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xf5, reg_1a = 0xf5, reg_37 = CONFIG_WHITE}, // OOK_Rb2_4Bw4_8
+        new() { reg_02 = CONFIG_OOK,  reg_03 = 0x1a, reg_04 = 0x0b, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xf4, reg_1a = 0xf4, reg_37 = CONFIG_WHITE}, // OOK_Rb4_8Bw9_6
+        new() { reg_02 = CONFIG_OOK,  reg_03 = 0x0d, reg_04 = 0x05, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xf3, reg_1a = 0xf3, reg_37 = CONFIG_WHITE}, // OOK_Rb9_6Bw19_2
+        new() { reg_02 = CONFIG_OOK,  reg_03 = 0x06, reg_04 = 0x83, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xf2, reg_1a = 0xf2, reg_37 = CONFIG_WHITE}, // OOK_Rb19_2Bw38_4
+        new() { reg_02 = CONFIG_OOK,  reg_03 = 0x03, reg_04 = 0xe8, reg_05 = 0x00, reg_06 = 0x10, reg_19 = 0xe2, reg_1a = 0xe2, reg_37 = CONFIG_WHITE}  // OOK_Rb32Bw64
+    ];
 }
