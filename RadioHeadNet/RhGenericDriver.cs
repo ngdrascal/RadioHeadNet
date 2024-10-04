@@ -240,10 +240,10 @@ public abstract class RhGenericDriver
     /// <summary>FLAGS header sent in all messages</summary>
     public byte TxHeaderFlags { get; set; }
 
-    /// Tells the receiver to accept messages with any TO address, not just messages
-    /// addressed to thisAddress or the broadcast address
-    /// \param[in] promiscuous true if you wish to receive messages with any TO address
-    public virtual void SetPromiscuous(bool promiscuous) { _promiscuous = promiscuous; } // TODO: convert to property
+    /// <summary>Tells the receiver to accept messages with any TO address, not just messages
+    /// addressed to thisAddress or the broadcast address.
+    /// </summary>
+    public bool Promiscuous { get; set; }
 
     /// <summary>TO header in the last received message</summary>
     public byte RxHeaderTo { get; protected set; }
@@ -301,10 +301,6 @@ public abstract class RhGenericDriver
 
     /// This node id
     protected byte _thisAddress;
-
-    /// Whether the transport is in promiscuous Mode
-    protected bool _promiscuous;
-
 
 
     /// Count of the number of bad messages (e.g. - bad checksum etc.) received

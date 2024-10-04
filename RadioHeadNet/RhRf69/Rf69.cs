@@ -175,7 +175,7 @@ public partial class Rf69 : RhSpiDriver
             {
                 RxHeaderTo = Spi.ReadByte();
                 // Check addressing
-                if (_promiscuous ||
+                if (Promiscuous ||
                     RxHeaderTo == _thisAddress ||
                     RxHeaderTo == RadioHead.RH_BROADCAST_ADDRESS)
                 {
