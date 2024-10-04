@@ -181,7 +181,7 @@ public partial class Rf69 : RhSpiDriver
                 {
                     // Get the rest of the headers
                     RxHeaderFrom = Spi.ReadByte();
-                    _rxHeaderId = Spi.ReadByte();
+                    RxHeaderId = Spi.ReadByte();
                     _rxHeaderFlags = Spi.ReadByte();
 
                     // And now the real payload

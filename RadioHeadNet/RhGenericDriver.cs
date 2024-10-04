@@ -264,9 +264,8 @@ public abstract class RhGenericDriver
     /// <summary>FROM header in the last received message</summary>
     public byte RxHeaderFrom { get; protected set; }
 
-    /// Returns the ID header of the last received message
-    /// \return The ID header
-    public virtual byte headerId() { return _rxHeaderId; } // TODO: convert to property
+    /// <summary>ID header in the last received message</summary>
+    public byte RxHeaderId { get; protected set; }
 
     /// Returns the FLAGS header of the last received message
     /// \return The FLAGS header
@@ -320,9 +319,6 @@ public abstract class RhGenericDriver
 
     /// Whether the transport is in promiscuous Mode
     protected bool _promiscuous;
-
-    /// ID header in the last received message
-    protected byte _rxHeaderId;
 
     /// FLAGS header in the last received message
     protected byte _rxHeaderFlags;

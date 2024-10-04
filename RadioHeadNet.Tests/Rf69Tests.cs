@@ -506,7 +506,7 @@ public class Rf69Tests
             (byte)(data.Length + Rf69.RH_RF69_HEADER_LEN),
             RadioHead.RH_BROADCAST_ADDRESS, // _radio._txHeaderFrom,
             RadioHead.RH_BROADCAST_ADDRESS, // _radio.HeaderTo(), 
-            _radio.headerId(),
+            _radio.RxHeaderId,
             _radio.HeaderFlags()
         };
         result.AddRange(data);
