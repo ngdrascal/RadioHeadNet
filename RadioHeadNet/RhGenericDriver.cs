@@ -267,15 +267,13 @@ public abstract class RhGenericDriver
     /// <summary>ID header in the last received message</summary>
     public byte RxHeaderId { get; protected set; }
 
-    /// Returns the FLAGS header of the last received message
-    /// \return The FLAGS header
-    public virtual byte HeaderFlags() { return _rxHeaderFlags; } // TODO: convert to property
+    /// <summary>FLAGS header in the last received message</summary>
+    public byte RxHeaderFlags { get; protected set; }
 
-    /// Returns the most recent RSSI (Receiver Signal Strength Indicator).
-    /// Usually it is the RSSI of the last received message, which is measured when the preamble is received.
-    /// If you called readRssi() more recently, it will return that more recent value.
-    /// \return The most recent RSSI measurement in dBm.
-    public virtual short LastRssi() { return _lastRssi; }
+    /// <summary>The RSSI of the last received message, which is measured when the
+    /// preamble is received.
+    /// </summary>
+    public short LastRssi { get; protected set; }
 
     /// <summary>
     /// The current transport operating Mode
@@ -320,8 +318,6 @@ public abstract class RhGenericDriver
     /// Whether the transport is in promiscuous Mode
     protected bool _promiscuous;
 
-    /// FLAGS header in the last received message
-    protected byte _rxHeaderFlags;
 
     /// TO header to Send in all messages
     protected byte _txHeaderTo;
@@ -334,9 +330,6 @@ public abstract class RhGenericDriver
 
     /// FLAGS header to Send in all messages
     protected byte _txHeaderFlags;
-
-    /// The value of the last received RSSI value, in some transport specific units
-    protected short _lastRssi;
 
     /// Count of the number of bad messages (e.g. - bad checksum etc.) received
     protected ushort _rxBad;

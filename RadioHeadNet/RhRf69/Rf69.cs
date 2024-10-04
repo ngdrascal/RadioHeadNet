@@ -149,7 +149,7 @@ public partial class Rf69 : RhSpiDriver
         {
             // A complete message has been received with good CRC
             // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
-            _lastRssi = (short)-(SpiRead(REG_24_RSSIVALUE) >> 1);
+            LastRssi = (short)-(SpiRead(REG_24_RSSIVALUE) >> 1);
 
             LastPreambleTime = DateTime.Now.Ticks;
 
@@ -182,7 +182,7 @@ public partial class Rf69 : RhSpiDriver
                     // Get the rest of the headers
                     RxHeaderFrom = Spi.ReadByte();
                     RxHeaderId = Spi.ReadByte();
-                    _rxHeaderFlags = Spi.ReadByte();
+                    RxHeaderFlags = Spi.ReadByte();
 
                     // And now the real payload
                     for (_bufLen = 0; _bufLen < (payloadLen - RH_RF69_HEADER_LEN); _bufLen++)
@@ -246,7 +246,7 @@ public partial class Rf69 : RhSpiDriver
     /// Causes the current signal strength to be measured and returned.
     /// If you want to find the RSSI of the last received message, use LastRssi() instead.
     /// </summary>
-    /// <returns>\return The current RSSI value on units of 0.5dB.</returns>
+    /// <returns>The current RSSI value on units of 0.5dB.</returns>
     public sbyte RssiRead()
     {
         // Force a new value to be measured

@@ -483,7 +483,7 @@ public class Rf69Tests
         // ASSERT:
         Assert.That(result, Is.True);
         Assert.That(actual, Is.EqualTo(expected));
-        Assert.That(_radio.LastRssi(), Is.EqualTo(-85));
+        Assert.That(_radio.LastRssi, Is.EqualTo(-85));
     }
 
     private void MockSendData(byte[] data)
@@ -507,7 +507,7 @@ public class Rf69Tests
             RadioHead.RH_BROADCAST_ADDRESS, // _radio._txHeaderFrom,
             RadioHead.RH_BROADCAST_ADDRESS, // _radio.HeaderTo(), 
             _radio.RxHeaderId,
-            _radio.HeaderFlags()
+            _radio.RxHeaderFlags
         };
         result.AddRange(data);
 
