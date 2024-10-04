@@ -41,9 +41,9 @@ public abstract class RhSpiDriver : RhGenericDriver
     /// <summary>
     /// Constructor
     /// </summary>
-    /// <param name="deviceSelectPin"> The controller pin to use to select the desired SPI
-    /// device. This pin will be driven LOW during SPI communications with the SPI device
-    /// that is used by this Driver.
+    /// <param name="deviceSelectPin"> The controller pin to use to select the desired
+    /// SPI device. This pin will be driven LOW during SPI communications with the SPI
+    /// device that is used by this Driver.
     /// </param>
     /// <param name="spi">Reference to the SPI interface to use. The default is to use a
     /// default built-in Hardware interface.
@@ -124,9 +124,8 @@ public abstract class RhSpiDriver : RhGenericDriver
     /// byte is returned.  It may or may not be meaningful depending on the type of
     /// device being accessed.
     /// </returns>
-    protected byte WriteTo(byte reg, byte value)
+    protected void WriteTo(byte reg, byte value)
     {
-        const byte status = 0;
         lock (CriticalSection)
         {
             SelectDevice();
@@ -135,8 +134,6 @@ public abstract class RhSpiDriver : RhGenericDriver
             _spi.WriteByte(value); // New value follows
             DeselectDevice();
         }
-
-        return status;
     }
 
     /// <summary>
@@ -150,7 +147,7 @@ public abstract class RhSpiDriver : RhGenericDriver
     /// byte is returned.  It may or may not be meaningful depending on the type of
     /// device being accessed.
     /// </returns>
-    public byte BurstReadFrom(byte reg, out byte[] dest, byte len)
+    protected byte BurstReadFrom(byte reg, out byte[] dest, byte len)
     {
         const byte status = 0;
         dest = new byte[len];
@@ -184,20 +181,10 @@ public abstract class RhSpiDriver : RhGenericDriver
     }
 
     /// <summary>
-    /// Set the SPI interrupt number.  If SPI transactions can occur within an interrupt,
-    /// tell the low level SPI interface which interrupt is used.
-    /// </summary>
-    /// <param name="interruptNumber">the interrupt number</param>
-    public void SpiUsingInterrupt(byte interruptNumber)
-    {
-        throw new NotImplementedException($"{nameof(SpiUsingInterrupt)}");
-    }
-
-    /// <summary>
     /// Override this if you need an unusual way of selecting the slave before SPI
     /// transactions.  The default uses digitalWrite(_slaveSelectPin, LOW) 
     /// </summary>
-    protected void SelectDevice()
+    protected virtual void SelectDevice()
     {
         _deviceSelectPin.Write(PinValue.Low);
     }
@@ -206,7 +193,7 @@ public abstract class RhSpiDriver : RhGenericDriver
     /// Override this if you need an unusual way of selecting the slave before SPI
     /// transactions. The default uses digitalWrite(_slaveSelectPin, HIGH)
     /// </summary>
-    protected void DeselectDevice()
+    protected virtual void DeselectDevice()
     {
         _deviceSelectPin.Write(PinValue.High);
     }

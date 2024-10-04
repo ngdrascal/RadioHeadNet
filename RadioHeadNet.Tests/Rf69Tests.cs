@@ -397,7 +397,7 @@ public class Rf69Tests
         _radio.Init();
 
         byte[] data = [1, 2, 3, 4];
-        var expected = BuildPacketWithDefaults([1, 2, 3, 4]);
+        var expected = BuildPacket([1, 2, 3, 4]);
 
         var actual = new List<byte>();
 
@@ -447,7 +447,9 @@ public class Rf69Tests
         byte[] expected = [1, 2, 3, 4];
 
         _radio.Init();
-        MockSendData(expected);
+        var packet = BuildPacket(expected);
+        MockReceiveData(packet);
+
         _radio.SetModeRx();
         _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
 
@@ -462,6 +464,7 @@ public class Rf69Tests
     //        AND IRQFLAGS2.PAYLOADREADY flag is set
     // WHEN: Receive() is called
     // THEN: the data received matches the data sent
+    //       AND the headers received match the headers sent
     //       AND the RSSI value is correct
     //       AND the count of good packets is 1
     //       AND the count of bad packets is 0
@@ -469,24 +472,35 @@ public class Rf69Tests
     public void Receive()
     {
         // ARRANGE:
+        const byte expectedTo = 0xAA;
+        const byte expectedFrom = 0xBB;
+        const byte expectedId = 0xCC;
+        const byte expectedFlags = 0xDD;
+
         // RSSI value is -(170/2) = -85 dBm
         _registers.Poke(Rf69.REG_24_RSSIVALUE, 170);
 
-        byte[] expected = [1, 2, 3, 4];
+        byte[] expectedData = [1, 2, 3, 4];
 
         _radio.Init();
-        _radio.ThisAddress = 0xAA;
-        _radio.Promiscuous = true;
-        MockSendData(expected);
+        _radio.ThisAddress = expectedTo;
+
+        var packet = BuildPacket(expectedData, expectedTo, expectedFrom, expectedId, expectedFlags);
+        MockReceiveData(packet);
+
         _radio.SetModeRx();
         _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
 
         // ACT:
-        var result = _radio.Receive(out var actual);
+        var result = _radio.Receive(out var actualData);
 
         // ASSERT:
         Assert.That(result, Is.True);
-        Assert.That(actual, Is.EqualTo(expected));
+        Assert.That(actualData, Is.EqualTo(expectedData));
+        Assert.That(_radio.RxHeaderTo, Is.EqualTo(expectedTo));
+        Assert.That(_radio.RxHeaderFrom, Is.EqualTo(expectedFrom));
+        Assert.That(_radio.RxHeaderId, Is.EqualTo(expectedId));
+        Assert.That(_radio.RxHeaderFlags, Is.EqualTo(expectedFlags));
         Assert.That(_radio.LastRssi, Is.EqualTo(-85));
         Assert.That(_radio.RxGood, Is.EqualTo(1));
         Assert.That(_radio.RxBad, Is.EqualTo(0));
@@ -505,8 +519,11 @@ public class Rf69Tests
         byte toAddress = 0xBB;
 
         _radio.Init();
+
         _radio.Promiscuous = promiscuous;
-        MockSendData(expected, toAddress);
+        var packet = BuildPacket(expected, toAddress);
+        MockReceiveData(packet);
+        
         _radio.SetModeRx();
         _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
 
@@ -517,14 +534,46 @@ public class Rf69Tests
         Assert.That(result, Is.EqualTo(promiscuous));
     }
 
-    private void MockSendData(byte[] data,
-        byte toAddress = RadioHead.RH_BROADCAST_ADDRESS,
-        byte fromAddress = RadioHead.RH_BROADCAST_ADDRESS)
+    // GIVEN: an instance of the Rf69 class
+    //        AND the radio received a packet
+    // WHEN: PollAvailable() is call
+    // THEN: return true
+    [Test]
+    public void PollAvailablePacketReceived()
     {
-        var dataPacket = BuildPacketWithDefaults(data);
-        dataPacket[1] = toAddress;
-        dataPacket[2] = fromAddress;
+        // ARRANGE:
+        _registers.Poke(Rf69.REG_28_IRQFLAGS2, Rf69.IRQFLAGS2_PAYLOADREADY);
 
+        _radio.Init();
+
+        // ACT:
+        var actual = _radio.PollAvailable(100);
+
+        // ASSERT:
+        Assert.That(actual, Is.True);
+    }
+
+    // GIVEN: an instance of the Rf69 class
+    //        AND the radio received a packet
+    // WHEN: PollAvailable() is call
+    // THEN: return true
+    [Test]
+    public void PollAvailableNoPackedReceived()
+    {
+        // ARRANGE:
+        _registers.Poke(Rf69.REG_28_IRQFLAGS2, 0x00);
+
+        _radio.Init();
+
+        // ACT:
+        var actual = _radio.PollAvailable(100);
+
+        // ASSERT:
+        Assert.That(actual, Is.False);
+    }
+
+    private void MockReceiveData(byte[] dataPacket)
+    {
         var pkgIdx = 0;
         _registers.DoOnRead(Rf69.REG_00_FIFO, _ =>
         {
@@ -534,18 +583,22 @@ public class Rf69Tests
         _registers.Poke(Rf69.REG_28_IRQFLAGS2, Rf69.IRQFLAGS2_PAYLOADREADY);
     }
 
-    private byte[] BuildPacketWithDefaults(byte[] data)
+    private byte[] BuildPacket(byte[] data,
+        byte toAddress = RadioHead.RH_BROADCAST_ADDRESS,
+        byte fromAddress = RadioHead.RH_BROADCAST_ADDRESS,
+        byte headerId = 0x00,
+        byte headerFlags = 0x00)
     {
-        var result = new List<byte>()
+        var packet = new List<byte>()
         {
             (byte)(data.Length + Rf69.RH_RF69_HEADER_LEN),
-            RadioHead.RH_BROADCAST_ADDRESS, // _radio.TxHeaderFrom,
-            RadioHead.RH_BROADCAST_ADDRESS, // _radio.TxHeaderTo(), 
-            _radio.RxHeaderId,
-            _radio.RxHeaderFlags
+            toAddress,
+            fromAddress,
+            headerId,
+            headerFlags
         };
-        result.AddRange(data);
+        packet.AddRange(data);
 
-        return result.ToArray();
+        return packet.ToArray();
     }
 }

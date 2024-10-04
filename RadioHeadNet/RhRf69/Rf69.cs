@@ -129,9 +129,13 @@ public partial class Rf69 : RhSpiDriver
         return true;
     }
 
-    // Interrupt handler for this instance
-    // RH_RF69 is unusual in that it has several interrupt lines, and not a single, combined one.
-    // We use the single interrupt line to get PACKETSENT and PAYLOADREADY interrupts.
+    /// <summary>
+    /// Interrupt handler for this instance.  RH_RF69 is unusual in that it has several
+    /// interrupt lines, and not a single, combined one.  We use the single interrupt
+    /// line to get PACKETSENT and PAYLOADREADY interrupts.
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="arg"></param>
     public void HandleInterrupt(object sender, PinValueChangedEventArgs arg)
     {
         // Get the interrupt cause
@@ -499,7 +503,7 @@ public partial class Rf69 : RhSpiDriver
     /// </summary>
     /// <param name="timeout">milliseconds to wait before a packet before return false</param>
     /// <returns></returns>
-    public bool PollReceiver(int timeout)
+    public bool PollAvailable(int timeout)
     {
         if (Mode == Rh69Modes.Tx)
             return false;

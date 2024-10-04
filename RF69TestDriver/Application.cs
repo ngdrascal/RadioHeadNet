@@ -1,7 +1,6 @@
 ﻿using System.Device.Gpio;
 using System.Diagnostics.CodeAnalysis;
-using RadioHeadNet;
-using Rf69 = RadioHeadNet.RhRf69.Rf69;
+using RadioHeadNet.RhRf69;
 
 namespace RF69TestDriver;
 
@@ -23,7 +22,8 @@ internal class Application
 
     public void Run()
     {
-        InitializeRadio();
+        ResetRadio();
+        ConfigureRadio();
 
         var tempBuf = BitConverter.GetBytes(12.3f);
         var humBuf = BitConverter.GetBytes(45.6f);
@@ -33,7 +33,7 @@ internal class Application
         _radio.Send(message);
         _radio.SetModeIdle();
 
-        if (_radio.PollReceiver(5000))
+        if (_radio.PollAvailable(5000))
         {
             _radio.Receive(out var receivedData);
             var temp = BitConverter.ToSingle(receivedData, 0);
@@ -43,9 +43,8 @@ internal class Application
         }
     }
 
-    private void InitializeRadio()
+    private void ConfigureRadio()
     {
-        ResetRadio();
         _radio.Init();
         _radio.SetTxPower(_power, true);
         _radio.SetFrequency(_frequency);

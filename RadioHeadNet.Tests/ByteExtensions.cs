@@ -22,7 +22,7 @@ internal static class ByteExtensions
         if (bitCount is < 1 or > 8)
             throw new ArgumentOutOfRangeException(nameof(bitCount), "Bit count must be between 1 and 8");
         if (offset + bitCount > 8)
-            throw new ArgumentOutOfRangeException(nameof(bitCount), "Offset + bit count must be less than or equal to 8");
+            throw new ArgumentOutOfRangeException(nameof(bitCount), "Offset + bit count must be <= 8");
 
         var mask = 0;
         for (var i = 0; i < bitCount; i++)
