@@ -4,6 +4,26 @@ using System.Diagnostics;
 
 namespace RadioHeadNet;
 
+/// <summary>
+/// Abstract base class for a RadioHead driver.
+///
+/// This class defines the functions that must be provided by any RadioHead driver.
+/// Different types of driver will implement all the abstract functions, and will perhaps override 
+/// other functions in this subclass, or perhaps add new functions specifically required by that driver.
+/// Do not directly instantiate this class: it is only to be subclassed by driver classes.
+///
+/// Subclasses are expected to implement a half-duplex, unreliable, error checked, unaddressed packet transport.
+/// They are expected to carry a message payload with an appropriate maximum length for the transport hardware
+/// and to also carry unaltered 4 message headers: TO, FROM, ID, FLAGS
+/// <para>Headers</para>
+///
+/// Each message sent and received by a RadioHead driver includes 4 headers:
+/// -TO The node address that the message is being sent to (broadcast RH_BROADCAST_ADDRESS (255) is permitted)
+/// -FROM The node address of the sending node
+/// -ID A message ID, distinct (over short time scales) for each message sent by a particular node
+/// -FLAGS A bitmask of flags. The most significant 4 bits are reserved for use by RadioHead. The least
+/// significant 4 bits are reserved for applications.
+/// </summary>
 public abstract class RhGenericDriver
 {
     // Defines bits of the FLAGS header reserved for use by the RadioHead library and 
@@ -15,29 +35,6 @@ public abstract class RhGenericDriver
     // Default timeout for WaitCAD() in ms
     protected const int RH_CAD_DEFAULT_TIMEOUT = 10000;
 
-    /////////////////////////////////////////////////////////////////////
-    /// <summary>
-    /// Abstract base class for a RadioHead driver.
-    ///
-    /// This class defines the functions that must be provided by any RadioHead driver.
-    /// Different types of driver will implement all the abstract functions, and will perhaps override 
-    /// other functions in this subclass, or perhaps add new functions specifically required by that driver.
-    /// Do not directly instantiate this class: it is only to be subclassed by driver classes.
-    ///
-    /// Subclasses are expected to implement a half-duplex, unreliable, error checked, unaddressed packet transport.
-    /// They are expected to carry a message payload with an appropriate maximum length for the transport hardware
-    /// and to also carry unaltered 4 message headers: TO, FROM, ID, FLAGS
-    /// <para>Headers</para>
-    ///
-    /// Each message sent and received by a RadioHead driver includes 4 headers:
-    /// -TO The node address that the message is being sent to (broadcast RH_BROADCAST_ADDRESS (255) is permitted)
-    /// -FROM The node address of the sending node
-    /// -ID A message ID, distinct (over short time scales) for each message sent by a particular node
-    /// -FLAGS A bitmask of flags. The most significant 4 bits are reserved for use by RadioHead. The least
-    /// significant 4 bits are reserved for applications.
-    /// </summary>
-
-    /// Constructor
     protected RhGenericDriver()
     {
         Mode = Rh69Modes.Initialising;
@@ -53,59 +50,69 @@ public abstract class RhGenericDriver
         CadTimeout = 0;
     }
 
+    /// <summary>
     /// Initialise the Driver transport hardware and software.
     /// Make sure the Driver is properly configured before calling Init().
-    /// \return true if initialisation succeeded.
+    /// <return>true if initialisation succeeded.</return>
+    /// </summary>
     public virtual bool Init()
     {
         return true;
     }
 
+    /// <summary>
     /// Tests whether a new message is Available
     /// from the Driver. 
     /// On most drivers, if there is an uncollected received message, and there is no message
     /// currently bing transmitted, this will also put the Driver into Rh69Modes.Rx Mode until
     /// a message is actually received by the transport, when it will be returned to Rh69Modes.Idle.
     /// This can be called multiple times in a timeout loop.
-    /// \return true if a new, complete, error-free uncollected message is Available to be
+    /// </summary>
+    /// <return>true if a new, complete, error-free uncollected message is Available to be
     /// retrieved by Receive().
+    /// </return>
     public abstract bool Available();
 
+    /// <summary>
     /// Turns the receiver on if it not already on.
     /// If there is a valid message Available, copy it to buffer and return true
     /// else return false.
     /// If a message is copied, *len is set to the length (Caution, 0 length messages are permitted).
     /// You should be sure to call this function frequently enough to not miss any messages
     /// It is recommended that you call it in your main loop.
-    /// \param[in] buffer Location to copy the received message
-    /// \param[in,out] len Pointer to Available space in buffer. Set to the actual number of octets copied.
-    /// \return true if a valid message was copied to buffer
+    /// </summary>
+    /// <param name="buffer">Location to copy the received message to</param>
+    /// <return>true if a valid message was copied to buffer</return>
     public abstract bool Receive(out byte[] buffer);
 
+    /// <summary>
     /// Waits until any previous transmit packet is finished being transmitted with WaitPacketSent().
     /// Then optionally waits for Channel Activity Detection (CAD) 
     /// to show the channel is clear (if the radio supports CAD) by calling WaitCAD().
     /// Then loads a message into the transmitter and starts the transmitter. Note that a message length
     /// of 0 is NOT permitted. If the message is too long for the underlying radio technology, Send() will
     /// return false and will not Send the message.
-    /// \param[in] data Array of data to be sent
-    /// \param[in] len Number of bytes of data to Send (> 0)
-    /// specify the maximum time in ms to wait. If 0 (the default) do not wait for CAD before transmitting.
-    /// \return true if the message length was valid, and it was correctly queued for transmit. Return false
+    /// </summary>
+    /// <param name="data">Array of data to be sent</param>
+    /// <return>true if the message length was valid, and it was correctly queued for transmit. Return false
     /// if CAD was requested and the CAD timeout timed out before clear channel was detected.
+    /// </return>
     public abstract bool Send(byte[] data);
 
-    /// Returns the maximum message length 
-    /// Available in this Driver.
-    /// \return The maximum legal message length
+    /// <summary>
+    /// Returns the maximum message length available in this driver.
+    /// </summary>
+    /// <returns>The maximum legal message length</returns>
     public abstract byte maxMessageLength();
 
-    /// Starts the receiver and blocks until a valid received 
-    /// message is Available.
-    /// Default implementation calls Available() repeatedly until it returns true;
-    /// \param[in] pollDelay Time between polling Available() in milliseconds. This can be useful
-    /// in multitaking environment like Linux to prevent WaitAvailableTimeout
-    /// using all the CPU while polling for receiver activity
+    /// <summary>
+    /// Starts the receiver and blocks until a valid received message is available.
+    /// Default implementation calls Available() repeatedly until it returns true.
+    /// </summary>
+    /// <param name="pollDelay">Time between polling Available() in milliseconds. This
+    /// can be useful in multitasking environment like Linux to prevent
+    /// WaitAvailableTimeout using all the CPU while polling for receiver activity.
+    /// </param>
     public virtual void WaitAvailable(ushort pollDelay = 0)
     {
         while (!Available())
@@ -116,8 +123,9 @@ public abstract class RhGenericDriver
         }
     }
 
-    /// Blocks until the transmitter 
-    /// is no longer transmitting.
+    /// <summary>
+    /// Blocks until the transmitter is no longer transmitting.
+    /// </summary>
     public virtual bool WaitPacketSent()
     {
         while (Mode == Rh69Modes.Tx)
@@ -125,10 +133,14 @@ public abstract class RhGenericDriver
         return true;
     }
 
+    /// <summary>
     /// Blocks until the transmitter is no longer transmitting.
     /// or until the timeout occuers, whichever happens first
-    /// \param[in] timeout Maximum time to wait in milliseconds.
-    /// \return true if the radio completed transmission within the timeout period. False if it timed out.
+    /// </summary>
+    /// <param name="timeout">Maximum time to wait in milliseconds.</param>
+    /// <returns>true if the radio completed transmission within the timeout period.
+    /// False if it timed out.
+    /// </returns>
     public virtual bool WaitPacketSent(ushort timeout)
     {
         while (Mode == Rh69Modes.Tx)
@@ -136,14 +148,17 @@ public abstract class RhGenericDriver
         return true;
     }
 
+    /// <summary>
     /// Starts the receiver and blocks until a received message is Available or a timeout.
     /// Default implementation calls Available() repeatedly until it returns true;
-    /// \param[in] timeout Maximum time to wait in milliseconds.
-    /// \param[in] polldelay Time between polling Available() in milliseconds. This can be useful
+    /// </summary>
+    /// <param name="timeout">Maximum time to wait in milliseconds.</param>
+    /// <param name="pollDelay">Time between polling Available() in milliseconds. This can be useful
     /// in multitasking environment like Linux to prevent WaitAvailableTimeout
-    /// using all the CPU while polling for receiver activity
-    /// \return true if a message is Available
-    public virtual bool WaitAvailableTimeout(ushort timeout, ushort polldelay = 0)
+    /// using all the CPU while polling for receiver activity.
+    /// </param>
+    /// <returns>true if a message is Available</returns>
+    public virtual bool WaitAvailableTimeout(ushort timeout, ushort pollDelay = 0)
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
@@ -154,8 +169,8 @@ public abstract class RhGenericDriver
                 return true;
             }
             Thread.Yield();
-            if (polldelay != 0)
-                Thread.Sleep(polldelay);
+            if (pollDelay != 0)
+                Thread.Sleep(pollDelay);
         }
         return false;
     }
@@ -208,26 +223,29 @@ public abstract class RhGenericDriver
     /// </summary>
     public uint CadTimeout { get; set; }
 
-    /// Determine if the currently selected radio channel is active.
-    /// This is expected to be subclassed by specific radios to implement their Channel Activity Detection
-    /// if supported. If the radio does not support CAD, returns true immediately. If a RadioHead radio 
-    /// supports IsChannelActive() it will be documented in the radio specific documentation.
-    /// This is called automatically by WaitCAD().
-    /// \return true if the radio-specific CAD (as returned by override of IsChannelActive()) shows the
-    /// current radio channel as active, else false. If there is no radio-specific CAD, returns false.
-    ///
-    /// subclasses are expected to override if CAD is Available for that radio
+    /// <summary>
+    /// Determine if the currently selected radio channel is active.  This is expected
+    /// to be subclassed by specific radios to implement their Channel Activity Detection
+    /// if supported. If the radio does not support CAD, returns true immediately. If a
+    /// RadioHead radio supports IsChannelActive() it will be documented in the radio
+    /// specific documentation. This is called automatically by WaitCAD().
+    /// </summary>
+    /// <returns>true if the radio-specific CAD (as returned by override of
+    /// IsChannelActive()) shows the current radio channel as active, else false. If
+    /// there is no radio-specific CAD, returns false.
+    /// </returns>
     public virtual bool IsChannelActive() { return false; }
 
-    /// Sets the address of this node. Defaults to 0xFF. Subclasses or the user may want to change this.
-    /// This will be used to test the address in incoming messages. In non-promiscuous Mode,
-    /// only messages with a TO header the same as thisAddress or the broadcast address (0xFF) will be accepted.
-    /// In promiscuous Mode, all messages will be accepted regardless of the TO header.
-    /// In a conventional multinode system, all nodes will have a unique address 
-    /// (which you could store in EEPROM).
-    /// You would normally set the header FROM address to be the same as thisAddress (though you dont have to, 
-    /// allowing the possibility of address spoofing).
-    /// \param[in] thisAddress The address of this node.
+    /// <summary>
+    /// Sets the address of this node. Defaults to 0xFF. Subclasses or the user may want
+    /// to change this.  This will be used to test the address in incoming messages. In
+    /// non-promiscuous Mode, only messages with a TO header the same as thisAddress or
+    /// the broadcast address (0xFF) will be accepted.  In promiscuous Mode, all messages
+    /// will be accepted regardless of the TO header.  In a conventional multinode system,
+    /// all nodes will have a unique address (which you could store in EEPROM).
+    /// You would normally set the header FROM address to be the same as thisAddress
+    /// (though you don't have to, allowing the possibility of address spoofing).
+    /// </summary>
     public byte ThisAddress { get; set; }
 
     /// <summary>TO header sent in all messages</summary>
@@ -242,8 +260,8 @@ public abstract class RhGenericDriver
     /// <summary>FLAGS header sent in all messages</summary>
     public byte TxHeaderFlags { get; set; }
 
-    /// <summary>Tells the receiver to accept messages with any TO address, not just messages
-    /// addressed to thisAddress or the broadcast address.
+    /// <summary>Tells the receiver to accept messages with any TO address, not just
+    /// messages addressed to thisAddress or the broadcast address.
     /// </summary>
     public bool Promiscuous { get; set; }
 
@@ -267,20 +285,17 @@ public abstract class RhGenericDriver
     /// <summary>The current transport operating Mode</summary>
     protected Rh69Modes Mode { get; set; }
 
-    /// Sets the transport hardware into low-power Sleep Mode
-    /// (if supported). May be overridden by specific drivers to initiate Sleep Mode.
-    /// If successful, the transport will stay in Sleep Mode until woken by 
-    /// changing Mode it idle, transmit or receive (eg by calling Send(), Receive(), Available() etc.)
-    /// \return true if Sleep Mode is supported by transport hardware and the RadioHead driver, and if Sleep Mode
-    ///         was successfully entered. If Sleep Mode is not supported, return false.
+    /// <summary>
+    /// Sets the transport hardware into low-power Sleep Mode (if supported). May be
+    /// overridden by specific drivers to initiate Sleep Mode.  If successful, the
+    /// transport will stay in Sleep Mode until woken by changing Mode to idle,
+    /// transmit or receive (e.g. - by calling Send(), Receive(), Available() etc.)
+    /// </summary>
+    /// <returns>true if Sleep Mode is supported by transport hardware and the RadioHead
+    /// driver, and if Sleep Mode was successfully entered. If Sleep Mode is not
+    /// supported, return false.
+    /// </returns>
     public virtual bool Sleep() { return false; }
-
-    /// Prints a data buffer in HEX.
-    /// For diagnostic use
-    /// \param[in] prompt string to preface the print
-    /// \param[in] buf Location of the buffer to print
-    /// \param[in] len Length of the buffer in octets.
-    public static void PrintBuffer(string prompt, byte[] buf) { }
 
     /// <summary>
     /// The count of the number of bad received packets (ie packets with bad lengths,
