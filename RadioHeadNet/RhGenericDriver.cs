@@ -41,7 +41,7 @@ public abstract class RhGenericDriver
     /// Constructor
     protected RhGenericDriver()
     {
-        _mode = Rh69Modes.Initialising;
+        Mode = Rh69Modes.Initialising;
         _thisAddress = RadioHead.RH_BROADCAST_ADDRESS;
         _txHeaderTo = RadioHead.RH_BROADCAST_ADDRESS;
         _txHeaderFrom = RadioHead.RH_BROADCAST_ADDRESS;
@@ -120,7 +120,7 @@ public abstract class RhGenericDriver
     /// is no longer transmitting.
     public virtual bool WaitPacketSent()
     {
-        while (_mode == Rh69Modes.Tx)
+        while (Mode == Rh69Modes.Tx)
             Thread.Yield(); // Wait for any previous transmit to finish
         return true;
     }
@@ -131,7 +131,7 @@ public abstract class RhGenericDriver
     /// \return true if the radio completed transmission within the timeout period. False if it timed out.
     public virtual bool WaitPacketSent(ushort timeout)
     {
-        while (_mode == Rh69Modes.Tx)
+        while (Mode == Rh69Modes.Tx)
             Thread.Yield(); // Wait for any previous transmit to finish
         return true;
     }
@@ -280,12 +280,13 @@ public abstract class RhGenericDriver
     /// \return The most recent RSSI measurement in dBm.
     public virtual short LastRssi() { return _lastRssi; }
 
-    /// Returns the operating Mode of the library.
-    /// \return the current Mode, one of RF69_MODE_*
-    public virtual Rh69Modes Mode() { return _mode; }
+    // protected Rh69Modes _mode;
 
-    /// Sets the operating Mode of the transport.
-    public virtual void SetMode(Rh69Modes mode) { _mode = mode; }
+
+    /// <summary>
+    /// The current transport operating Mode
+    /// </summary>
+    public Rh69Modes Mode { get; set; }
 
     /// Sets the transport hardware into low-power Sleep Mode
     /// (if supported). May be overridden by specific drivers to initiate Sleep Mode.
@@ -318,9 +319,6 @@ public abstract class RhGenericDriver
     /// packets successfully transmitted (though not necessarily received by the destination)
     /// \return The number of packets successfully transmitted
     public virtual ushort TxGood() { return _txGood; }
-
-    /// The current transport operating Mode
-    protected Rh69Modes _mode;
 
     /// This node id
     protected byte _thisAddress;

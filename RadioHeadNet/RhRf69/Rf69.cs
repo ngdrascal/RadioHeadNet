@@ -136,7 +136,7 @@ public partial class Rf69 : RhSpiDriver
     {
         // Get the interrupt cause
         var irqFlags2 = SpiRead(REG_28_IRQFLAGS2);
-        if (_mode == Rh69Modes.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
+        if (Mode == Rh69Modes.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
         {
             // A transmitter message has been fully sent
             SetModeIdle(); // Clears FIFO
@@ -145,7 +145,7 @@ public partial class Rf69 : RhSpiDriver
 
         // Must look for PAYLOADREADY, not CRCOK, since only PAYLOADREADY occurs _after_
         // AES decryption has been done
-        if (_mode == Rh69Modes.Rx && (irqFlags2 & IRQFLAGS2_PAYLOADREADY) != 0)
+        if (Mode == Rh69Modes.Rx && (irqFlags2 & IRQFLAGS2_PAYLOADREADY) != 0)
         {
             // A complete message has been received with good CRC
             // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
@@ -264,7 +264,7 @@ public partial class Rf69 : RhSpiDriver
     /// This is a low level device access function and should not normally need to be used by user code. 
     /// Instead, can use stModeRx(), setModeTx(), setModeIdle()
     /// </summary>
-    /// <param name="mode">Mode RF69 OPMODE to set, one of OPMODE_MODE_*.</param>
+    /// <param name="mode">Mode RF69 OPMODE to set, one of OPMODEMode_*.</param>
     private void SetOpMode(byte mode)
     {
         var clrMask = InvertByte(OPMODE_MODE);
@@ -291,7 +291,7 @@ public partial class Rf69 : RhSpiDriver
     /// </summary>
     public void SetModeIdle()
     {
-        if (_mode != Rh69Modes.Idle)
+        if (Mode != Rh69Modes.Idle)
         {
             if (_power >= 18)
             {
@@ -301,7 +301,7 @@ public partial class Rf69 : RhSpiDriver
             }
 
             SetOpMode(_idleMode);
-            _mode = Rh69Modes.Idle;
+            Mode = Rh69Modes.Idle;
         }
     }
 
@@ -310,7 +310,7 @@ public partial class Rf69 : RhSpiDriver
     /// </summary>
     public void SetModeRx()
     {
-        if (_mode != Rh69Modes.Rx)
+        if (Mode != Rh69Modes.Rx)
         {
             if (_power >= 18)
             {
@@ -322,7 +322,7 @@ public partial class Rf69 : RhSpiDriver
             // Set interrupt line 0 PayloadReady
             SpiWrite(REG_25_DIOMAPPING1, DIOMAPPING1_DIO0MAPPING_01);
             SetOpMode(OPMODE_MODE_RX); // Clears FIFO
-            _mode = Rh69Modes.Rx;
+            Mode = Rh69Modes.Rx;
         }
     }
 
@@ -331,7 +331,7 @@ public partial class Rf69 : RhSpiDriver
     /// </summary>
     public void SetModeTx()
     {
-        if (_mode != Rh69Modes.Tx)
+        if (Mode != Rh69Modes.Tx)
         {
             if (_power >= 18)
             {
@@ -343,7 +343,7 @@ public partial class Rf69 : RhSpiDriver
 
             SpiWrite(REG_25_DIOMAPPING1, DIOMAPPING1_DIO0MAPPING_00); // Set interrupt line 0 PacketSent
             SetOpMode(OPMODE_MODE_TX); // Clears FIFO
-            _mode = Rh69Modes.Tx;
+            Mode = Rh69Modes.Tx;
         }
     }
 
@@ -452,7 +452,7 @@ public partial class Rf69 : RhSpiDriver
     /// </returns>
     public override bool Available()
     {
-        if (_mode == Rh69Modes.Tx)
+        if (Mode == Rh69Modes.Tx)
             return false;
 
         // Make sure we are receiving
@@ -492,7 +492,7 @@ public partial class Rf69 : RhSpiDriver
 
     public bool PoleReceiver(int timeout)
     {
-        if (_mode == Rh69Modes.Tx)
+        if (Mode == Rh69Modes.Tx)
             return false;
 
         SetModeRx();
@@ -681,10 +681,10 @@ public partial class Rf69 : RhSpiDriver
     /// <returns>true if Sleep Mode was successfully entered</returns>
     public override bool Sleep()
     {
-        if (_mode != Rh69Modes.Sleep)
+        if (Mode != Rh69Modes.Sleep)
         {
             SpiWrite(REG_01_OPMODE, OPMODE_MODE_SLEEP);
-            _mode = Rh69Modes.Sleep;
+            Mode = Rh69Modes.Sleep;
         }
 
         return true;
