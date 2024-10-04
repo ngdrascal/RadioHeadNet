@@ -71,7 +71,7 @@ public class RhSpiDriver : RhGenericDriver
         throw new NotImplementedException();
     }
 
-    public override bool Receive(out byte[] buf)
+    public override bool Receive(out byte[] buffer)
     {
         throw new NotImplementedException();
     }

@@ -72,15 +72,15 @@ public abstract class RhGenericDriver
     public abstract bool Available();
 
     /// Turns the receiver on if it not already on.
-    /// If there is a valid message Available, copy it to buf and return true
+    /// If there is a valid message Available, copy it to buffer and return true
     /// else return false.
     /// If a message is copied, *len is set to the length (Caution, 0 length messages are permitted).
     /// You should be sure to call this function frequently enough to not miss any messages
     /// It is recommended that you call it in your main loop.
-    /// \param[in] buf Location to copy the received message
-    /// \param[in,out] len Pointer to Available space in buf. Set to the actual number of octets copied.
-    /// \return true if a valid message was copied to buf
-    public abstract bool Receive(out byte[] buf);
+    /// \param[in] buffer Location to copy the received message
+    /// \param[in,out] len Pointer to Available space in buffer. Set to the actual number of octets copied.
+    /// \return true if a valid message was copied to buffer
+    public abstract bool Receive(out byte[] buffer);
 
     /// Waits until any previous transmit packet is finished being transmitted with WaitPacketSent().
     /// Then optionally waits for Channel Activity Detection (CAD) 
@@ -355,13 +355,13 @@ public abstract class RhGenericDriver
     /// The value of the last received RSSI value, in some transport specific units
     protected short _lastRssi;
 
-    /// Count of the number of bad messages (eg bad checksum etc) received
+    /// Count of the number of bad messages (e.g. - bad checksum etc.) received
     protected ushort _rxBad;
 
     /// Count of the number of successfully transmitted messaged
     protected ushort _rxGood;
 
-    /// Count of the number of bad messages (correct checksum etc) received
+    /// Count of the number of bad messages (correct checksum etc.) received
     protected ushort _txGood;
 
     /// Channel activity detected

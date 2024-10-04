@@ -1,5 +1,6 @@
 ﻿using System.Device.Gpio;
 using System.Device.Spi;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace RadioHeadNet;
@@ -455,40 +456,65 @@ public partial class RhRf69 : RhSpiDriver
             return false;
 
         // Make sure we are receiving
-        SetModeRx(); 
+        SetModeRx();
 
         return _rxBufValid;
     }
 
     /// <summary>
-    /// Turns the receiver on if it not already on.
-    /// If there is a valid message Available, copy it to buf and return true
-    /// else return false.
-    /// If a message is copied, *len is set to the length (Caution, 0 length messages are permitted).
+    /// Turns the receiver on if it not already on.  If there is a valid message
+    /// available, copy it to buf and return true  else return false.
+    /// If a message is copied,  (Caution, 0 length messages are permitted).
     /// You should be sure to call this function frequently enough to not miss any messages
     /// It is recommended that you call it in your main loop.
     /// </summary>
-    /// <param name="target">buffer to copy the received message</param>
-    /// <returns>true if a valid message was copied to buf</returns>
+    /// <param name="buffer">buffer to copy the received message</param>
+    /// <returns>true if a valid message was copied to buffer</returns>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    public override bool Receive(out byte[] target)
+    public override bool Receive(out byte[] buffer)
     {
         if (!Available())
         {
-            target = Array.Empty<byte>();
+            buffer = Array.Empty<byte>();
             return false;
         }
 
-        target = new byte[_bufLen];
+        buffer = new byte[_bufLen];
         lock (CriticalSection)
         {
-            Array.Copy(_buf, target, _bufLen);
+            Array.Copy(_buf, buffer, _bufLen);
         }
 
         _rxBufValid = false; // Got the most recent message
 
         return true;
     }
+
+    public bool PoleReceiver(int timeout)
+    {
+        if (_mode == RhMode.Tx)
+            return false;
+
+        SetModeRx();
+
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+
+        var irqFlags2 = SpiRead(REG_28_IRQFLAGS2);
+        while ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0 && stopwatch.ElapsedMilliseconds < timeout)
+        {
+            irqFlags2 = SpiRead(REG_28_IRQFLAGS2);
+        }
+
+        stopwatch.Stop();
+
+        if ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0)
+            return false;
+
+        HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Rising, 1));
+        return true;
+    }
+
 
     /// <summary>
     /// Waits until any previous transmit packet is finished being transmitted with

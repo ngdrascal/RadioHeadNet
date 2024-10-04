@@ -23,13 +23,23 @@ internal class Application
     public void Run()
     {
         InitializeRadio();
-        
+
         var tempBuf = BitConverter.GetBytes(12.3f);
         var humBuf = BitConverter.GetBytes(45.6f);
         var volBuf = BitConverter.GetBytes(3.7f);
         var message = tempBuf.Concat(humBuf).Concat(volBuf).ToArray();
 
         _radio.Send(message);
+        _radio.SetModeIdle();
+
+        if (_radio.PoleReceiver(5000))
+        {
+            _radio.Receive(out var receivedData);
+            var temp = BitConverter.ToSingle(receivedData, 0);
+            var hum = BitConverter.ToSingle(receivedData, 4);
+            var vol = BitConverter.ToSingle(receivedData, 8);
+            Console.WriteLine($"{temp} C, {hum} %RH, {vol} V");
+        }
     }
 
     private void InitializeRadio()
