@@ -215,7 +215,7 @@ public abstract class RhGenericDriver
     /// current radio channel as active, else false. If there is no radio-specific CAD, returns false.
     ///
     /// subclasses are expected to override if CAD is Available for that radio
-    public virtual bool IsChannelActive(){ return false; }
+    public virtual bool IsChannelActive() { return false; }
 
     /// Sets the address of this node. Defaults to 0xFF. Subclasses or the user may want to change this.
     /// This will be used to test the address in incoming messages. In non-promiscuous Mode,
@@ -258,13 +258,11 @@ public abstract class RhGenericDriver
     /// \param[in] promiscuous true if you wish to receive messages with any TO address
     public virtual void SetPromiscuous(bool promiscuous) { _promiscuous = promiscuous; } // TODO: convert to property
 
-    /// Returns the TO header of the last received message
-    /// \return The TO header
-    public virtual byte HeaderTo() { return _rxHeaderTo; } // TODO: convert to property
+    /// <summary>TO header in the last received message</summary>
+    public byte RxHeaderTo { get; protected set; }
 
-    /// Returns the FROM header of the last received message
-    /// \return The FROM header
-    public virtual byte HeaderFrom() { return _rxHeaderFrom; } // TODO: convert to property
+    /// <summary>FROM header in the last received message</summary>
+    public byte RxHeaderFrom { get; protected set; }
 
     /// Returns the ID header of the last received message
     /// \return The ID header
@@ -280,13 +278,10 @@ public abstract class RhGenericDriver
     /// \return The most recent RSSI measurement in dBm.
     public virtual short LastRssi() { return _lastRssi; }
 
-    // protected Rh69Modes _mode;
-
-
     /// <summary>
     /// The current transport operating Mode
     /// </summary>
-    public Rh69Modes Mode { get; set; }
+    protected Rh69Modes Mode { get; set; }
 
     /// Sets the transport hardware into low-power Sleep Mode
     /// (if supported). May be overridden by specific drivers to initiate Sleep Mode.
@@ -325,12 +320,6 @@ public abstract class RhGenericDriver
 
     /// Whether the transport is in promiscuous Mode
     protected bool _promiscuous;
-
-    /// TO header in the last received message
-    protected byte _rxHeaderTo;
-
-    /// FROM header in the last received message
-    protected byte _rxHeaderFrom;
 
     /// ID header in the last received message
     protected byte _rxHeaderId;

@@ -164,7 +164,7 @@ public partial class Rf69 : RhSpiDriver
     // Caution: since we put our headers in what the RH_RF69 considers to be the payload, if encryption is enabled
     // we have to suffer the cost of decryption before we can determine whether the address is acceptable.
     // Performance issue?
-    protected void ReadFifo()
+    private void ReadFifo()
     {
         lock (CriticalSection)
         {
@@ -173,14 +173,14 @@ public partial class Rf69 : RhSpiDriver
             var payloadLen = Spi.ReadByte(); // First byte is payload len (counting the headers)
             if (payloadLen is <= RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN and >= RH_RF69_HEADER_LEN)
             {
-                _rxHeaderTo = Spi.ReadByte();
+                RxHeaderTo = Spi.ReadByte();
                 // Check addressing
                 if (_promiscuous ||
-                    _rxHeaderTo == _thisAddress ||
-                    _rxHeaderTo == RadioHead.RH_BROADCAST_ADDRESS)
+                    RxHeaderTo == _thisAddress ||
+                    RxHeaderTo == RadioHead.RH_BROADCAST_ADDRESS)
                 {
                     // Get the rest of the headers
-                    _rxHeaderFrom = Spi.ReadByte();
+                    RxHeaderFrom = Spi.ReadByte();
                     _rxHeaderId = Spi.ReadByte();
                     _rxHeaderFlags = Spi.ReadByte();
 
