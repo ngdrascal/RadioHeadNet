@@ -31,7 +31,7 @@ public abstract class RhSpiDriver : RhGenericDriver
     private static readonly object CriticalSection = new();
 
     private readonly GpioPin _deviceSelectPin;
-    protected readonly SpiDevice Spi;
+    private readonly SpiDevice _spi;
 
     /// <summary>
     /// This is the bit in the SPI address that marks it as a write operation
@@ -51,7 +51,7 @@ public abstract class RhSpiDriver : RhGenericDriver
     protected RhSpiDriver(GpioPin deviceSelectPin, SpiDevice spi)
     {
         _deviceSelectPin = deviceSelectPin;
-        Spi = spi;
+        _spi = spi;
     }
 
     /// <summary>
@@ -70,42 +70,69 @@ public abstract class RhSpiDriver : RhGenericDriver
     }
 
     /// <summary>
+    /// Reads a byte from the SPI device.
+    /// </summary>
+    /// <returns>A byte read from the SPI device.</returns>
+    protected byte ReadByte()
+    {
+        byte value;
+        lock (CriticalSection)
+        {
+            value = _spi.ReadByte();
+        }
+
+        return value;
+    }
+
+    /// <summary>
+    /// Writes a byte to the SPI device.
+    /// </summary>
+    /// <param name="value">The byte to be written to the SPI device.</param>
+    protected void WriteByte(byte value)
+    {
+        lock (CriticalSection)
+        {
+            _spi.WriteByte(value);
+        }
+    }
+
+    /// <summary>
     /// Reads a single register from the SPI device
     /// </summary>
     /// <param name="reg">Register number</param>
     /// <returns>The value of the register</returns>
-    protected byte SpiRead(byte reg)
+    protected byte ReadFrom(byte reg)
     {
-        byte val;
+        byte value;
         lock (CriticalSection)
         {
             SelectDevice();
             // Send the address with the write mask off
-            Spi.WriteByte((byte)(reg & ~RhSpiWriteMask));
-            val = Spi.ReadByte(); // The written value is ignored, reg value is read
+            _spi.WriteByte((byte)(reg & ~RhSpiWriteMask));
+            value = _spi.ReadByte(); // The written value is ignored, reg value is read
             DeselectDevice();
         }
-        return val;
+        return value;
     }
 
     /// <summary>
     /// Writes a single byte to the SPI device
     /// </summary>
     /// <param name="reg">Register number</param>
-    /// <param name="val">The value to write</param>
+    /// <param name="value">The value to write</param>
     /// <returns>Some devices return a status byte during the first data transfer. This
     /// byte is returned.  It may or may not be meaningful depending on the type of
     /// device being accessed.
     /// </returns>
-    protected byte SpiWrite(byte reg, byte val)
+    protected byte WriteTo(byte reg, byte value)
     {
         const byte status = 0;
         lock (CriticalSection)
         {
             SelectDevice();
             // Send the address with the write mask on
-            Spi.WriteByte((byte)(reg | RhSpiWriteMask));
-            Spi.WriteByte(val); // New value follows
+            _spi.WriteByte((byte)(reg | RhSpiWriteMask));
+            _spi.WriteByte(value); // New value follows
             DeselectDevice();
         }
 
@@ -123,7 +150,7 @@ public abstract class RhSpiDriver : RhGenericDriver
     /// byte is returned.  It may or may not be meaningful depending on the type of
     /// device being accessed.
     /// </returns>
-    public byte SpiBurstRead(byte reg, out byte[] dest, byte len)
+    public byte BurstReadFrom(byte reg, out byte[] dest, byte len)
     {
         const byte status = 0;
         dest = new byte[len];
@@ -131,8 +158,8 @@ public abstract class RhSpiDriver : RhGenericDriver
         {
             SelectDevice();
             // send the start address with the write mask off
-            Spi.WriteByte((byte)(reg & ~RhSpiWriteMask));
-            Spi.Read(dest);
+            _spi.WriteByte((byte)(reg & ~RhSpiWriteMask));
+            _spi.Read(dest);
             DeselectDevice();
         }
 
@@ -144,23 +171,16 @@ public abstract class RhSpiDriver : RhGenericDriver
     /// </summary>
     /// <param name="reg">Register number of the first register</param>
     /// <param name="buffer">Array of new register values to write.</param>
-    /// <returns>Some devices return a status byte during the first data transfer. This
-    /// byte is returned.  It may or may not be meaningful depending on the type of
-    /// device being accessed.
-    /// </returns>
-    protected byte SpiBurstWrite(byte reg, byte[] buffer)
+    protected void BurstWriteTo(byte reg, byte[] buffer)
     {
-        const byte status = 0;
         lock (CriticalSection)
         {
             SelectDevice();
             // Send the start address with the write mask on
-            Spi.WriteByte((byte)(reg | RhSpiWriteMask));
-            Spi.Write(buffer);
+            _spi.WriteByte((byte)(reg | RhSpiWriteMask));
+            _spi.Write(buffer);
             DeselectDevice();
         }
-
-        return status;
     }
 
     /// <summary>
@@ -186,7 +206,7 @@ public abstract class RhSpiDriver : RhGenericDriver
     /// Override this if you need an unusual way of selecting the slave before SPI
     /// transactions. The default uses digitalWrite(_slaveSelectPin, HIGH)
     /// </summary>
-    protected virtual void DeselectDevice()
+    protected void DeselectDevice()
     {
         _deviceSelectPin.Write(PinValue.High);
     }

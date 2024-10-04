@@ -68,7 +68,7 @@ public partial class Rf69 : RhSpiDriver
 
         // Get the device type and check it. This also tests whether we are really
         // connected to a device.  My test devices return 0x24.
-        _deviceType = SpiRead(REG_10_VERSION);
+        _deviceType = ReadFrom(REG_10_VERSION);
         if (_deviceType is 00 or 0xff)
             return false;
 
@@ -86,23 +86,23 @@ public partial class Rf69 : RhSpiDriver
         // headers to the beginning of the RH_RF69 payload
 
         // thresh 15 is default
-        SpiWrite(REG_3C_FIFOTHRESH, FIFOTHRESH_TXSTARTCONDITION_NOTEMPTY | 0x0F);
+        WriteTo(REG_3C_FIFOTHRESH, FIFOTHRESH_TXSTARTCONDITION_NOTEMPTY | 0x0F);
 
         // RSSITHRESH is default
-        // SpiWrite(REG_29_RSSITHRESH, 220); // -110 dbM
+        // WriteTo(REG_29_RSSITHRESH, 220); // -110 dbM
 
         // SYNCCONFIG is default. SyncSize is set later by setSyncWords()
-        // SpiWrite(REG_2E_SYNCCONFIG, SYNCCONFIG_SYNCON); // auto, tolerance 0
+        // WriteTo(REG_2E_SYNCCONFIG, SYNCCONFIG_SYNCON); // auto, tolerance 0
 
         // PAYLOADLENGTH is default
-        // SpiWrite(REG_38_PAYLOADLENGTH, RH_RF69_FIFO_SIZE); // max size only for RX
+        // WriteTo(REG_38_PAYLOADLENGTH, RH_RF69_FIFO_SIZE); // max size only for RX
 
         // PACKETCONFIG 2 is default
-        SpiWrite(REG_6F_TESTDAGC, TESTDAGC_CONTINUOUSDAGC_IMPROVED_LOWBETAOFF);
+        WriteTo(REG_6F_TESTDAGC, TESTDAGC_CONTINUOUSDAGC_IMPROVED_LOWBETAOFF);
 
         // If high power boost set previously, disable it
-        SpiWrite(REG_5A_TESTPA1, TESTPA1_NORMAL);
-        SpiWrite(REG_5C_TESTPA2, TESTPA2_NORMAL);
+        WriteTo(REG_5A_TESTPA1, TESTPA1_NORMAL);
+        WriteTo(REG_5C_TESTPA2, TESTPA2_NORMAL);
 
         // The following can be changed later by the user if necessary.
         // Set up default configuration
@@ -135,7 +135,7 @@ public partial class Rf69 : RhSpiDriver
     public void HandleInterrupt(object sender, PinValueChangedEventArgs arg)
     {
         // Get the interrupt cause
-        var irqFlags2 = SpiRead(REG_28_IRQFLAGS2);
+        var irqFlags2 = ReadFrom(REG_28_IRQFLAGS2);
         if (Mode == Rh69Modes.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
         {
             // A transmitter message has been fully sent
@@ -149,7 +149,7 @@ public partial class Rf69 : RhSpiDriver
         {
             // A complete message has been received with good CRC
             // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
-            LastRssi = (short)-(SpiRead(REG_24_RSSIVALUE) >> 1);
+            LastRssi = (short)-(ReadFrom(REG_24_RSSIVALUE) >> 1);
 
             LastPreambleTime = DateTime.Now.Ticks;
 
@@ -169,24 +169,24 @@ public partial class Rf69 : RhSpiDriver
         lock (CriticalSection)
         {
             SelectDevice();
-            Spi.WriteByte(REG_00_FIFO); // Send the start address with the write mask off
-            var payloadLen = Spi.ReadByte(); // First byte is payload len (counting the headers)
+            WriteByte(REG_00_FIFO); // Send the start address with the write mask off
+            var payloadLen = ReadByte(); // First byte is payload len (counting the headers)
             if (payloadLen is <= RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN and >= RH_RF69_HEADER_LEN)
             {
-                RxHeaderTo = Spi.ReadByte();
+                RxHeaderTo = ReadByte();
                 // check the address
                 if (Promiscuous ||
                     RxHeaderTo == ThisAddress ||
                     RxHeaderTo == RadioHead.RH_BROADCAST_ADDRESS)
                 {
                     // get the rest of the headers
-                    RxHeaderFrom = Spi.ReadByte();
-                    RxHeaderId = Spi.ReadByte();
-                    RxHeaderFlags = Spi.ReadByte();
+                    RxHeaderFrom = ReadByte();
+                    RxHeaderId = ReadByte();
+                    RxHeaderFlags = ReadByte();
 
                     // and now the real payload
                     for (_bufLen = 0; _bufLen < (payloadLen - RH_RF69_HEADER_LEN); _bufLen++)
-                        _buf[_bufLen] = Spi.ReadByte();
+                        _buf[_bufLen] = ReadByte();
 
                     RxGood++;
                     _rxBufValid = true;
@@ -211,16 +211,16 @@ public partial class Rf69 : RhSpiDriver
     {
         // Caution: must be ins standby.
         // setModeIdle();
-        SpiWrite(REG_4E_TEMP1, TEMP1_TEMPMEASSTART); // Start the measurement
+        WriteTo(REG_4E_TEMP1, TEMP1_TEMPMEASSTART); // Start the measurement
 
         // Wait for the measurement to complete
-        var reg4E = SpiRead(REG_4E_TEMP1);
+        var reg4E = ReadFrom(REG_4E_TEMP1);
         while ((reg4E & TEMP1_TEMPMEASRUNNING) != 0)  // wait for bit 4 to equal 0
         {
-            reg4E = SpiRead(REG_4E_TEMP1);
+            reg4E = ReadFrom(REG_4E_TEMP1);
         }
 
-        return (sbyte)(166 - SpiRead(REG_4F_TEMP2)); // Very approximate, based on observation
+        return (sbyte)(166 - ReadFrom(REG_4F_TEMP2)); // Very approximate, based on observation
     }
 
     /// <summary>
@@ -235,9 +235,9 @@ public partial class Rf69 : RhSpiDriver
     {
         // Frf = FRF / FSTEP
         var frf = (uint)((centre * 1000000.0) / RH_RF69_FSTEP);
-        SpiWrite(REG_07_FRFMSB, (byte)((frf >> 16) & 0xFF));
-        SpiWrite(REG_08_FRFMID, (byte)((frf >> 8) & 0xFF));
-        SpiWrite(REG_09_FRFLSB, (byte)(frf & 0xFF));
+        WriteTo(REG_07_FRFMSB, (byte)((frf >> 16) & 0xFF));
+        WriteTo(REG_08_FRFMID, (byte)((frf >> 8) & 0xFF));
+        WriteTo(REG_09_FRFLSB, (byte)(frf & 0xFF));
 
         // afcPullInRange is not used
         // (void)afcPullInRange;
@@ -259,7 +259,7 @@ public partial class Rf69 : RhSpiDriver
         //      while (!(spiRead(REG_23_RSSICONFIG) & RH_RF69_RSSICONFIG_RSSIDONE))
         //         ;
         // #endif
-        return (sbyte)-(SpiRead(REG_24_RSSIVALUE) >> 1);
+        return (sbyte)-(ReadFrom(REG_24_RSSIVALUE) >> 1);
     }
 
     /// <summary>
@@ -272,13 +272,13 @@ public partial class Rf69 : RhSpiDriver
     {
         var clrMask = InvertByte(OPMODE_MODE);
 
-        var curValue = SpiRead(REG_01_OPMODE);
+        var curValue = ReadFrom(REG_01_OPMODE);
         var newValue = (byte)(curValue & clrMask);
         newValue |= (byte)(mode & OPMODE_MODE);
-        SpiWrite(REG_01_OPMODE, newValue);
+        WriteTo(REG_01_OPMODE, newValue);
 
         // Wait for Mode to change.
-        while ((SpiRead(REG_27_IRQFLAGS1) & IRQFLAGS1_MODEREADY) == 0) { }
+        while ((ReadFrom(REG_27_IRQFLAGS1) & IRQFLAGS1_MODEREADY) == 0) { }
     }
 
     // Do this in a method instead of online because the compiler doesn't like casting
@@ -299,8 +299,8 @@ public partial class Rf69 : RhSpiDriver
             if (_power >= 18)
             {
                 // If high power boost, return power amp to receive Mode
-                SpiWrite(REG_5A_TESTPA1, TESTPA1_NORMAL);
-                SpiWrite(REG_5C_TESTPA2, TESTPA2_NORMAL);
+                WriteTo(REG_5A_TESTPA1, TESTPA1_NORMAL);
+                WriteTo(REG_5C_TESTPA2, TESTPA2_NORMAL);
             }
 
             SetOpMode(_idleMode);
@@ -318,12 +318,12 @@ public partial class Rf69 : RhSpiDriver
             if (_power >= 18)
             {
                 // If high power boost, return power amp to receive Mode
-                SpiWrite(REG_5A_TESTPA1, TESTPA1_NORMAL);
-                SpiWrite(REG_5C_TESTPA2, TESTPA2_NORMAL);
+                WriteTo(REG_5A_TESTPA1, TESTPA1_NORMAL);
+                WriteTo(REG_5C_TESTPA2, TESTPA2_NORMAL);
             }
 
             // Set interrupt line 0 PayloadReady
-            SpiWrite(REG_25_DIOMAPPING1, DIOMAPPING1_DIO0MAPPING_01);
+            WriteTo(REG_25_DIOMAPPING1, DIOMAPPING1_DIO0MAPPING_01);
             SetOpMode(OPMODE_MODE_RX); // Clears FIFO
             Mode = Rh69Modes.Rx;
         }
@@ -340,11 +340,11 @@ public partial class Rf69 : RhSpiDriver
             {
                 // Set high power boost Mode
                 // Note that OCP defaults to ON so no need to change that.
-                SpiWrite(REG_5A_TESTPA1, TESTPA1_BOOST);
-                SpiWrite(REG_5C_TESTPA2, TESTPA2_BOOST);
+                WriteTo(REG_5A_TESTPA1, TESTPA1_BOOST);
+                WriteTo(REG_5C_TESTPA2, TESTPA2_BOOST);
             }
 
-            SpiWrite(REG_25_DIOMAPPING1, DIOMAPPING1_DIO0MAPPING_00); // Set interrupt line 0 PacketSent
+            WriteTo(REG_25_DIOMAPPING1, DIOMAPPING1_DIO0MAPPING_00); // Set interrupt line 0 PacketSent
             SetOpMode(OPMODE_MODE_TX); // Clears FIFO
             Mode = Rh69Modes.Tx;
         }
@@ -408,7 +408,7 @@ public partial class Rf69 : RhSpiDriver
             paLevel = (byte)(PALEVEL_PA0ON | ((_power + 18) & PALEVEL_OUTPUTPOWER));
         }
 
-        SpiWrite(REG_11_PALEVEL, paLevel);
+        WriteTo(REG_11_PALEVEL, paLevel);
     }
 
     /// <summary>
@@ -420,12 +420,12 @@ public partial class Rf69 : RhSpiDriver
     /// modem configuration registers.</param>
     public void SetModemRegisters(ModemConfig config)
     {
-        SpiBurstWrite(REG_02_DATAMODUL,
+        BurstWriteTo(REG_02_DATAMODUL,
             [config.reg_02, config.reg_03, config.reg_04, config.reg_05, config.reg_06]);
 
-        SpiBurstWrite(REG_19_RXBW, [config.reg_19, config.reg_1a]);
+        BurstWriteTo(REG_19_RXBW, [config.reg_19, config.reg_1a]);
 
-        SpiWrite(REG_37_PACKETCONFIG1, config.reg_37);
+        WriteTo(REG_37_PACKETCONFIG1, config.reg_37);
     }
 
     /// <summary>
@@ -509,10 +509,10 @@ public partial class Rf69 : RhSpiDriver
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var irqFlags2 = SpiRead(REG_28_IRQFLAGS2);
+        var irqFlags2 = ReadFrom(REG_28_IRQFLAGS2);
         while ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0 && stopwatch.ElapsedMilliseconds < timeout)
         {
-            irqFlags2 = SpiRead(REG_28_IRQFLAGS2);
+            irqFlags2 = ReadFrom(REG_28_IRQFLAGS2);
         }
 
         stopwatch.Stop();
@@ -548,20 +548,20 @@ public partial class Rf69 : RhSpiDriver
             SelectDevice();
 
             // Send the start address with the write mask on
-            Spi.WriteByte(REG_00_FIFO | RH_RF69_SPI_WRITE_MASK);
+            WriteByte(REG_00_FIFO | RH_RF69_SPI_WRITE_MASK);
 
             // Include length of headers
-            Spi.WriteByte((byte)(data.Length + RH_RF69_HEADER_LEN));
+            WriteByte((byte)(data.Length + RH_RF69_HEADER_LEN));
 
             // First the 4 headers
-            Spi.WriteByte(TxHeaderTo);
-            Spi.WriteByte(TxHeaderFrom);
-            Spi.WriteByte(TxHeaderId);
-            Spi.WriteByte(TxHeaderFlags);
+            WriteByte(TxHeaderTo);
+            WriteByte(TxHeaderFrom);
+            WriteByte(TxHeaderId);
+            WriteByte(TxHeaderFlags);
 
             // Now the payload
             foreach (var d in data)
-                Spi.WriteByte(d);
+                WriteByte(d);
 
             DeselectDevice();
         }
@@ -578,8 +578,8 @@ public partial class Rf69 : RhSpiDriver
     /// <param name="length">Preamble length in bytes</param>
     public void SetPreambleLength(ushort length)
     {
-        SpiWrite(REG_2C_PREAMBLEMSB, (byte)(length >> 8));
-        SpiWrite(REG_2D_PREAMBLELSB, (byte)(length & 0xFF));
+        WriteTo(REG_2C_PREAMBLEMSB, (byte)(length >> 8));
+        WriteTo(REG_2D_PREAMBLELSB, (byte)(length & 0xFF));
     }
 
     /// <summary>
@@ -600,10 +600,10 @@ public partial class Rf69 : RhSpiDriver
         if (syncWords.Length > 4)
             throw new ArgumentException($"{nameof(SetSyncWords)}: syncWords must be 1 to 4 octets long.");
 
-        var syncConfig = SpiRead(REG_2E_SYNCCONFIG);
+        var syncConfig = ReadFrom(REG_2E_SYNCCONFIG);
         if (syncWords.Length is >= 1 and <= 4)
         {
-            SpiBurstWrite(REG_2F_SYNCVALUE1, syncWords);
+            BurstWriteTo(REG_2F_SYNCVALUE1, syncWords);
             syncConfig |= SYNCCONFIG_SYNCON;
         }
         else
@@ -611,7 +611,7 @@ public partial class Rf69 : RhSpiDriver
 
         syncConfig &= InvertByte(SYNCCONFIG_SYNCSIZE);
         syncConfig |= (byte)((syncWords.Length - 1) << 3);
-        SpiWrite(REG_2E_SYNCCONFIG, syncConfig);
+        WriteTo(REG_2E_SYNCCONFIG, syncConfig);
     }
 
     /// <summary>
@@ -625,13 +625,13 @@ public partial class Rf69 : RhSpiDriver
     {
         if (key.Length == 16)
         {
-            SpiBurstWrite(REG_3E_AESKEY1, key);
+            BurstWriteTo(REG_3E_AESKEY1, key);
 
-            SpiWrite(REG_3D_PACKETCONFIG2, (byte)(SpiRead(REG_3D_PACKETCONFIG2) | PACKETCONFIG2_AESON));
+            WriteTo(REG_3D_PACKETCONFIG2, (byte)(ReadFrom(REG_3D_PACKETCONFIG2) | PACKETCONFIG2_AESON));
         }
         else if (key.Length == 0)
         {
-            SpiWrite(REG_3D_PACKETCONFIG2, (byte)(SpiRead(REG_3D_PACKETCONFIG2) & ~PACKETCONFIG2_AESON));
+            WriteTo(REG_3D_PACKETCONFIG2, (byte)(ReadFrom(REG_3D_PACKETCONFIG2) & ~PACKETCONFIG2_AESON));
         }
         else
         {
@@ -691,7 +691,7 @@ public partial class Rf69 : RhSpiDriver
     {
         if (Mode != Rh69Modes.Sleep)
         {
-            SpiWrite(REG_01_OPMODE, OPMODE_MODE_SLEEP);
+            WriteTo(REG_01_OPMODE, OPMODE_MODE_SLEEP);
             Mode = Rh69Modes.Sleep;
         }
 
