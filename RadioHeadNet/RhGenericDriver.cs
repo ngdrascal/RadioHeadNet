@@ -103,7 +103,7 @@ public abstract class RhGenericDriver
     /// Returns the maximum message length available in this driver.
     /// </summary>
     /// <returns>The maximum legal message length</returns>
-    public abstract byte maxMessageLength();
+    public abstract byte MaxMessageLength();
 
     /// <summary>
     /// Starts the receiver and blocks until a valid received message is available.
@@ -129,13 +129,13 @@ public abstract class RhGenericDriver
     public virtual bool WaitPacketSent()
     {
         while (Mode == Rh69Modes.Tx)
-            Thread.Yield(); // Wait for any previous transmit to finish
+            Thread.Yield();
         return true;
     }
 
     /// <summary>
-    /// Blocks until the transmitter is no longer transmitting.
-    /// or until the timeout occuers, whichever happens first
+    /// Blocks until the transmitter is no longer transmitting or until the timeout
+    /// occurs, whichever happens first.
     /// </summary>
     /// <param name="timeout">Maximum time to wait in milliseconds.</param>
     /// <returns>true if the radio completed transmission within the timeout period.
@@ -143,9 +143,14 @@ public abstract class RhGenericDriver
     /// </returns>
     public virtual bool WaitPacketSent(ushort timeout)
     {
-        while (Mode == Rh69Modes.Tx)
-            Thread.Yield(); // Wait for any previous transmit to finish
-        return true;
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        while (Mode == Rh69Modes.Tx && stopwatch.ElapsedMilliseconds < timeout)
+        {
+            Thread.Yield();
+        }
+
+        return Mode != Rh69Modes.Tx;
     }
 
     /// <summary>
@@ -193,7 +198,7 @@ public abstract class RhGenericDriver
     /// the channel is clear within the timeout period (or the timeout period is 0), else
     /// returns false.
     /// </returns>
-    public virtual bool WaitCAD()
+    protected virtual bool WaitCAD()
     {
         if (CadTimeout == 0)
             return true;
@@ -210,7 +215,7 @@ public abstract class RhGenericDriver
         {
             if (stopwatch.ElapsedMilliseconds > CadTimeout)
                 return false;
-            Thread.Sleep(random.Next(1, 10) * 100); // Should these values be configurable? Macros?
+            Thread.Sleep(random.Next(1, 10) * 100);
         }
 
         return true;

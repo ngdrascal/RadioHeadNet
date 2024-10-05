@@ -13,6 +13,7 @@ public class Rf69Tests
     private ILoggerFactory _loggerFactory;
     private Rf69RegistersFake _registers;
     private Rf69 _radio;
+    private GpioPin _interruptPin;
 
     [SetUp]
     public void Setup()
@@ -27,11 +28,14 @@ public class Rf69Tests
 
         var driver = new GpioDriverFake();
         var controller = new GpioController(PinNumberingScheme.Board, driver);
-        var deviceSelectPin = controller.OpenPin(0);
+        var deviceSelectPin = controller.OpenPin(5);
         _registers = new Rf69RegistersFake(deviceSelectPin, _loggerFactory);
         var spiConnSetting = new SpiConnectionSettings(0);
         var spiDevice = new SpiDeviceFake(spiConnSetting, controller, _registers, _loggerFactory);
         _radio = new Rf69(deviceSelectPin, spiDevice, _loggerFactory);
+
+        _interruptPin = controller.OpenPin(6);
+        _interruptPin.ValueChanged += _radio.HandleInterrupt;
     }
 
     [TearDown]
@@ -384,12 +388,11 @@ public class Rf69Tests
 
     // GIVEN: an instance of the Rf69 class
     //        AND using the default settings
-    //        AND the radio is in Rx mode
+    //        AND the radio is not in Tx mode
     // WHEN: Send() is called
-    // THEN: a data packet is constructed with the correct length preamble
-    //       AND the correct sync words
-    //       AND if encryption is enabled, is encrypted with the correct key
-    //       AND is broadcast by the radio
+    // THEN: the sent packet has the correct data
+    //       AND the sent packet has the correct header
+    //       AND the of packets transmitted is 1
     [Test]
     public void Send()
     {
@@ -401,19 +404,29 @@ public class Rf69Tests
 
         var actual = new List<byte>();
 
-        _registers.DoAfterWrite(Rf69.REG_00_FIFO,
-            _ =>
+        _registers.DoAfterWrite(Rf69.REG_00_FIFO, _ =>
             {
+                // record each byte written to the FIFO register
                 actual.Add(_registers.Peek(Rf69.REG_00_FIFO));
+            });
+
+        _registers.DoOnRead(Rf69.REG_28_IRQFLAGS2, _ =>
+            {
+                // simulate the packet sent flag being set after the 3rd the flag is read
+                _registers.Poke(Rf69.REG_28_IRQFLAGS2, Rf69.IRQFLAGS2_PACKETSENT);
             });
 
         // ACT:
         var result = _radio.Send(data);
 
+        // simulate the interrupt pin going low
+        _interruptPin.Write(PinValue.Low);
+
         // ASSERT:
         Assert.That(result, Is.True);
         Assert.That(actual, Is.EqualTo(expected));
-        Assert.That(_registers.Peek(Rf69.REG_01_OPMODE), Is.EqualTo(Rf69.OPMODE_MODE_TX));
+        Assert.That(_radio.TxGood, Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.REG_01_OPMODE), Is.Not.EqualTo(Rf69.OPMODE_MODE_TX));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -466,6 +479,7 @@ public class Rf69Tests
     // THEN: the data received matches the data sent
     //       AND the headers received match the headers sent
     //       AND the RSSI value is correct
+    //       AND the LastPreambleTime is set
     //       AND the count of good packets is 1
     //       AND the count of bad packets is 0
     [Test]
@@ -502,6 +516,7 @@ public class Rf69Tests
         Assert.That(_radio.RxHeaderId, Is.EqualTo(expectedId));
         Assert.That(_radio.RxHeaderFlags, Is.EqualTo(expectedFlags));
         Assert.That(_radio.LastRssi, Is.EqualTo(-85));
+        Assert.That(_radio.LastPreambleTime, Is.Not.EqualTo(0));
         Assert.That(_radio.RxGood, Is.EqualTo(1));
         Assert.That(_radio.RxBad, Is.EqualTo(0));
     }
@@ -523,7 +538,7 @@ public class Rf69Tests
         _radio.Promiscuous = promiscuous;
         var packet = BuildPacket(expected, toAddress);
         MockReceiveData(packet);
-        
+
         _radio.SetModeRx();
         _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
 

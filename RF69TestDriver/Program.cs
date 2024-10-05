@@ -6,7 +6,6 @@ using System.Device.Spi;
 using Iot.Device.Board;
 using Iot.Device.Common;
 using Microsoft.Extensions.Configuration;
-using RadioHeadNet;
 using System.Diagnostics.CodeAnalysis;
 using Rf69 = RadioHeadNet.RhRf69.Rf69;
 

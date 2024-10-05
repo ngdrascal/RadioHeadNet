@@ -28,8 +28,11 @@ public partial class Rf69 : RhSpiDriver
     /// True when there is a valid message in the Rx buffer
     private bool _rxBufValid;
 
-    /// Time in millis since the last preamble was received (and the last time the RSSI was measured)
-    protected long LastPreambleTime;
+    /// <summary>
+    /// Time in millis since the last preamble was received (and the last time the RSSI
+    /// was measured)
+    /// </summary>
+    public long LastPreambleTime { get; private set; }
 
     /// <summary>
     /// Constructor. You can have multiple instances, but each instance must have its own
@@ -159,7 +162,7 @@ public partial class Rf69 : RhSpiDriver
 
             SetModeIdle();
 
-            // Save it in our buffer
+            // save it in our buffer
             ReadFifo();
         }
     }
@@ -589,7 +592,7 @@ public partial class Rf69 : RhSpiDriver
     /// <summary>
     /// Sets the sync words for transmit and receive 
     /// Caution: SyncWords should be set to the same value on all nodes in your network.
-    /// Nodes with different SyncWords set will never receive  each others messages, so
+    /// Nodes with different SyncWords set will never receive each others messages, so
     /// different SyncWords can be used to isolate different networks from each other.
     /// Default is { 0x2d, 0xd4 }.
     /// Caution: tests here show that with a single sync word (ie where len == 1), RFM69
@@ -619,12 +622,12 @@ public partial class Rf69 : RhSpiDriver
     }
 
     /// <summary>
-    /// Enables AES encryption and sets the AES encryption key, used
-    /// to encrypt and decrypt all messages. The default is disabled.
+    /// Enables AES encryption and sets the AES encryption key, used to encrypt and
+    /// decrypt all messages. The default is disabled.
     /// </summary>
-    /// <param name="key">The key to use. Must be 16 bytes long. The same key must be installed
-    /// in other instances of RF69, otherwise communications will not work correctly. If key is NULL,
-    /// encryption is disabled, which is the default.</param>
+    /// <param name="key">The key to use. Must be 16 bytes long. The same key must be
+    /// installed in other instances of RF69, otherwise communications will not work
+    /// correctly. If key is NULL, encryption is disabled, which is the default.</param>
     public void SetEncryptionKey(byte[] key)
     {
         if (key.Length == 16)
@@ -647,32 +650,9 @@ public partial class Rf69 : RhSpiDriver
     /// The maximum message length supported by this driver
     /// </summary>
     /// <returns>The maximum message length supported by this driver</returns>
-    public override byte maxMessageLength()
+    public override byte MaxMessageLength()
     {
         return RH_RF69_MAX_MESSAGE_LEN;
-    }
-
-    public bool PrintRegister(byte reg)
-    {
-#if RH_HAVE_SERIAL
-        Serial.print(reg, HEX);
-        Serial.print(" ");
-        Serial.println(spiRead(reg), HEX);
-#endif
-        return true;
-    }
-
-    public bool PrintRegisters()
-    {
-        byte i;
-        for (i = 0; i < 0x50; i++)
-            PrintRegister(i);
-        // Non-contiguous registers
-        PrintRegister(REG_58_TESTLNA);
-        PrintRegister(REG_6F_TESTDAGC);
-        PrintRegister(REG_71_TESTAFC);
-
-        return true;
     }
 
     /// <summary>
@@ -703,10 +683,8 @@ public partial class Rf69 : RhSpiDriver
     }
 
     /// <summary>
-    /// Return the integer value of the device type
-    /// as read from the device in from REG_10_VERSION.
-    /// Expect 0x24, depending on the type of device actually
-    /// connected.
+    /// Return the integer value of the device type as read from the device in from
+    /// REG_10_VERSION.  Expect 0x24, depending on the type of device actually connected.
     /// </summary>
     /// <returns>The integer device type</returns>
     public ushort DeviceType() { return _deviceType; }
