@@ -625,19 +625,29 @@ public class Rf69Tests
     }
 
     // GIVEN: an instance of the Rf69 class
-    // WHEN: SetModemConfig() is called
+    // WHEN: WaitAvailable() is called
     // THEN:
     [Test]
-    public void SetModemConfig()
+    public void WaitAvailable()
     {
         // ARRANGE:
+        byte[] expected = [1, 2, 3, 4];
+
         _radio.Init();
 
+        var packet = BuildPacket(expected);
+        MockReceiveData(packet);
+
+        _radio.SetModeRx();
+
+        // simulate the receiver notifying the MPU a received data packet is ready by
+        // activating the interrupt pin
+        _interruptPin.Write(PinValue.Low);
+
         // ACT:
-        _radio.SetModemConfig(Rf69.ModemConfigChoice.FSK_Rb125Fd125);
+        _radio.WaitAvailable();
 
         // ASSERT:
         Assert.Pass();
-
     }
 }
