@@ -419,7 +419,8 @@ public class Rf69Tests
         // ACT:
         var result = _radio.Send(data);
 
-        // simulate the interrupt pin going low
+        // simulate the transmitter notifying the MPU the data packet was sent by
+        // activating the interrupt pin
         _interruptPin.Write(PinValue.Low);
 
         // ASSERT:
@@ -503,7 +504,10 @@ public class Rf69Tests
         MockReceiveData(packet);
 
         _radio.SetModeRx();
-        _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
+
+        // simulate the receiver notifying the MPU a received data packet is ready by
+        // activating the interrupt pin
+        _interruptPin.Write(PinValue.Low);
 
         // ACT:
         var result = _radio.Receive(out var actualData);
@@ -540,7 +544,10 @@ public class Rf69Tests
         MockReceiveData(packet);
 
         _radio.SetModeRx();
-        _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
+
+        // simulate the receiver notifying the MPU a received data packet is ready by
+        // activating the interrupt pin
+        _interruptPin.Write(PinValue.Low);
 
         // ACT:
         var result = _radio.Receive(out _);
@@ -615,5 +622,22 @@ public class Rf69Tests
         packet.AddRange(data);
 
         return packet.ToArray();
+    }
+
+    // GIVEN: an instance of the Rf69 class
+    // WHEN: SetModemConfig() is called
+    // THEN:
+    [Test]
+    public void SetModemConfig()
+    {
+        // ARRANGE:
+        _radio.Init();
+
+        // ACT:
+        _radio.SetModemConfig(Rf69.ModemConfigChoice.FSK_Rb125Fd125);
+
+        // ASSERT:
+        Assert.Pass();
+
     }
 }

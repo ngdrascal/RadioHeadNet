@@ -288,8 +288,8 @@ public partial class Rf69 : RhSpiDriver
         while ((ReadFrom(REG_27_IRQFLAGS1) & IRQFLAGS1_MODEREADY) == 0) { }
     }
 
-    // Do this in a method instead of online because the compiler doesn't like casting
-    // a negative constant to a byte.
+    // Do this in a method instead of inline because the compiler doesn't like casting a
+    // negative constant to a byte.
     private static byte InvertByte(byte input)
     {
         return (byte)~input;
@@ -485,7 +485,7 @@ public partial class Rf69 : RhSpiDriver
     {
         if (!Available())
         {
-            buffer = Array.Empty<byte>();
+            buffer = [];
             return false;
         }
 
