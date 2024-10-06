@@ -626,9 +626,10 @@ public class Rf69Tests
 
     // GIVEN: an instance of the Rf69 class
     // WHEN: WaitAvailable() is called
-    // THEN:
-    [Test]
-    public void WaitAvailable()
+    // THEN: the method returns when the interrupt signals a packet has been received
+    [TestCase((ushort)0)]
+    [TestCase((ushort)100)]
+    public void WaitAvailable(ushort pollDelay)
     {
         // ARRANGE:
         byte[] expected = [1, 2, 3, 4];
@@ -640,12 +641,54 @@ public class Rf69Tests
 
         _radio.SetModeRx();
 
-        // simulate the receiver notifying the MPU a received data packet is ready by
-        // activating the interrupt pin
-        _interruptPin.Write(PinValue.Low);
+        var t = Task.Run(() =>
+        {
+            Task.Delay(TimeSpan.FromMilliseconds(1000));
+
+            // simulate the receiver notifying the MPU a received data packet is ready by
+            // activating the interrupt pin
+            _interruptPin.Write(PinValue.Low);
+        });
 
         // ACT:
-        _radio.WaitAvailable();
+        _radio.WaitAvailable(pollDelay);
+
+        Task.WaitAny([t]);
+
+        // ASSERT:
+        Assert.Pass();
+    }
+
+    // GIVEN: an instance of the Rf69 class
+    // WHEN: WaitAvailableTimeout() is called
+    // THEN: the method returns when the interrupt signals a packet has been received
+    [TestCase((ushort)100, (ushort)0)]
+    [TestCase((ushort)100, (ushort)100)]
+    public void WaitAvailableTimeout(ushort timeout, ushort pollDelay)
+    {
+        // ARRANGE:
+        byte[] expected = [1, 2, 3, 4];
+
+        _radio.Init();
+
+        var packet = BuildPacket(expected);
+        MockReceiveData(packet);
+
+        _radio.SetModeRx();
+
+        var t = Task.Run(() =>
+        {
+            Task.Delay(TimeSpan.FromMilliseconds(1000));
+
+            // simulate the receiver notifying the MPU a received data packet is ready by
+            // activating the interrupt pin
+            _interruptPin.Write(PinValue.Low);
+        });
+
+        // ACT:
+        _radio.WaitAvailableTimeout(timeout, pollDelay);
+
+        Task.WaitAny([t]);
 
         // ASSERT:
         Assert.Pass();

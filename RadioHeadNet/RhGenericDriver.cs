@@ -119,7 +119,9 @@ public abstract class RhGenericDriver
         {
             Thread.Yield();
             if (pollDelay != 0)
+            {
                 Thread.Sleep(pollDelay);
+            }
         }
     }
 
@@ -128,8 +130,10 @@ public abstract class RhGenericDriver
     /// </summary>
     public virtual bool WaitPacketSent()
     {
-        while (Mode == Rh69Modes.Tx)
-            Thread.Yield();
+        {
+            while (Mode == Rh69Modes.Tx)
+                Thread.Yield();
+        }
         return true;
     }
 
@@ -175,7 +179,9 @@ public abstract class RhGenericDriver
             }
             Thread.Yield();
             if (pollDelay != 0)
+            {
                 Thread.Sleep(pollDelay);
+            }
         }
         return false;
     }
