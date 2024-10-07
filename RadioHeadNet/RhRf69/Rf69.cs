@@ -143,6 +143,8 @@ public partial class Rf69 : RhSpiDriver
     {
         // Get the interrupt cause
         var irqFlags2 = ReadFrom(REG_28_IRQFLAGS2);
+        _logger.LogTrace("-->{0}(): mode={1}, IrqFlags2={2}", nameof(HandleInterrupt), Mode.ToString(), irqFlags2.ToString());
+
         if (Mode == Rh69Modes.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
         {
             // A transmitter message has been fully sent
@@ -493,9 +495,8 @@ public partial class Rf69 : RhSpiDriver
         lock (CriticalSection)
         {
             Array.Copy(_buf, buffer, _bufLen);
+            _rxBufValid = false; // Got the most recent message
         }
-
-        _rxBufValid = false; // Got the most recent message
 
         return true;
     }

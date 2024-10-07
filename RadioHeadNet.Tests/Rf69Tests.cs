@@ -1,6 +1,7 @@
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Diagnostics.CodeAnalysis;
+using System.Timers;
 using Microsoft.Extensions.Logging;
 using RadioHeadNet.RhRf69;
 using UnitTestLogger;
@@ -602,6 +603,8 @@ public class Rf69Tests
             _registers.Poke(Rf69.REG_00_FIFO, dataPacket[pkgIdx++]);
         });
 
+        // simulate the receiver updating the IRQFLAGS2 register to indicate a data
+        // packed was received
         _registers.Poke(Rf69.REG_28_IRQFLAGS2, Rf69.IRQFLAGS2_PAYLOADREADY);
     }
 
@@ -628,7 +631,7 @@ public class Rf69Tests
     // WHEN: WaitAvailable() is called
     // THEN: the method returns when the interrupt signals a packet has been received
     [TestCase((ushort)0)]
-    [TestCase((ushort)100)]
+    [TestCase((ushort)10)]
     public void WaitAvailable(ushort pollDelay)
     {
         // ARRANGE:
@@ -641,56 +644,68 @@ public class Rf69Tests
 
         _radio.SetModeRx();
 
-        var t = Task.Run(() =>
-        {
-            Task.Delay(TimeSpan.FromMilliseconds(1000));
-
-            // simulate the receiver notifying the MPU a received data packet is ready by
-            // activating the interrupt pin
-            _interruptPin.Write(PinValue.Low);
-        });
+        // simulate the receiver notifying the MPU a received data packet is ready by
+        // activating the interrupt pin
+        _interruptPin.Write(PinValue.Low);
 
         // ACT:
         _radio.WaitAvailable(pollDelay);
-
-        Task.WaitAny([t]);
-
         // ASSERT:
         Assert.Pass();
     }
 
     // GIVEN: an instance of the Rf69 class
     // WHEN: WaitAvailableTimeout() is called
-    // THEN: the method returns when the interrupt signals a packet has been received
+    //       AND a packet is received before the timeout expires
+    // THEN: the method returns true
     [TestCase((ushort)100, (ushort)0)]
-    [TestCase((ushort)100, (ushort)100)]
+    [TestCase((ushort)100, (ushort)10)]
     public void WaitAvailableTimeout(ushort timeout, ushort pollDelay)
     {
         // ARRANGE:
-        byte[] expected = [1, 2, 3, 4];
+        byte[] data = [1, 2, 3, 4];
 
         _radio.Init();
 
-        var packet = BuildPacket(expected);
+        var packet = BuildPacket(data);
         MockReceiveData(packet);
 
         _radio.SetModeRx();
 
-        var t = Task.Run(() =>
-        {
-            Task.Delay(TimeSpan.FromMilliseconds(1000));
-
-            // simulate the receiver notifying the MPU a received data packet is ready by
-            // activating the interrupt pin
-            _interruptPin.Write(PinValue.Low);
-        });
+        // simulate the receiver notifying the MPU a received data packet is ready by
+        // activating the interrupt pin
+        _interruptPin.Write(PinValue.Low);
 
         // ACT:
-        _radio.WaitAvailableTimeout(timeout, pollDelay);
-
-        Task.WaitAny([t]);
+        var result = _radio.WaitAvailableTimeout(timeout, pollDelay);
 
         // ASSERT:
-        Assert.Pass();
+        Assert.That(result, Is.True);
     }
+
+    // GIVEN: an instance of the Rf69 class
+    // WHEN: WaitAvailableTimeout() is called
+    //       AND a packet is not received before the timeout expires
+    // THEN: the method returns false
+    [TestCase((ushort)100, (ushort)0)]
+    [TestCase((ushort)100, (ushort)10)]
+    public void WaitAvailableTimeoutNoPacket(ushort timeout, ushort pollDelay)
+    {
+        // ARRANGE:
+        byte[] data = [1, 2, 3, 4];
+
+        _radio.Init();
+
+        var packet = BuildPacket(data);
+        MockReceiveData(packet);
+
+        _radio.SetModeRx();
+
+        // ACT:
+        var result = _radio.WaitAvailableTimeout(timeout, pollDelay);
+
+        // ASSERT:
+        Assert.That(result, Is.False);
+    }
+
 }
