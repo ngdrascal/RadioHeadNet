@@ -7,7 +7,7 @@ using Iot.Device.Board;
 using Iot.Device.Common;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics.CodeAnalysis;
-using Rf69 = RadioHeadNet.RhRf69.Rf69;
+using RadioHeadNet.RhRf69;
 
 namespace RF69TestDriver;
 

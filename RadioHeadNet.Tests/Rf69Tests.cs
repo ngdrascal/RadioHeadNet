@@ -1,7 +1,6 @@
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Diagnostics.CodeAnalysis;
-using System.Timers;
 using Microsoft.Extensions.Logging;
 using RadioHeadNet.RhRf69;
 using UnitTestLogger;
