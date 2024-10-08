@@ -101,7 +101,7 @@ public partial class Rf69
     private const byte OPMODE_SEQUENCEROFF = 0x80;
     private const byte OPMODE_LISTENON = 0x40;
     private const byte OPMODE_LISTENABORT = 0x20;
-    private const byte OPMODE_MODE = 0x1C;
+    internal const byte OPMODE_MODE = 0x1C;
     internal const byte OPMODE_MODE_SLEEP = 0x00;
     internal const byte OPMODE_MODE_STDBY = 0x04;
     internal const byte OPMODE_MODE_FS = 0x08;
