@@ -23,7 +23,7 @@ public partial class Rf69 : RhSpiDriver
     private byte _bufLen;
 
     /// Array of octets of the last received message or the next to transmit message
-    private readonly byte[] _buf = new byte[RH_RF69_MAX_MESSAGE_LEN];
+    private readonly byte[] _buf = new byte[MAX_MESSAGE_LEN];
 
     /// True when there is a valid message in the Rx buffer
     private bool _rxBufValid;
@@ -180,7 +180,7 @@ public partial class Rf69 : RhSpiDriver
             SelectDevice();
             WriteByte(REG_00_Fifo); // Send the start address with the write mask off
             var payloadLen = ReadByte(); // First byte is payload len (counting the headers)
-            if (payloadLen is <= RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN and >= RH_RF69_HEADER_LEN)
+            if (payloadLen is <= MAX_ENCRYPTABLE_PAYLOAD_LEN and >= HEADER_LEN)
             {
                 RxHeaderTo = ReadByte();
                 // check the address
@@ -194,7 +194,7 @@ public partial class Rf69 : RhSpiDriver
                     RxHeaderFlags = ReadByte();
 
                     // and now the real payload
-                    for (_bufLen = 0; _bufLen < (payloadLen - RH_RF69_HEADER_LEN); _bufLen++)
+                    for (_bufLen = 0; _bufLen < (payloadLen - HEADER_LEN); _bufLen++)
                         _buf[_bufLen] = ReadByte();
 
                     RxGood++;
@@ -242,7 +242,7 @@ public partial class Rf69 : RhSpiDriver
     public bool SetFrequency(float center)
     {
         // FRF = FRF / FSTEP
-        var frf = (uint)((center * 1000000.0) / RH_RF69_FSTEP);
+        var frf = (uint)((center * 1000000.0) / FSTEP);
         WriteTo(REG_07_FrfMsb, (byte)((frf >> 16) & 0xFF));
         WriteTo(REG_08_FrfMid, (byte)((frf >> 8) & 0xFF));
         WriteTo(REG_09_FrfLsb, (byte)(frf & 0xFF));
@@ -262,8 +262,8 @@ public partial class Rf69 : RhSpiDriver
     {
         // Force a new value to be measured
         // Hmmm, this hangs forever!
-        // spiWrite(REG_23_RssiConfig, RH_RF69_RSSICONFIG_RSSISTART);
-        // while (!(spiRead(REG_23_RssiConfig) & RH_RF69_RSSICONFIG_RSSIDONE)) {}
+        // spiWrite(REG_23_RssiConfig, RSSICONFIG_RSSISTART);
+        // while (!(spiRead(REG_23_RssiConfig) & RSSICONFIG_RSSIDONE)) {}
 
         return (sbyte)-(ReadFrom(REG_24_RssiValue) >> 1);
     }
@@ -539,7 +539,7 @@ public partial class Rf69 : RhSpiDriver
     /// transmit</returns>
     public override bool Send(byte[] data)
     {
-        if (data.Length > RH_RF69_MAX_MESSAGE_LEN)
+        if (data.Length > MAX_MESSAGE_LEN)
             return false;
 
         WaitPacketSent();  // Make sure we don't interrupt an outgoing message
@@ -553,10 +553,10 @@ public partial class Rf69 : RhSpiDriver
             SelectDevice();
 
             // Send the start address with the write mask on
-            WriteByte(REG_00_Fifo | RH_RF69_SPI_WRITE_MASK);
+            WriteByte(REG_00_Fifo | SPI_WRITE_MASK);
 
             // Include length of headers
-            WriteByte((byte)(data.Length + RH_RF69_HEADER_LEN));
+            WriteByte((byte)(data.Length + HEADER_LEN));
 
             // First the 4 headers
             WriteByte(TxHeaderTo);
@@ -650,7 +650,7 @@ public partial class Rf69 : RhSpiDriver
     /// <returns>The maximum message length supported by this driver</returns>
     public override byte MaxMessageLength()
     {
-        return RH_RF69_MAX_MESSAGE_LEN;
+        return MAX_MESSAGE_LEN;
     }
 
     /// <summary>

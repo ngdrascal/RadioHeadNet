@@ -615,7 +615,7 @@ public class Rf69Tests
     {
         var packet = new List<byte>()
         {
-            (byte)(data.Length + Rf69.RH_RF69_HEADER_LEN),
+            (byte)(data.Length + Rf69.HEADER_LEN),
             toAddress,
             fromAddress,
             headerId,

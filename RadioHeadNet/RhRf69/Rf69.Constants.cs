@@ -9,20 +9,20 @@ namespace RadioHeadNet.RhRf69;
 public partial class Rf69
 {
     // The crystal oscillator frequency of the RF69 module
-    private const float RH_RF69_FXOSC = 32000000.0f;
+    private const float FXOSC = 32000000.0f;
 
-    // The Frequency Synthesizer step = RH_RF69_FXOSC / 2^^19
-    private const float RH_RF69_FSTEP = (RH_RF69_FXOSC / 524288);
+    // The Frequency Synthesizer step = FXOSC / 2^^19
+    private const float FSTEP = (FXOSC / 524288);
 
     // This is the bit in the SPI address that marks it as a write operation
-    private const byte RH_RF69_SPI_WRITE_MASK = 0x80;
+    private const byte SPI_WRITE_MASK = 0x80;
 
     // Maximum encrypt-able payload length the RF69 can support
-    internal const byte RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN = 64;
+    internal const byte MAX_ENCRYPTABLE_PAYLOAD_LEN = 64;
 
     // The length of the headers we add.
     // The headers are inside the RF69's payload and are therefore encrypted if encryption is enabled
-    internal const byte RH_RF69_HEADER_LEN = 4;
+    internal const byte HEADER_LEN = 4;
 
     // This is the maximum message length that can be supported by this driver. Limited by
     // the size of the FIFO, since we are unable to support on-the-fly filling and emptying 
@@ -30,7 +30,7 @@ public partial class Rf69
     // Can be pre-defined to a smaller size (to save SRAM) prior to including this header
     // Here we allow for 4 bytes of address and header and payload to be included in the 64 byte encryption limit.
     // the one byte payload length is not encrypted
-    private const byte RH_RF69_MAX_MESSAGE_LEN = RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN - RH_RF69_HEADER_LEN;
+    private const byte MAX_MESSAGE_LEN = MAX_ENCRYPTABLE_PAYLOAD_LEN - HEADER_LEN;
 
     // Register names
     internal const byte REG_00_Fifo = 0x00;
@@ -132,8 +132,8 @@ public partial class Rf69
     private const byte PALEVEL_OUTPUTPOWER = 0x1F;
 
     // REG_23_RssiConfig                                           
-    private const byte RH_RF69_RSSICONFIG_RSSIDONE = 0x02;
-    private const byte RH_RF69_RSSICONFIG_RSSISTART = 0x01;
+    private const byte RSSICONFIG_RSSIDONE = 0x02;
+    private const byte RSSICONFIG_RSSISTART = 0x01;
 
     // REG_25_DioMapping1                                          
     private const byte DIOMAPPING1_DIO0MAPPING = 0xC0;
