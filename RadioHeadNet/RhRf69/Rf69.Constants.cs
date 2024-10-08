@@ -1,10 +1,8 @@
 ﻿// ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local
+// ReSharper disable UnusedMember.Global
 // ReSharper disable IdentifierTypo
 // ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable UnusedMember.Global
-
-#define RFM69_HW
 
 namespace RadioHeadNet.RhRf69;
 
@@ -16,14 +14,8 @@ public partial class Rf69
     // The Frequency Synthesizer step = RH_RF69_FXOSC / 2^^19
     private const float RH_RF69_FSTEP = (RH_RF69_FXOSC / 524288);
 
-    // This is the maximum number of interrupts the driver can support
-    private const byte RH_RF69_NUM_INTERRUPTS = 3;
-
     // This is the bit in the SPI address that marks it as a write operation
     private const byte RH_RF69_SPI_WRITE_MASK = 0x80;
-
-    // Max number of octets the RH_RF69 Rx and Tx FIFOs can hold
-    private const byte RH_RF69_FIFO_SIZE = 66;
 
     // Maximum encrypt-able payload length the RF69 can support
     internal const byte RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN = 64;
@@ -40,24 +32,6 @@ public partial class Rf69
     // the one byte payload length is not encrypted
     private const byte RH_RF69_MAX_MESSAGE_LEN = RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN - RH_RF69_HEADER_LEN;
 
-    // Keep track of the Mode the RF69 is in
-    public const byte RH_RF69_MODE_IDLE = 0;
-    public const byte RH_RF69_MODE_RX = 1;
-    public const byte RH_RF69_MODE_TX = 2;
-
-    // This is the default node address,
-    private const byte RH_RF69_DEFAULT_NODE_ADDRESS = 0;
-
-    // You can define the following macro (either by editing here or by passing it as a
-    // compiler definition// to change the default value of the isHighPowerModule argument
-    // to setTxPower to true
-
-#if RFM69_HW
-    private const bool RH_RF69_DEFAULT_HIGHPOWER = true;
-#else
-    private const bool RH_RF69_DEFAULT_HIGHPOWER = false;
-#endif
-
     // Register names
     internal const byte Reg00Fifo = 0x00;
     internal const byte Reg01OpMode = 0x01;
@@ -71,7 +45,6 @@ public partial class Rf69
     internal const byte Reg09FrfLsb = 0x09;
     internal const byte Reg0aOsc1 = 0x0A;
     internal const byte Reg0bAfcCtrl = 0x0B;
-    // internal const byte Reg0CReserved = 0x0C;
     internal const byte Reg0dListen1 = 0x0D;
     internal const byte Reg0eListen2 = 0x0E;
     internal const byte Reg0fListen3 = 0x0F;
@@ -79,10 +52,6 @@ public partial class Rf69
     internal const byte Reg11PaLevel = 0x11;
     internal const byte Reg12PaRamp = 0x12;
     internal const byte Reg13Ocp = 0x13;
-    // internal const byte Reg14Reserved = 0x14;
-    // internal const byte Reg15Reserved = 0x15;
-    // internal const byte Reg16Reserved = 0x16;
-    // internal const byte Reg17Reserved = 0x17;
     internal const byte Reg18Lna = 0x18;
     internal const byte Reg19RxBw = 0x19;
     internal const byte Reg1aAfcBw = 0x1A;
@@ -116,7 +85,7 @@ public partial class Rf69
     internal const byte Reg3cFifoThresh = 0x3C;
     internal const byte Reg3dPacketConfig2 = 0x3D;
     internal const byte Reg3eAesKey1 = 0x3E;
-    // Another 15 AES key bytes follow
+    // another 15 AES key bytes follow
     internal const byte Reg4eTemp1 = 0x4E;
     internal const byte Reg4fTemp2 = 0x4F;
     internal const byte Reg58TestLna = 0x58;

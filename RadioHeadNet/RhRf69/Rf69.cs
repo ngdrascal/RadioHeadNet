@@ -77,7 +77,7 @@ public partial class Rf69 : RhSpiDriver
 
         SetModeIdle();
 
-        // Configure important RH_RF69 registers
+        // Configure important RF69 registers
         // Here we set up the standard packet format for use by the RH_RF69 library:
         //    4 bytes preamble
         //    2 SYNC words 2d, d4
@@ -233,17 +233,16 @@ public partial class Rf69 : RhSpiDriver
     }
 
     /// <summary>
-    /// Sets the transmitter and receiver centre frequency
+    /// Sets the transmitter and receiver center frequency
     /// </summary>
-    /// <param name="centre">centre Frequency in MHz. 240.0 to 960.0. Caution, RF69 comes in several
+    /// <param name="center">center Frequency in MHz. 240.0 to 960.0. Caution, RF69 comes in several
     /// different frequency ranges, and setting a frequency outside that range of your radio will probably not work
     /// </param>
-    /// <param name="afcPullInRange">afcPullInRange Not used</param>
-    /// <returns>true if the selected frequency centre is within range</returns>
-    public bool SetFrequency(float centre, float afcPullInRange = 0)
+    /// <returns>true if the selected frequency center is within range</returns>
+    public bool SetFrequency(float center)
     {
-        // Frf = FRF / FSTEP
-        var frf = (uint)((centre * 1000000.0) / RH_RF69_FSTEP);
+        // FRF = FRF / FSTEP
+        var frf = (uint)((center * 1000000.0) / RH_RF69_FSTEP);
         WriteTo(Reg07FrfMsb, (byte)((frf >> 16) & 0xFF));
         WriteTo(Reg08FrfMid, (byte)((frf >> 8) & 0xFF));
         WriteTo(Reg09FrfLsb, (byte)(frf & 0xFF));
@@ -263,11 +262,9 @@ public partial class Rf69 : RhSpiDriver
     {
         // Force a new value to be measured
         // Hmmm, this hangs forever!
-        // #if 0
-        //      spiWrite(Reg23RssiConfig, RH_RF69_RSSICONFIG_RSSISTART);
-        //      while (!(spiRead(Reg23RssiConfig) & RH_RF69_RSSICONFIG_RSSIDONE))
-        //         ;
-        // #endif
+        // spiWrite(Reg23RssiConfig, RH_RF69_RSSICONFIG_RSSISTART);
+        // while (!(spiRead(Reg23RssiConfig) & RH_RF69_RSSICONFIG_RSSIDONE)) {}
+
         return (sbyte)-(ReadFrom(Reg24RssiValue) >> 1);
     }
 
@@ -430,11 +427,11 @@ public partial class Rf69 : RhSpiDriver
     public void SetModemRegisters(ModemConfig config)
     {
         BurstWriteTo(Reg02DataModul,
-            [config.reg_02, config.reg_03, config.reg_04, config.reg_05, config.reg_06]);
+            [config.Reg02, config.Reg03, config.Reg04, config.Reg05, config.Reg06]);
 
-        BurstWriteTo(Reg19RxBw, [config.reg_19, config.reg_1a]);
+        BurstWriteTo(Reg19RxBw, [config.Reg19, config.Reg1A]);
 
-        WriteTo(Reg37PacketConfig1, config.reg_37);
+        WriteTo(Reg37PacketConfig1, config.Reg37);
     }
 
     /// <summary>
