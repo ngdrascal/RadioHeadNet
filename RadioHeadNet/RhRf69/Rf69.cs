@@ -71,7 +71,7 @@ public partial class Rf69 : RhSpiDriver
 
         // Get the device type and check it. This also tests whether we are really
         // connected to a device.  My test devices return 0x24.
-        _deviceType = ReadFrom(REG_10_VERSION);
+        _deviceType = ReadFrom(Reg10Version);
         if (_deviceType is 00 or 0xff)
             return false;
 
@@ -89,23 +89,23 @@ public partial class Rf69 : RhSpiDriver
         // headers to the beginning of the RH_RF69 payload
 
         // thresh 15 is default
-        WriteTo(REG_3C_FIFOTHRESH, FIFOTHRESH_TXSTARTCONDITION_NOTEMPTY | 0x0F);
+        WriteTo(Reg3cFifoThresh, FIFOTHRESH_TXSTARTCONDITION_NOTEMPTY | 0x0F);
 
         // RSSITHRESH is default
-        // WriteTo(REG_29_RSSITHRESH, 220); // -110 dbM
+        // WriteTo(Reg29RssiThresh, 220); // -110 dbM
 
         // SYNCCONFIG is default. SyncSize is set later by setSyncWords()
-        // WriteTo(REG_2E_SYNCCONFIG, SYNCCONFIG_SYNCON); // auto, tolerance 0
+        // WriteTo(Reg2eSyncConfig, SYNCCONFIG_SYNCON); // auto, tolerance 0
 
         // PAYLOADLENGTH is default
-        // WriteTo(REG_38_PAYLOADLENGTH, RH_RF69_FIFO_SIZE); // max size only for RX
+        // WriteTo(Reg38PayloadLength, RH_RF69_FIFO_SIZE); // max size only for RX
 
         // PACKETCONFIG 2 is default
-        WriteTo(REG_6F_TESTDAGC, TESTDAGC_CONTINUOUSDAGC_IMPROVED_LOWBETAOFF);
+        WriteTo(Reg6fTestDagc, TESTDAGC_CONTINUOUSDAGC_IMPROVED_LOWBETAOFF);
 
         // If high power boost set previously, disable it
-        WriteTo(REG_5A_TESTPA1, TESTPA1_NORMAL);
-        WriteTo(REG_5C_TESTPA2, TESTPA2_NORMAL);
+        WriteTo(Reg5aTestPa1, TESTPA1_NORMAL);
+        WriteTo(Reg5cTestPa2, TESTPA2_NORMAL);
 
         // The following can be changed later by the user if necessary.
         // Set up default configuration
@@ -142,7 +142,7 @@ public partial class Rf69 : RhSpiDriver
     public void HandleInterrupt(object sender, PinValueChangedEventArgs arg)
     {
         // Get the interrupt cause
-        var irqFlags2 = ReadFrom(REG_28_IRQFLAGS2);
+        var irqFlags2 = ReadFrom(Reg28IrqFlags2);
         _logger.LogTrace("-->{0}(): mode={1}, IrqFlags2={2}", nameof(HandleInterrupt), Mode.ToString(), irqFlags2.ToString());
 
         if (Mode == Rh69Modes.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
@@ -158,7 +158,7 @@ public partial class Rf69 : RhSpiDriver
         {
             // A complete message has been received with good CRC
             // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
-            LastRssi = (short)-(ReadFrom(REG_24_RSSIVALUE) >> 1);
+            LastRssi = (short)-(ReadFrom(Reg24RssiValue) >> 1);
 
             LastPreambleTime = DateTime.Now.Ticks;
 
@@ -178,7 +178,7 @@ public partial class Rf69 : RhSpiDriver
         lock (CriticalSection)
         {
             SelectDevice();
-            WriteByte(REG_00_FIFO); // Send the start address with the write mask off
+            WriteByte(Reg00Fifo); // Send the start address with the write mask off
             var payloadLen = ReadByte(); // First byte is payload len (counting the headers)
             if (payloadLen is <= RH_RF69_MAX_ENCRYPTABLE_PAYLOAD_LEN and >= RH_RF69_HEADER_LEN)
             {
@@ -220,16 +220,16 @@ public partial class Rf69 : RhSpiDriver
     {
         // Caution: must be ins standby.
         // setModeIdle();
-        WriteTo(REG_4E_TEMP1, TEMP1_TEMPMEASSTART); // Start the measurement
+        WriteTo(Reg4eTemp1, TEMP1_TEMPMEASSTART); // Start the measurement
 
         // Wait for the measurement to complete
-        var reg4E = ReadFrom(REG_4E_TEMP1);
+        var reg4E = ReadFrom(Reg4eTemp1);
         while ((reg4E & TEMP1_TEMPMEASRUNNING) != 0)  // wait for bit 4 to equal 0
         {
-            reg4E = ReadFrom(REG_4E_TEMP1);
+            reg4E = ReadFrom(Reg4eTemp1);
         }
 
-        return (sbyte)(166 - ReadFrom(REG_4F_TEMP2)); // Very approximate, based on observation
+        return (sbyte)(166 - ReadFrom(Reg4fTemp2)); // Very approximate, based on observation
     }
 
     /// <summary>
@@ -244,9 +244,9 @@ public partial class Rf69 : RhSpiDriver
     {
         // Frf = FRF / FSTEP
         var frf = (uint)((centre * 1000000.0) / RH_RF69_FSTEP);
-        WriteTo(REG_07_FRFMSB, (byte)((frf >> 16) & 0xFF));
-        WriteTo(REG_08_FRFMID, (byte)((frf >> 8) & 0xFF));
-        WriteTo(REG_09_FRFLSB, (byte)(frf & 0xFF));
+        WriteTo(Reg07FrfMsb, (byte)((frf >> 16) & 0xFF));
+        WriteTo(Reg08FrfMid, (byte)((frf >> 8) & 0xFF));
+        WriteTo(Reg09FrfLsb, (byte)(frf & 0xFF));
 
         // afcPullInRange is not used
         // (void)afcPullInRange;
@@ -264,11 +264,11 @@ public partial class Rf69 : RhSpiDriver
         // Force a new value to be measured
         // Hmmm, this hangs forever!
         // #if 0
-        //      spiWrite(REG_23_RSSICONFIG, RH_RF69_RSSICONFIG_RSSISTART);
-        //      while (!(spiRead(REG_23_RSSICONFIG) & RH_RF69_RSSICONFIG_RSSIDONE))
+        //      spiWrite(Reg23RssiConfig, RH_RF69_RSSICONFIG_RSSISTART);
+        //      while (!(spiRead(Reg23RssiConfig) & RH_RF69_RSSICONFIG_RSSIDONE))
         //         ;
         // #endif
-        return (sbyte)-(ReadFrom(REG_24_RSSIVALUE) >> 1);
+        return (sbyte)-(ReadFrom(Reg24RssiValue) >> 1);
     }
 
     /// <summary>
@@ -281,13 +281,13 @@ public partial class Rf69 : RhSpiDriver
     {
         var clrMask = InvertByte(OPMODE_MODE);
 
-        var curValue = ReadFrom(REG_01_OPMODE);
+        var curValue = ReadFrom(Reg01OpMode);
         var newValue = (byte)(curValue & clrMask);
         newValue |= (byte)(mode & OPMODE_MODE);
-        WriteTo(REG_01_OPMODE, newValue);
+        WriteTo(Reg01OpMode, newValue);
 
         // Wait for Mode to change.
-        while ((ReadFrom(REG_27_IRQFLAGS1) & IRQFLAGS1_MODEREADY) == 0) { }
+        while ((ReadFrom(Reg27IrqFlags1) & IRQFLAGS1_MODEREADY) == 0) { }
     }
 
     // Do this in a method instead of inline because the compiler doesn't like casting a
@@ -308,8 +308,8 @@ public partial class Rf69 : RhSpiDriver
             if (_power >= 18)
             {
                 // If high power boost, return power amp to receive Mode
-                WriteTo(REG_5A_TESTPA1, TESTPA1_NORMAL);
-                WriteTo(REG_5C_TESTPA2, TESTPA2_NORMAL);
+                WriteTo(Reg5aTestPa1, TESTPA1_NORMAL);
+                WriteTo(Reg5cTestPa2, TESTPA2_NORMAL);
             }
 
             SetOpMode(_idleMode);
@@ -327,12 +327,12 @@ public partial class Rf69 : RhSpiDriver
             if (_power >= 18)
             {
                 // If high power boost, return power amp to receive Mode
-                WriteTo(REG_5A_TESTPA1, TESTPA1_NORMAL);
-                WriteTo(REG_5C_TESTPA2, TESTPA2_NORMAL);
+                WriteTo(Reg5aTestPa1, TESTPA1_NORMAL);
+                WriteTo(Reg5cTestPa2, TESTPA2_NORMAL);
             }
 
             // Set interrupt line 0 PayloadReady
-            WriteTo(REG_25_DIOMAPPING1, DIOMAPPING1_DIO0MAPPING_01);
+            WriteTo(Reg25DioMapping1, DIOMAPPING1_DIO0MAPPING_01);
             SetOpMode(OPMODE_MODE_RX); // Clears FIFO
             Mode = Rh69Modes.Rx;
         }
@@ -349,11 +349,11 @@ public partial class Rf69 : RhSpiDriver
             {
                 // Set high power boost Mode
                 // Note that OCP defaults to ON so no need to change that.
-                WriteTo(REG_5A_TESTPA1, TESTPA1_BOOST);
-                WriteTo(REG_5C_TESTPA2, TESTPA2_BOOST);
+                WriteTo(Reg5aTestPa1, TESTPA1_BOOST);
+                WriteTo(Reg5cTestPa2, TESTPA2_BOOST);
             }
 
-            WriteTo(REG_25_DIOMAPPING1, DIOMAPPING1_DIO0MAPPING_00); // Set interrupt line 0 PacketSent
+            WriteTo(Reg25DioMapping1, DIOMAPPING1_DIO0MAPPING_00); // Set interrupt line 0 PacketSent
             SetOpMode(OPMODE_MODE_TX); // Clears FIFO
             Mode = Rh69Modes.Tx;
         }
@@ -417,7 +417,7 @@ public partial class Rf69 : RhSpiDriver
             paLevel = (byte)(PALEVEL_PA0ON | ((_power + 18) & PALEVEL_OUTPUTPOWER));
         }
 
-        WriteTo(REG_11_PALEVEL, paLevel);
+        WriteTo(Reg11PaLevel, paLevel);
     }
 
     /// <summary>
@@ -429,12 +429,12 @@ public partial class Rf69 : RhSpiDriver
     /// modem configuration registers.</param>
     public void SetModemRegisters(ModemConfig config)
     {
-        BurstWriteTo(REG_02_DATAMODUL,
+        BurstWriteTo(Reg02DataModul,
             [config.reg_02, config.reg_03, config.reg_04, config.reg_05, config.reg_06]);
 
-        BurstWriteTo(REG_19_RXBW, [config.reg_19, config.reg_1a]);
+        BurstWriteTo(Reg19RxBw, [config.reg_19, config.reg_1a]);
 
-        WriteTo(REG_37_PACKETCONFIG1, config.reg_37);
+        WriteTo(Reg37PacketConfig1, config.reg_37);
     }
 
     /// <summary>
@@ -517,10 +517,10 @@ public partial class Rf69 : RhSpiDriver
         var stopwatch = new Stopwatch();
         stopwatch.Start();
 
-        var irqFlags2 = ReadFrom(REG_28_IRQFLAGS2);
+        var irqFlags2 = ReadFrom(Reg28IrqFlags2);
         while ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0 && stopwatch.ElapsedMilliseconds < timeout)
         {
-            irqFlags2 = ReadFrom(REG_28_IRQFLAGS2);
+            irqFlags2 = ReadFrom(Reg28IrqFlags2);
         }
 
         stopwatch.Stop();
@@ -556,7 +556,7 @@ public partial class Rf69 : RhSpiDriver
             SelectDevice();
 
             // Send the start address with the write mask on
-            WriteByte(REG_00_FIFO | RH_RF69_SPI_WRITE_MASK);
+            WriteByte(Reg00Fifo | RH_RF69_SPI_WRITE_MASK);
 
             // Include length of headers
             WriteByte((byte)(data.Length + RH_RF69_HEADER_LEN));
@@ -586,8 +586,8 @@ public partial class Rf69 : RhSpiDriver
     /// <param name="length">Preamble length in bytes</param>
     public void SetPreambleLength(ushort length)
     {
-        WriteTo(REG_2C_PREAMBLEMSB, (byte)(length >> 8));
-        WriteTo(REG_2D_PREAMBLELSB, (byte)(length & 0xFF));
+        WriteTo(Reg2cPreambleMsb, (byte)(length >> 8));
+        WriteTo(Reg2dPreambleLsb, (byte)(length & 0xFF));
     }
 
     /// <summary>
@@ -608,10 +608,10 @@ public partial class Rf69 : RhSpiDriver
         if (syncWords.Length > 4)
             throw new ArgumentException($"{nameof(SetSyncWords)}: syncWords must be 1 to 4 octets long.");
 
-        var syncConfig = ReadFrom(REG_2E_SYNCCONFIG);
+        var syncConfig = ReadFrom(Reg2eSyncConfig);
         if (syncWords.Length is >= 1 and <= 4)
         {
-            BurstWriteTo(REG_2F_SYNCVALUE1, syncWords);
+            BurstWriteTo(Reg2fSyncValue1, syncWords);
             syncConfig |= SYNCCONFIG_SYNCON;
         }
         else
@@ -619,7 +619,7 @@ public partial class Rf69 : RhSpiDriver
 
         syncConfig &= InvertByte(SYNCCONFIG_SYNCSIZE);
         syncConfig |= (byte)((syncWords.Length - 1) << 3);
-        WriteTo(REG_2E_SYNCCONFIG, syncConfig);
+        WriteTo(Reg2eSyncConfig, syncConfig);
     }
 
     /// <summary>
@@ -633,13 +633,13 @@ public partial class Rf69 : RhSpiDriver
     {
         if (key.Length == 16)
         {
-            BurstWriteTo(REG_3E_AESKEY1, key);
+            BurstWriteTo(Reg3eAesKey1, key);
 
-            WriteTo(REG_3D_PACKETCONFIG2, (byte)(ReadFrom(REG_3D_PACKETCONFIG2) | PACKETCONFIG2_AESON));
+            WriteTo(Reg3dPacketConfig2, (byte)(ReadFrom(Reg3dPacketConfig2) | PACKETCONFIG2_AESON));
         }
         else if (key.Length == 0)
         {
-            WriteTo(REG_3D_PACKETCONFIG2, (byte)(ReadFrom(REG_3D_PACKETCONFIG2) & ~PACKETCONFIG2_AESON));
+            WriteTo(Reg3dPacketConfig2, (byte)(ReadFrom(Reg3dPacketConfig2) & ~PACKETCONFIG2_AESON));
         }
         else
         {
@@ -676,7 +676,7 @@ public partial class Rf69 : RhSpiDriver
     {
         if (Mode != Rh69Modes.Sleep)
         {
-            WriteTo(REG_01_OPMODE, OPMODE_MODE_SLEEP);
+            WriteTo(Reg01OpMode, OPMODE_MODE_SLEEP);
             Mode = Rh69Modes.Sleep;
         }
 
@@ -685,7 +685,7 @@ public partial class Rf69 : RhSpiDriver
 
     /// <summary>
     /// Return the integer value of the device type as read from the device in from
-    /// REG_10_VERSION.  Expect 0x24, depending on the type of device actually connected.
+    /// Reg10Version.  Expect 0x24, depending on the type of device actually connected.
     /// </summary>
     /// <returns>The integer device type</returns>
     public ushort DeviceType() { return _deviceType; }

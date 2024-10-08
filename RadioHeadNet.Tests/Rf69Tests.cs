@@ -51,24 +51,24 @@ public class Rf69Tests
     public void TemperatureRead()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_4E_TEMP1, 0xFF);
-        _registers.DoAfterWrite(Rf69.REG_4E_TEMP1,
-            _ => { _registers.Poke(Rf69.REG_4E_TEMP1, 0x04); });
-        _registers.DoAfterRead(Rf69.REG_4E_TEMP1,
+        _registers.Poke(Rf69.Reg4eTemp1, 0xFF);
+        _registers.DoAfterWrite(Rf69.Reg4eTemp1,
+            _ => { _registers.Poke(Rf69.Reg4eTemp1, 0x04); });
+        _registers.DoAfterRead(Rf69.Reg4eTemp1,
             (count) =>
             {
                 if (count >= 3)
-                    _registers.Poke(Rf69.REG_4E_TEMP1, 0x00);
+                    _registers.Poke(Rf69.Reg4eTemp1, 0x00);
             });
-        _registers.Poke(Rf69.REG_4F_TEMP2, 165);
+        _registers.Poke(Rf69.Reg4fTemp2, 165);
 
         // ACT:
         var actual = _radio.TemperatureRead();
 
         // ASSERT:
-        Assert.That(_registers.WriteCount(Rf69.REG_4E_TEMP1), Is.EqualTo(1));
-        Assert.That(_registers.ReadCount(Rf69.REG_4E_TEMP1), Is.GreaterThanOrEqualTo(1));
-        Assert.That(_registers.ReadCount(Rf69.REG_4F_TEMP2), Is.EqualTo(1));
+        Assert.That(_registers.WriteCount(Rf69.Reg4eTemp1), Is.EqualTo(1));
+        Assert.That(_registers.ReadCount(Rf69.Reg4eTemp1), Is.GreaterThanOrEqualTo(1));
+        Assert.That(_registers.ReadCount(Rf69.Reg4fTemp2), Is.EqualTo(1));
         Assert.That(actual, Is.EqualTo(1));
     }
 
@@ -79,15 +79,15 @@ public class Rf69Tests
     public void SetModeIdleDefault()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_01_OPMODE, 0xFF);
+        _registers.Poke(Rf69.Reg01OpMode, 0xFF);
 
         // ACT:
         _radio.SetModeIdle();
 
         // ASSERT:
-        Assert.That(_registers.ReadCount(Rf69.REG_01_OPMODE), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_01_OPMODE) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_STDBY));
-        Assert.That(_registers.ReadCount(Rf69.REG_27_IRQFLAGS1), Is.GreaterThan(0));
+        Assert.That(_registers.ReadCount(Rf69.Reg01OpMode), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg01OpMode) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_STDBY));
+        Assert.That(_registers.ReadCount(Rf69.Reg27IrqFlags1), Is.GreaterThan(0));
     }
 
     // GIVEN: an instance of the Rf69 class who's idle-mode has been set
@@ -98,16 +98,16 @@ public class Rf69Tests
     public void SetModeIdle(byte idleMode)
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_01_OPMODE, 0xFF);
+        _registers.Poke(Rf69.Reg01OpMode, 0xFF);
         _radio.SetIdleMode(idleMode);
 
         // ACT:
         _radio.SetModeIdle();
 
         // ASSERT:
-        Assert.That(_registers.ReadCount(Rf69.REG_01_OPMODE), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_01_OPMODE) & 0b00011100, Is.EqualTo(idleMode));
-        Assert.That(_registers.ReadCount(Rf69.REG_27_IRQFLAGS1), Is.GreaterThan(0));
+        Assert.That(_registers.ReadCount(Rf69.Reg01OpMode), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg01OpMode) & 0b00011100, Is.EqualTo(idleMode));
+        Assert.That(_registers.ReadCount(Rf69.Reg27IrqFlags1), Is.GreaterThan(0));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -117,19 +117,19 @@ public class Rf69Tests
     public void SetModeRx()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_01_OPMODE, 0xFF);
+        _registers.Poke(Rf69.Reg01OpMode, 0xFF);
 
         // ACT:
         _radio.SetModeRx();
 
         // ASSERT:
-        Assert.That(_registers.ReadCount(Rf69.REG_01_OPMODE), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_01_OPMODE) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_RX));
+        Assert.That(_registers.ReadCount(Rf69.Reg01OpMode), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg01OpMode) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_RX));
 
-        Assert.That(_registers.ReadCount(Rf69.REG_27_IRQFLAGS1), Is.GreaterThan(0));
+        Assert.That(_registers.ReadCount(Rf69.Reg27IrqFlags1), Is.GreaterThan(0));
 
-        Assert.That(_registers.WriteCount(Rf69.REG_25_DIOMAPPING1), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_25_DIOMAPPING1), Is.EqualTo(Rf69.DIOMAPPING1_DIO0MAPPING_01));
+        Assert.That(_registers.WriteCount(Rf69.Reg25DioMapping1), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg25DioMapping1), Is.EqualTo(Rf69.DIOMAPPING1_DIO0MAPPING_01));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -139,15 +139,15 @@ public class Rf69Tests
     public void SetModeTx()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_01_OPMODE, 0xFF);
+        _registers.Poke(Rf69.Reg01OpMode, 0xFF);
 
         // ACT:
         _radio.SetModeTx();
 
         // ASSERT:
-        Assert.That(_registers.ReadCount(Rf69.REG_01_OPMODE), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_01_OPMODE) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_TX));
-        Assert.That(_registers.ReadCount(Rf69.REG_27_IRQFLAGS1), Is.GreaterThan(0));
+        Assert.That(_registers.ReadCount(Rf69.Reg01OpMode), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg01OpMode) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_TX));
+        Assert.That(_registers.ReadCount(Rf69.Reg27IrqFlags1), Is.GreaterThan(0));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -157,13 +157,13 @@ public class Rf69Tests
     public void Sleep()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_01_OPMODE, 0xFF);
+        _registers.Poke(Rf69.Reg01OpMode, 0xFF);
 
         // ACT:
         _radio.Sleep();
 
         // ASSERT:
-        Assert.That(_registers.Peek(Rf69.REG_01_OPMODE) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_SLEEP));
+        Assert.That(_registers.Peek(Rf69.Reg01OpMode) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_SLEEP));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -173,22 +173,22 @@ public class Rf69Tests
     public void SetFrequency()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_07_FRFMSB, 0xFF);
-        _registers.Poke(Rf69.REG_08_FRFMID, 0xFF);
-        _registers.Poke(Rf69.REG_09_FRFLSB, 0xFF);
+        _registers.Poke(Rf69.Reg07FrfMsb, 0xFF);
+        _registers.Poke(Rf69.Reg08FrfMid, 0xFF);
+        _registers.Poke(Rf69.Reg09FrfLsb, 0xFF);
 
         // ACT:
         _radio.SetFrequency(915.0f);
 
         // ASSERT:
-        Assert.That(_registers.WriteCount(Rf69.REG_07_FRFMSB), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_07_FRFMSB), Is.EqualTo(0xE4));
+        Assert.That(_registers.WriteCount(Rf69.Reg07FrfMsb), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg07FrfMsb), Is.EqualTo(0xE4));
 
-        Assert.That(_registers.WriteCount(Rf69.REG_08_FRFMID), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_08_FRFMID), Is.EqualTo(0xC0));
+        Assert.That(_registers.WriteCount(Rf69.Reg08FrfMid), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg08FrfMid), Is.EqualTo(0xC0));
 
-        Assert.That(_registers.WriteCount(Rf69.REG_09_FRFLSB), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_09_FRFLSB), Is.EqualTo(0x00));
+        Assert.That(_registers.WriteCount(Rf69.Reg09FrfLsb), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg09FrfLsb), Is.EqualTo(0x00));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -207,14 +207,14 @@ public class Rf69Tests
     public void SetTxPowerForHighPowered(sbyte powerLevel, byte expected)
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_11_PALEVEL, 0xFF);
+        _registers.Poke(Rf69.Reg11PaLevel, 0xFF);
 
         // ACT:
         _radio.SetTxPower(powerLevel, true);
 
         // ASSERT:
-        Assert.That(_registers.WriteCount(Rf69.REG_11_PALEVEL), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_11_PALEVEL), Is.EqualTo(expected));
+        Assert.That(_registers.WriteCount(Rf69.Reg11PaLevel), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg11PaLevel), Is.EqualTo(expected));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -229,14 +229,14 @@ public class Rf69Tests
     public void SetTxPowerForNormalPower(sbyte powerLevel, byte expected)
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_11_PALEVEL, 0xFF);
+        _registers.Poke(Rf69.Reg11PaLevel, 0xFF);
 
         // ACT:
         _radio.SetTxPower(powerLevel, false);
 
         // ASSERT:
-        Assert.That(_registers.WriteCount(Rf69.REG_11_PALEVEL), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_11_PALEVEL), Is.EqualTo(expected));
+        Assert.That(_registers.WriteCount(Rf69.Reg11PaLevel), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg11PaLevel), Is.EqualTo(expected));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -251,11 +251,11 @@ public class Rf69Tests
     public void SetSyncWordsLength1To4(byte byte1, byte? byte2, byte? byte3, byte? byte4, byte expected)
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_2E_SYNCCONFIG, 0x00);
-        _registers.Poke(Rf69.REG_2F_SYNCVALUE1 + 0, 0xFF);
-        _registers.Poke(Rf69.REG_2F_SYNCVALUE1 + 1, 0xFF);
-        _registers.Poke(Rf69.REG_2F_SYNCVALUE1 + 2, 0xFF);
-        _registers.Poke(Rf69.REG_2F_SYNCVALUE1 + 3, 0xFF);
+        _registers.Poke(Rf69.Reg2eSyncConfig, 0x00);
+        _registers.Poke(Rf69.Reg2fSyncValue1 + 0, 0xFF);
+        _registers.Poke(Rf69.Reg2fSyncValue1 + 1, 0xFF);
+        _registers.Poke(Rf69.Reg2fSyncValue1 + 2, 0xFF);
+        _registers.Poke(Rf69.Reg2fSyncValue1 + 3, 0xFF);
 
         var syncWordList = new List<byte> { byte1 };
         if (byte2 != null) syncWordList.Add(byte2.Value);
@@ -267,13 +267,13 @@ public class Rf69Tests
         _radio.SetSyncWords(syncWords);
 
         // ASSERT:
-        Assert.That(_registers.WriteCount(Rf69.REG_2E_SYNCCONFIG), Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_2E_SYNCCONFIG), Is.EqualTo(expected));
+        Assert.That(_registers.WriteCount(Rf69.Reg2eSyncConfig), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg2eSyncConfig), Is.EqualTo(expected));
 
         for (var i = 0; i < syncWords.Length; i++)
         {
-            Assert.That(_registers.WriteCount((byte)(Rf69.REG_2F_SYNCVALUE1 + i)), Is.EqualTo(1));
-            Assert.That(_registers.Peek((byte)(Rf69.REG_2F_SYNCVALUE1 + i)), Is.EqualTo(syncWords[i]));
+            Assert.That(_registers.WriteCount((byte)(Rf69.Reg2fSyncValue1 + i)), Is.EqualTo(1));
+            Assert.That(_registers.Peek((byte)(Rf69.Reg2fSyncValue1 + i)), Is.EqualTo(syncWords[i]));
         }
     }
 
@@ -306,7 +306,7 @@ public class Rf69Tests
         _radio.SetSyncWords(syncWords);
 
         // ASSERT:
-        Assert.That(_registers.Peek((Rf69.REG_2E_SYNCCONFIG & 0x80)) >> 7, Is.EqualTo(0));
+        Assert.That(_registers.Peek((Rf69.Reg2eSyncConfig & 0x80)) >> 7, Is.EqualTo(0));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -316,8 +316,8 @@ public class Rf69Tests
     public void SetPreambleLength()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_2C_PREAMBLEMSB, 0xFF);
-        _registers.Poke(Rf69.REG_2D_PREAMBLELSB, 0xFF);
+        _registers.Poke(Rf69.Reg2cPreambleMsb, 0xFF);
+        _registers.Poke(Rf69.Reg2dPreambleLsb, 0xFF);
 
         const ushort length = 257;
 
@@ -325,8 +325,8 @@ public class Rf69Tests
         _radio.SetPreambleLength(length);
 
         // ASSERT:
-        Assert.That(_registers.Peek(Rf69.REG_2C_PREAMBLEMSB), Is.EqualTo((byte)(length >> 8)));
-        Assert.That(_registers.Peek(Rf69.REG_2D_PREAMBLELSB), Is.EqualTo((byte)(length & 0xFF)));
+        Assert.That(_registers.Peek(Rf69.Reg2cPreambleMsb), Is.EqualTo((byte)(length >> 8)));
+        Assert.That(_registers.Peek(Rf69.Reg2dPreambleLsb), Is.EqualTo((byte)(length & 0xFF)));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -337,9 +337,9 @@ public class Rf69Tests
     public void SetEncryptionKeyLength16()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_3D_PACKETCONFIG2, 0x00);
+        _registers.Poke(Rf69.Reg3dPacketConfig2, 0x00);
         for (var i = 0; i < 16; i++)
-            _registers.Poke((byte)(Rf69.REG_3E_AESKEY1 + i), 0xFF);
+            _registers.Poke((byte)(Rf69.Reg3eAesKey1 + i), 0xFF);
 
         byte[] key = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 
@@ -347,9 +347,9 @@ public class Rf69Tests
         _radio.SetEncryptionKey(key);
 
         // ASSERT:
-        Assert.That(_registers.Peek(Rf69.REG_3D_PACKETCONFIG2) & 0x01, Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.Reg3dPacketConfig2) & 0x01, Is.EqualTo(1));
         for (var i = 0; i < 16; i++)
-            Assert.That(_registers.Peek((byte)(Rf69.REG_3E_AESKEY1 + i)), Is.EqualTo(key[i]));
+            Assert.That(_registers.Peek((byte)(Rf69.Reg3eAesKey1 + i)), Is.EqualTo(key[i]));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -359,7 +359,7 @@ public class Rf69Tests
     public void SetEncryptionKeyLength0()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_3D_PACKETCONFIG2, 0xFF);
+        _registers.Poke(Rf69.Reg3dPacketConfig2, 0xFF);
 
         byte[] key = [];
 
@@ -367,7 +367,7 @@ public class Rf69Tests
         _radio.SetEncryptionKey(key);
 
         // ASSERT:
-        Assert.That(_registers.Peek(Rf69.REG_3D_PACKETCONFIG2) & 0x01, Is.EqualTo(0));
+        Assert.That(_registers.Peek(Rf69.Reg3dPacketConfig2) & 0x01, Is.EqualTo(0));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -404,16 +404,16 @@ public class Rf69Tests
 
         var actual = new List<byte>();
 
-        _registers.DoAfterWrite(Rf69.REG_00_FIFO, _ =>
+        _registers.DoAfterWrite(Rf69.Reg00Fifo, _ =>
             {
                 // record each byte written to the FIFO register
-                actual.Add(_registers.Peek(Rf69.REG_00_FIFO));
+                actual.Add(_registers.Peek(Rf69.Reg00Fifo));
             });
 
-        _registers.DoOnRead(Rf69.REG_28_IRQFLAGS2, _ =>
+        _registers.DoOnRead(Rf69.Reg28IrqFlags2, _ =>
             {
                 // simulate the packet sent flag being set after the 3rd the flag is read
-                _registers.Poke(Rf69.REG_28_IRQFLAGS2, Rf69.IRQFLAGS2_PACKETSENT);
+                _registers.Poke(Rf69.Reg28IrqFlags2, Rf69.IRQFLAGS2_PACKETSENT);
             });
 
         // ACT:
@@ -427,7 +427,7 @@ public class Rf69Tests
         Assert.That(result, Is.True);
         Assert.That(actual, Is.EqualTo(expected));
         Assert.That(_radio.TxGood, Is.EqualTo(1));
-        Assert.That(_registers.Peek(Rf69.REG_01_OPMODE), Is.Not.EqualTo(Rf69.OPMODE_MODE_TX));
+        Assert.That(_registers.Peek(Rf69.Reg01OpMode), Is.Not.EqualTo(Rf69.OPMODE_MODE_TX));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -493,7 +493,7 @@ public class Rf69Tests
         const byte expectedFlags = 0xDD;
 
         // RSSI value is -(170/2) = -85 dBm
-        _registers.Poke(Rf69.REG_24_RSSIVALUE, 170);
+        _registers.Poke(Rf69.Reg24RssiValue, 170);
 
         byte[] expectedData = [1, 2, 3, 4];
 
@@ -564,7 +564,7 @@ public class Rf69Tests
     public void PollAvailablePacketReceived()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_28_IRQFLAGS2, Rf69.IRQFLAGS2_PAYLOADREADY);
+        _registers.Poke(Rf69.Reg28IrqFlags2, Rf69.IRQFLAGS2_PAYLOADREADY);
 
         _radio.Init();
 
@@ -583,7 +583,7 @@ public class Rf69Tests
     public void PollAvailableNoPackedReceived()
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_28_IRQFLAGS2, 0x00);
+        _registers.Poke(Rf69.Reg28IrqFlags2, 0x00);
 
         _radio.Init();
 
@@ -597,14 +597,14 @@ public class Rf69Tests
     private void MockReceiveData(byte[] dataPacket)
     {
         var pkgIdx = 0;
-        _registers.DoOnRead(Rf69.REG_00_FIFO, _ =>
+        _registers.DoOnRead(Rf69.Reg00Fifo, _ =>
         {
-            _registers.Poke(Rf69.REG_00_FIFO, dataPacket[pkgIdx++]);
+            _registers.Poke(Rf69.Reg00Fifo, dataPacket[pkgIdx++]);
         });
 
         // simulate the receiver updating the IRQFLAGS2 register to indicate a data
         // packed was received
-        _registers.Poke(Rf69.REG_28_IRQFLAGS2, Rf69.IRQFLAGS2_PAYLOADREADY);
+        _registers.Poke(Rf69.Reg28IrqFlags2, Rf69.IRQFLAGS2_PAYLOADREADY);
     }
 
     private byte[] BuildPacket(byte[] data,
