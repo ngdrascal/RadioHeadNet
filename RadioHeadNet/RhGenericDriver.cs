@@ -18,7 +18,7 @@ namespace RadioHeadNet;
 /// <para>Headers</para>
 ///
 /// Each message sent and received by a RadioHead driver includes 4 headers:
-/// -TO The node address that the message is being sent to (broadcast BROADCAST_ADDRESS (255) is permitted)
+/// -TO The node address that the message is being sent to (broadcast BroadcastAddress (255) is permitted)
 /// -FROM The node address of the sending node
 /// -ID A message ID, distinct (over short time scales) for each message sent by a particular node
 /// -FLAGS A bitmask of flags. The most significant 4 bits are reserved for use by RadioHead. The least
@@ -38,9 +38,9 @@ public abstract class RhGenericDriver
     protected RhGenericDriver()
     {
         Mode = Rh69Modes.Initialising;
-        ThisAddress = RadioHead.BROADCAST_ADDRESS;
-        TxHeaderTo = RadioHead.BROADCAST_ADDRESS;
-        TxHeaderFrom = RadioHead.BROADCAST_ADDRESS;
+        ThisAddress = RadioHead.BroadcastAddress;
+        TxHeaderTo = RadioHead.BroadcastAddress;
+        TxHeaderFrom = RadioHead.BroadcastAddress;
         TxHeaderId = 0;
         TxHeaderFlags = 0;
         Promiscuous = false;

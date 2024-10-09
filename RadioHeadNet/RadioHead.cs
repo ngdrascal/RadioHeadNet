@@ -1,9 +1,7 @@
-﻿// ReSharper disable InconsistentNaming
-
-namespace RadioHeadNet
+﻿namespace RadioHeadNet
 {
     internal abstract class RadioHead
     {
-        public const byte BROADCAST_ADDRESS = 0xFF;
+        public const byte BroadcastAddress = 0xFF;
     }
 }
