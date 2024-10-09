@@ -130,10 +130,8 @@ public abstract class RhGenericDriver
     /// </summary>
     public virtual bool WaitPacketSent()
     {
-        {
-            while (Mode == Rh69Modes.Tx)
-                Thread.Yield();
-        }
+        while (Mode == Rh69Modes.Tx)
+            Thread.Yield();
         return true;
     }
 

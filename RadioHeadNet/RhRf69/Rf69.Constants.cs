@@ -136,11 +136,11 @@ public partial class Rf69
     private const byte RSSICONFIG_RSSISTART = 0x01;
 
     // REG_25_DioMapping1                                          
-    private const byte DIOMAPPING1_DIO0MAPPING = 0xC0;
-    private const byte DIOMAPPING1_DIO0MAPPING_00 = 0x00;
+    internal const byte DIOMAPPING1_DIO0MAPPING = 0xC0;
+    internal const byte DIOMAPPING1_DIO0MAPPING_00 = 0x00;
     internal const byte DIOMAPPING1_DIO0MAPPING_01 = 0x40;
     private const byte DIOMAPPING1_DIO0MAPPING_10 = 0x80;
-    private const byte DIOMAPPING1_DIO0MAPPING_11 = 0xc0;
+    private const byte DIOMAPPING1_DIO0MAPPING_11 = 0xC0;
 
     private const byte DIOMAPPING1_DIO1MAPPING = 0x30;
     private const byte DIOMAPPING1_DIO1MAPPING_00 = 0x00;
@@ -152,7 +152,7 @@ public partial class Rf69
     private const byte DIOMAPPING1_DIO2MAPPING_00 = 0x00;
     private const byte DIOMAPPING1_DIO2MAPPING_01 = 0x04;
     private const byte DIOMAPPING1_DIO2MAPPING_10 = 0x08;
-    private const byte DIOMAPPING1_DIO2MAPPING_11 = 0x0c;
+    private const byte DIOMAPPING1_DIO2MAPPING_11 = 0x0C;
 
     private const byte DIOMAPPING1_DIO3MAPPING = 0x03;
     private const byte DIOMAPPING1_DIO3MAPPING_00 = 0x00;
@@ -184,7 +184,7 @@ public partial class Rf69
     private const byte DIOMAPPING2_CLKOUT_FXOSC_OFF = 0x07;
 
     // REG_27_IrqFlags1                                            
-    private const byte IRQFLAGS1_MODEREADY = 0x80;
+    internal const byte IRQFLAGS1_MODEREADY = 0x80;
     private const byte IRQFLAGS1_RXREADY = 0x40;
     private const byte IRQFLAGS1_TXREADY = 0x20;
     private const byte IRQFLAGS1_PLLLOCK = 0x10;
@@ -270,12 +270,12 @@ public partial class Rf69
     private const byte TEMP1_TEMPMEASRUNNING = 0x04;
 
     // REG_5A_TestPa1                                              
-    private const byte TESTPA1_NORMAL = 0x55;
-    private const byte TESTPA1_BOOST = 0x5D;
+    internal const byte TESTPA1_NORMAL = 0x55;
+    internal const byte TESTPA1_BOOST = 0x5D;
 
     // REG_5C_TestPa2                                              
-    private const byte TESTPA2_NORMAL = 0x70;
-    private const byte TESTPA2_BOOST = 0x7C;
+    internal const byte TESTPA2_NORMAL = 0x70;
+    internal const byte TESTPA2_BOOST = 0x7C;
 
     // REG_6F_TestDagc                                             
     private const byte TESTDAGC_CONTINUOUSDAGC_NORMAL = 0x00;

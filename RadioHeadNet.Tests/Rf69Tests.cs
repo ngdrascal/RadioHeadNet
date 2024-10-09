@@ -15,6 +15,11 @@ public class Rf69Tests
     private Rf69 _radio;
     private GpioPin _interruptPin;
 
+    private static byte InvertByte(byte input)
+    {
+        return (byte)~input;
+    }
+
     [SetUp]
     public void Setup()
     {
@@ -45,6 +50,43 @@ public class Rf69Tests
     }
 
     // GIVEN: an instance of the Rf69 class
+    //        AND the radio is not initialized
+    //        AND the radio's device type is not supported
+    // WHEN: Init() is call
+    // THEN: return false
+    [Test]
+    public void Init()
+    {
+        // ARRANGE:
+        const byte deviceType = 0xFF;
+        _registers.Poke(Rf69.REG_10_Version, deviceType);
+
+        // ACT:
+        var actual = _radio.Init();
+
+        // ASSERT:
+        Assert.That(actual, Is.False);
+    }
+
+    // GIVEN: an instance of the Rf69 class
+    // WHEN: the DeviceType property is read
+    // THEN: the correct device type is returned
+    [Test]
+    public void DeviceType()
+    {
+        // ARRANGE:
+        const byte expected = 0xAA;
+        _registers.Poke(Rf69.REG_10_Version, expected);
+        _ = _radio.Init();
+
+        // ACT:
+        var actual = _radio.DeviceType;
+
+        // ASSERT:
+        Assert.That(actual, Is.EqualTo(expected));
+    }
+
+    // GIVEN: an instance of the Rf69 class
     // WHEN: TemperatureRead() is called
     // THEN: the temperature registers are read
     [Test]
@@ -72,82 +114,109 @@ public class Rf69Tests
         Assert.That(actual, Is.EqualTo(1));
     }
 
-    // GIVEN: an instance of the Rf69 class who's idle-mode has not been set
+    // GIVEN: an instance of the Rf69 class
+    //        AND SetIdleMode() has not been called
     // WHEN: SetModeIdle() is called
-    // THEN: the OpMode register's mode bits should be set to standby
+    // THEN: the OpMode register's mode bits equal STANDBY
+    //       AND the power mode is set to normal
     [Test]
     public void SetModeIdleDefault()
     {
         // ARRANGE:
         _registers.Poke(Rf69.REG_01_OpMode, 0xFF);
+        _radio.SetTxPower(20, true);
 
         // ACT:
         _radio.SetModeIdle();
 
         // ASSERT:
-        Assert.That(_registers.ReadCount(Rf69.REG_01_OpMode), Is.EqualTo(1));
         Assert.That(_registers.Peek(Rf69.REG_01_OpMode) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_STDBY));
-        Assert.That(_registers.ReadCount(Rf69.REG_27_IrqFlags1), Is.GreaterThan(0));
+        Assert.That(_registers.Peek(Rf69.REG_5A_TestPa1), Is.EqualTo(Rf69.TESTPA1_NORMAL));
+        Assert.That(_registers.Peek(Rf69.REG_5C_TestPa2), Is.EqualTo(Rf69.TESTPA2_NORMAL));
     }
 
-    // GIVEN: an instance of the Rf69 class who's idle-mode has been set
+    // GIVEN: an instance of the Rf69 class
+    //        AND SetIdleMode() was called
     // WHEN: SetModeIdle() is called
-    // THEN: the OpMode register's mode bits should be set according to the idle-mode
+    // THEN: the OpMode register's mode bits should be set correctly
+    //       AND the power mode is set to normal
     [TestCase(Rf69.OPMODE_MODE_SLEEP)]
     [TestCase(Rf69.OPMODE_MODE_STDBY)]
     public void SetModeIdle(byte idleMode)
     {
         // ARRANGE:
-        _registers.Poke(Rf69.REG_01_OpMode, 0xFF);
+        _registers.Poke(Rf69.REG_01_OpMode, InvertByte(Rf69.IRQFLAGS1_MODEREADY));
+        _registers.Poke(Rf69.REG_5A_TestPa1, Rf69.TESTPA1_BOOST);
+        _registers.Poke(Rf69.REG_5C_TestPa2, Rf69.TESTPA2_BOOST);
+
+        _radio.SetTxPower(20, true);
+
+        _registers.DoOnRead(Rf69.REG_27_IrqFlags1, count =>
+        {
+            // return the ModeReady flag set after the 3rd read
+            _registers.Poke(Rf69.REG_27_IrqFlags1, count <= 3 ?
+                (byte)0 : Rf69.IRQFLAGS1_MODEREADY);
+        });
+
         _radio.SetIdleMode(idleMode);
 
         // ACT:
         _radio.SetModeIdle();
 
         // ASSERT:
-        Assert.That(_registers.ReadCount(Rf69.REG_01_OpMode), Is.EqualTo(1));
         Assert.That(_registers.Peek(Rf69.REG_01_OpMode) & 0b00011100, Is.EqualTo(idleMode));
-        Assert.That(_registers.ReadCount(Rf69.REG_27_IrqFlags1), Is.GreaterThan(0));
+        Assert.That(_registers.Peek(Rf69.REG_5A_TestPa1), Is.EqualTo(Rf69.TESTPA1_NORMAL));
+        Assert.That(_registers.Peek(Rf69.REG_5C_TestPa2), Is.EqualTo(Rf69.TESTPA2_NORMAL));
     }
 
     // GIVEN: an instance of the Rf69 class
     // WHEN: SetModeRx() is called
-    // THEN: the OpMode register's mode bits should be set correctly
+    // THEN: the OpMode register's mode bits equal RX
+    //       AND the power mode is set to normal
+    //       AND interrupt line 0 is set to PAYLOADREADY
     [Test]
     public void SetModeRx()
     {
         // ARRANGE:
         _registers.Poke(Rf69.REG_01_OpMode, 0xFF);
+        _registers.Poke(Rf69.REG_5A_TestPa1, Rf69.TESTPA1_BOOST);
+        _registers.Poke(Rf69.REG_5C_TestPa2, Rf69.TESTPA2_BOOST);
+
+        _radio.SetTxPower(20, true);
 
         // ACT:
         _radio.SetModeRx();
 
         // ASSERT:
-        Assert.That(_registers.ReadCount(Rf69.REG_01_OpMode), Is.EqualTo(1));
         Assert.That(_registers.Peek(Rf69.REG_01_OpMode) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_RX));
-
-        Assert.That(_registers.ReadCount(Rf69.REG_27_IrqFlags1), Is.GreaterThan(0));
-
-        Assert.That(_registers.WriteCount(Rf69.REG_25_DioMapping1), Is.EqualTo(1));
+        Assert.That(_registers.Peek(Rf69.REG_5A_TestPa1), Is.EqualTo(Rf69.TESTPA1_NORMAL));
+        Assert.That(_registers.Peek(Rf69.REG_5C_TestPa2), Is.EqualTo(Rf69.TESTPA2_NORMAL));
         Assert.That(_registers.Peek(Rf69.REG_25_DioMapping1), Is.EqualTo(Rf69.DIOMAPPING1_DIO0MAPPING_01));
     }
 
     // GIVEN: an instance of the Rf69 class
     // WHEN: SetModeTx() is called
-    // THEN: the OpMode register's mode bits should be set correctly
+    // THEN: the OpMode register's mode bits equal TX
+    //       AND the power mode is set to BOOST
+    //       AND interrupt line 0 is set to PACKETSENT
     [Test]
     public void SetModeTx()
     {
         // ARRANGE:
         _registers.Poke(Rf69.REG_01_OpMode, 0xFF);
+        _registers.Poke(Rf69.REG_5A_TestPa1, Rf69.TESTPA1_NORMAL);
+        _registers.Poke(Rf69.REG_5C_TestPa2, Rf69.TESTPA2_NORMAL);
+
+        _radio.SetTxPower(20, true);
 
         // ACT:
         _radio.SetModeTx();
 
         // ASSERT:
-        Assert.That(_registers.ReadCount(Rf69.REG_01_OpMode), Is.EqualTo(1));
         Assert.That(_registers.Peek(Rf69.REG_01_OpMode) & 0b00011100, Is.EqualTo(Rf69.OPMODE_MODE_TX));
-        Assert.That(_registers.ReadCount(Rf69.REG_27_IrqFlags1), Is.GreaterThan(0));
+        Assert.That(_registers.Peek(Rf69.REG_5A_TestPa1), Is.EqualTo(Rf69.TESTPA1_BOOST));
+        Assert.That(_registers.Peek(Rf69.REG_5C_TestPa2), Is.EqualTo(Rf69.TESTPA2_BOOST));
+        Assert.That(_registers.Peek(Rf69.REG_25_DioMapping1), Is.EqualTo(Rf69.DIOMAPPING1_DIO0MAPPING_00));
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -178,7 +247,7 @@ public class Rf69Tests
         _registers.Poke(Rf69.REG_09_FrfLsb, 0xFF);
 
         // ACT:
-        _radio.SetFrequency(915.0f);
+        _ = _radio.SetFrequency(915.0f);
 
         // ASSERT:
         Assert.That(_registers.WriteCount(Rf69.REG_07_FrfMsb), Is.EqualTo(1));
@@ -446,7 +515,6 @@ public class Rf69Tests
 
         // ASSERT:
         Assert.That(result, Is.False);
-
     }
 
     // GIVEN: an instance of the Rf69 class
@@ -649,6 +717,7 @@ public class Rf69Tests
 
         // ACT:
         _radio.WaitAvailable(pollDelay);
+
         // ASSERT:
         Assert.Pass();
     }
@@ -707,4 +776,20 @@ public class Rf69Tests
         Assert.That(result, Is.False);
     }
 
+    // GIVEN: an instance of the Rf69 class
+    //        AND the radio is not in Tx mode
+    // WHEN: WaitPacketSent() is called
+    // THEN: return true
+    [Test]
+    public void WaitPacketSend()
+    {
+        // ARRANGE:
+        _radio.Init();
+
+        // ACT:
+        var actual = _radio.WaitPacketSent(100);
+
+        // ASSERT:
+        Assert.That(actual, Is.True);
+    }
 }

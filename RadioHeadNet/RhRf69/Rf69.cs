@@ -19,11 +19,11 @@ public partial class Rf69 : RhSpiDriver
     /// The selected output power in dBm
     private sbyte _power;
 
-    /// The message length in _buf
-    private byte _bufLen;
+    /// The message length in _rxBuf
+    private byte _rxBufLen;
 
     /// Array of octets of the last received message or the next to transmit message
-    private readonly byte[] _buf = new byte[MAX_MESSAGE_LEN];
+    private readonly byte[] _rxBuf = new byte[MAX_MESSAGE_LEN];
 
     /// True when there is a valid message in the Rx buffer
     private bool _rxBufValid;
@@ -72,7 +72,7 @@ public partial class Rf69 : RhSpiDriver
         // Get the device type and check it. This also tests whether we are really
         // connected to a device.  My test devices return 0x24.
         _deviceType = ReadFrom(REG_10_Version);
-        if (_deviceType is 00 or 0xff)
+        if (_deviceType is 0x00 or 0xFF)
             return false;
 
         SetModeIdle();
@@ -143,6 +143,7 @@ public partial class Rf69 : RhSpiDriver
     {
         // Get the interrupt cause
         var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
+
         _logger.LogTrace("-->{0}(): mode={1}, IrqFlags2={2}", nameof(HandleInterrupt), Mode.ToString(), irqFlags2.ToString());
 
         if (Mode == Rh69Modes.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
@@ -167,6 +168,8 @@ public partial class Rf69 : RhSpiDriver
             // save it in our buffer
             ReadFifo();
         }
+
+        _logger.LogTrace("<--{0}()", nameof(HandleInterrupt));
     }
 
     // Low level function reads the FIFO and checks the address
@@ -194,8 +197,8 @@ public partial class Rf69 : RhSpiDriver
                     RxHeaderFlags = ReadByte();
 
                     // and now the real payload
-                    for (_bufLen = 0; _bufLen < (payloadLen - HEADER_LEN); _bufLen++)
-                        _buf[_bufLen] = ReadByte();
+                    for (_rxBufLen = 0; _rxBufLen < (payloadLen - HEADER_LEN); _rxBufLen++)
+                        _rxBuf[_rxBufLen] = ReadByte();
 
                     RxGood++;
                     _rxBufValid = true;
@@ -247,8 +250,6 @@ public partial class Rf69 : RhSpiDriver
         WriteTo(REG_08_FrfMid, (byte)((frf >> 8) & 0xFF));
         WriteTo(REG_09_FrfLsb, (byte)(frf & 0xFF));
 
-        // afcPullInRange is not used
-        // (void)afcPullInRange;
         return true;
     }
 
@@ -328,8 +329,9 @@ public partial class Rf69 : RhSpiDriver
                 WriteTo(REG_5C_TestPa2, TESTPA2_NORMAL);
             }
 
-            // Set interrupt line 0 PayloadReady
+            // Set interrupt line 0 PAYLOADREADY
             WriteTo(REG_25_DioMapping1, DIOMAPPING1_DIO0MAPPING_01);
+
             SetOpMode(OPMODE_MODE_RX); // Clears FIFO
             Mode = Rh69Modes.Rx;
         }
@@ -350,7 +352,9 @@ public partial class Rf69 : RhSpiDriver
                 WriteTo(REG_5C_TestPa2, TESTPA2_BOOST);
             }
 
-            WriteTo(REG_25_DioMapping1, DIOMAPPING1_DIO0MAPPING_00); // Set interrupt line 0 PacketSent
+            // Set interrupt line 0 PACKETSENT
+            WriteTo(REG_25_DioMapping1, DIOMAPPING1_DIO0MAPPING_00);
+            
             SetOpMode(OPMODE_MODE_TX); // Clears FIFO
             Mode = Rh69Modes.Tx;
         }
@@ -488,10 +492,10 @@ public partial class Rf69 : RhSpiDriver
             return false;
         }
 
-        buffer = new byte[_bufLen];
+        buffer = new byte[_rxBufLen];
         lock (CriticalSection)
         {
-            Array.Copy(_buf, buffer, _bufLen);
+            Array.Copy(_rxBuf, buffer, _rxBufLen);
             _rxBufValid = false; // Got the most recent message
         }
 
@@ -657,9 +661,13 @@ public partial class Rf69 : RhSpiDriver
     /// 
     /// </summary>
     /// <param name="idleMode"></param>
+    /// <exception cref="ArgumentException"></exception>
     public void SetIdleMode(byte idleMode)
     {
-        _idleMode = idleMode;
+        if (idleMode is OPMODE_MODE_SLEEP or OPMODE_MODE_STDBY)
+            _idleMode = idleMode;
+        else
+            throw new ArgumentException("Only SLEEP and STANDBY modes allowed", nameof(idleMode));
     }
 
     /// <summary>
@@ -684,6 +692,5 @@ public partial class Rf69 : RhSpiDriver
     /// Return the integer value of the device type as read from the device in from
     /// REG_10_Version.  Expect 0x24, depending on the type of device actually connected.
     /// </summary>
-    /// <returns>The integer device type</returns>
-    public ushort DeviceType() { return _deviceType; }
+    public byte DeviceType => _deviceType;
 }

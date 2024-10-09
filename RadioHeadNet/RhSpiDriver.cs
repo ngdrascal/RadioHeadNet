@@ -6,25 +6,25 @@ namespace RadioHeadNet;
 /// <summary>
 /// Base class for RadioHead drivers that use the SPI bus to communicate with its
 /// transport hardware.
-///
+/// <para>
 /// This class can be subclassed by Drivers that require to use the SPI bus. It can be
 /// configured to use either the RHHardwareSPI class (if there is one Available on the
 /// platform) of the bit-banged RHSoftwareSPI class. The default behaviour is to use a
-/// pre-instantiated built-in RHHardwareSPI  interface.
-///
+/// pre-instantiated built-in RHHardwareSPI  interface.</para>
+/// <para>
 /// SPI bus access is protected by ATOMIC_BLOCK_START and ATOMIC_BLOCK_END, which will
-/// ensure interrupts  are disabled during access.
-/// 
+/// ensure interrupts  are disabled during access.</para>
+/// <para>
 /// The read and write routines implement commonly used SPI conventions: specifically
 /// that the MSB of the first byte transmitted indicates that it is a write operation
-/// and the remaining bits indicate the register to access.
-/// 
+/// and the remaining bits indicate the register to access.</para>
+/// <para>
 /// This can be overriden  in subclasses if necessary or an alternative class,
 /// RNRFSPIDriver can be used to access devices like Nordic NRF series radios, which
-/// have different requirements.
-///
+/// have different requirements.</para>
+/// <para>
 /// Application developers are not expected to instantiate this class directly: 
-/// it is for the use of Driver developers.
+/// it is for the use of Driver developers.</para>
 /// </summary>
 public abstract class RhSpiDriver : RhGenericDriver
 {
