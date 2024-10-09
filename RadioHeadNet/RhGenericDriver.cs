@@ -103,7 +103,7 @@ public abstract class RhGenericDriver
     /// Returns the maximum message length available in this driver.
     /// </summary>
     /// <returns>The maximum legal message length</returns>
-    public abstract byte MaxMessageLength();
+    public abstract byte MaxMessageLength { get; }
 
     /// <summary>
     /// Starts the receiver and blocks until a valid received message is available.

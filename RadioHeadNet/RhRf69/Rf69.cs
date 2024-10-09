@@ -543,7 +543,7 @@ public partial class Rf69 : RhSpiDriver
     /// transmit</returns>
     public override bool Send(byte[] data)
     {
-        if (data.Length > MAX_MESSAGE_LEN)
+        if (data.Length > MaxMessageLength)
             return false;
 
         WaitPacketSent();  // Make sure we don't interrupt an outgoing message
@@ -651,11 +651,7 @@ public partial class Rf69 : RhSpiDriver
     /// <summary>
     /// The maximum message length supported by this driver
     /// </summary>
-    /// <returns>The maximum message length supported by this driver</returns>
-    public override byte MaxMessageLength()
-    {
-        return MAX_MESSAGE_LEN;
-    }
+    public override byte MaxMessageLength => MAX_MESSAGE_LEN;
 
     /// <summary>
     /// 
