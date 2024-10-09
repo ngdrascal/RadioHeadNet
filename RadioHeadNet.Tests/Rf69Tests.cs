@@ -608,8 +608,8 @@ public class Rf69Tests
     }
 
     private byte[] BuildPacket(byte[] data,
-        byte toAddress = RadioHead.RH_BROADCAST_ADDRESS,
-        byte fromAddress = RadioHead.RH_BROADCAST_ADDRESS,
+        byte toAddress = RadioHead.BROADCAST_ADDRESS,
+        byte fromAddress = RadioHead.BROADCAST_ADDRESS,
         byte headerId = 0x00,
         byte headerFlags = 0x00)
     {

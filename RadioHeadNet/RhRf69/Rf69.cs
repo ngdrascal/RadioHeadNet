@@ -186,7 +186,7 @@ public partial class Rf69 : RhSpiDriver
                 // check the address
                 if (Promiscuous ||
                     RxHeaderTo == ThisAddress ||
-                    RxHeaderTo == RadioHead.RH_BROADCAST_ADDRESS)
+                    RxHeaderTo == RadioHead.BROADCAST_ADDRESS)
                 {
                     // get the rest of the headers
                     RxHeaderFrom = ReadByte();
