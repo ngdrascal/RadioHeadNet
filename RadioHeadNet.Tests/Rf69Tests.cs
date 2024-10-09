@@ -779,7 +779,7 @@ public class Rf69Tests
     // GIVEN: an instance of the Rf69 class
     //        AND the radio is not in Tx mode
     // WHEN: WaitPacketSent() is called
-    // THEN: return true
+    // THEN: returns true
     [Test]
     public void WaitPacketSend()
     {
@@ -791,5 +791,23 @@ public class Rf69Tests
 
         // ASSERT:
         Assert.That(actual, Is.True);
+    }
+
+    // GIVEN: an instance of the Rf69 class
+    // WHEN: RssiRead() is called
+    // THEN:
+    [Test]
+    public void RssiRead()
+    {
+        // ARRANGE:
+        const sbyte expected = -32;
+        var regValue = (byte)(expected * -2);
+        _registers.Poke(Rf69.REG_24_RssiValue, regValue);
+        
+        // ACT:
+        var actual = _radio.RssiRead();
+
+        // ASSERT:
+        Assert.That(actual, Is.EqualTo(expected));
     }
 }
