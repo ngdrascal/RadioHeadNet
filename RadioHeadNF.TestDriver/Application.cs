@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Threading;
+using System.Device;
 using System.Device.Gpio;
+using System.Diagnostics;
 using RadioHeadNF.RhRf69;
 
 namespace RadioHeadNF.TestDriver
@@ -22,18 +23,33 @@ namespace RadioHeadNF.TestDriver
 
         public void Run()
         {
+            Debug.WriteLine("Resetting radio ...");
             ResetRadio();
-            ConfigureRadio();
 
+            Debug.WriteLine("Configuring radio ...");
+            if (!ConfigureRadio())
+            {
+                Debug.WriteLine("Configuring radio failed!");
+                return;
+            }
+
+            Debug.WriteLine("Sending data ...");
             SendData(12.3f, 4.56f, 7.8f);
 
+            Debug.WriteLine("Polling for data ...");
             if (_radio.PollAvailable(5000))
             {
                 _radio.Receive(out var receivedData);
                 var temp = BitConverter.ToSingle(receivedData, 0);
                 var hum = BitConverter.ToSingle(receivedData, 4);
                 var vol = BitConverter.ToSingle(receivedData, 8);
-                Console.WriteLine($"{temp} C, {hum} %RH, {vol} V");
+                Debug.WriteLine($"{temp} C, {hum} %RH, {vol} V");
+            }
+            else
+                Debug.WriteLine("Timed out waiting for data!");
+
+            while (true)
+            {
             }
         }
 
@@ -52,11 +68,23 @@ namespace RadioHeadNF.TestDriver
             _radio.SetModeIdle();
         }
 
-        private void ConfigureRadio()
+        private bool ConfigureRadio()
         {
-            _radio.Init();
+            if (!_radio.Init())
+            {
+                Debug.WriteLine("RadioHead init failed");
+                return false;
+            }
+
             _radio.SetTxPower(_power, true);
-            _radio.SetFrequency(_frequency);
+
+
+            if (_radio.SetFrequency(_frequency))
+                return true;
+
+            Debug.WriteLine("set frequency failed");
+            return false;
+
         }
 
         private void ResetRadio()
@@ -64,10 +92,10 @@ namespace RadioHeadNF.TestDriver
             _resetPin.Write(PinValue.Low);
 
             _resetPin.Write(PinValue.High);
-            Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            DelayHelper.DelayMicroseconds(10, false);
 
             _resetPin.Write(PinValue.Low);
-            Thread.Sleep(TimeSpan.FromMilliseconds(5));
+            DelayHelper.DelayMilliseconds(5, false);
         }
     }
 }

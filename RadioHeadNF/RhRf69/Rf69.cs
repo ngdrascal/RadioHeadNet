@@ -37,7 +37,7 @@ namespace RadioHeadNF.RhRf69
 
         /// <summary>
         /// Constructor. You can have multiple instances, but each instance must have its own
-        /// interrupt and slave select pin. After constructing, you must call Init() to
+        /// interrupt and device select pin. After constructing, you must call Init() to
         /// initialise the interface and the radio module. A maximum of 3 instances can
         /// co-exist on one processor, provided there are sufficient distinct interrupt lines,
         /// one for each instance.
@@ -55,7 +55,7 @@ namespace RadioHeadNF.RhRf69
         /// <summary>
         /// Initialises this instance and the radio module connected to it.
         /// The following steps are taken:
-        /// - Initialise the slave select pin and the SPI interface library
+        /// - Initialise the device select pin and the SPI interface library
         /// - Checks the connected RF69 module can be communicated
         /// - Attaches an interrupt handler
         /// - Configures the RF69 module
@@ -274,7 +274,7 @@ namespace RadioHeadNF.RhRf69
         /// <summary>
         /// Sets the parameters for the RF69 OPMODE.
         /// This is a low level device access function and should not normally need to be used by user code. 
-        /// Instead, can use stModeRx(), setModeTx(), setModeIdle()
+        /// Instead, can use setModeRx(), setModeTx(), setModeIdle()
         /// </summary>
         /// <param name="mode">Mode RF69 OPMODE to set, one of OPMODEMode_*.</param>
         private void SetOpMode(byte mode)
