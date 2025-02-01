@@ -17,6 +17,10 @@ Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "RadioHeadNF.TestDriver", "R
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NanoFramework", "NanoFramework", "{B099FDE5-0FA9-4FFA-974F-5E8BC5AB2112}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analysis", "Analysis", "{A6AFF2B5-9B19-4016-8F04-1B16DA512089}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rf69CaptureAnalyzer", "Rf69CaptureAnalyzer\Rf69CaptureAnalyzer.csproj", "{5906CE97-42DA-4CA4-8922-0225971844CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,10 @@ Global
 		{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{5906CE97-42DA-4CA4-8922-0225971844CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5906CE97-42DA-4CA4-8922-0225971844CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5906CE97-42DA-4CA4-8922-0225971844CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5906CE97-42DA-4CA4-8922-0225971844CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +66,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A55DC3E6-D5F2-4FE1-BF78-A78ABC911E87} = {B099FDE5-0FA9-4FFA-974F-5E8BC5AB2112}
 		{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0} = {B099FDE5-0FA9-4FFA-974F-5E8BC5AB2112}
+		{5906CE97-42DA-4CA4-8922-0225971844CF} = {A6AFF2B5-9B19-4016-8F04-1B16DA512089}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {04E1449A-3F2D-41F1-BBBE-2A8F099CB48E}

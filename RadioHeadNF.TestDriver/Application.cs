@@ -90,9 +90,10 @@ namespace RadioHeadNF.TestDriver
         private void ResetRadio()
         {
             _resetPin.Write(PinValue.Low);
+            DelayHelper.DelayMilliseconds(5, false);
 
             _resetPin.Write(PinValue.High);
-            DelayHelper.DelayMicroseconds(10, false);
+            DelayHelper.DelayMicroseconds(100, false);
 
             _resetPin.Write(PinValue.Low);
             DelayHelper.DelayMilliseconds(5, false);
