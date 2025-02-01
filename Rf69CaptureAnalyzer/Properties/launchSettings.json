@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Rf69CaptureAnalyzer": {
+      "commandName": "Project",
+      "commandLineArgs": "--file \"C:\\Users\\rickd\\Downloads\\NF_RF69_Capture.csv\""
+    }
+  }
+}
