@@ -15,14 +15,7 @@ internal class Application(Analyzer analyzer)
 
         foreach (var instruction in analyzer.Instructions)
         {
-            var opMnemonic = instruction.Operation.ToString()[0];
-            var sb = new StringBuilder($"{opMnemonic}: {instruction.RegisterName, -14}");
-            foreach (var data in instruction.Data)
-            {
-                sb.Append($" {data.ToString("X2")}");
-            }
-
-            Console.WriteLine(sb.ToString());
+            Console.WriteLine(instruction.Print());
         }
     }
 

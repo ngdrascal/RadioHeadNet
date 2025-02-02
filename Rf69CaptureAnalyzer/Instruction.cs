@@ -10,6 +10,7 @@ internal class Instruction(byte commandValue)
     }
 
     public Operations Operation => commandValue.OperationOf();
+    public Registers Register => (Registers)commandValue.RegisterAddress();
     public string RegisterName => commandValue.RegisterNameOf();
     public byte RegisterAddress => commandValue.RegisterAddress();
     public byte[] Data => _data.ToArray();
