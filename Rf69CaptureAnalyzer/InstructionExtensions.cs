@@ -2,7 +2,7 @@
 
 namespace Rf69CaptureAnalyzer;
 
-internal static class InstructionExtension
+internal static class InstructionExtensions
 {
     public static string Print(this Instruction instruction)
     {
