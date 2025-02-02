@@ -2,18 +2,18 @@
 
 internal class ResultState(Analyzer analyzer, State state) : State(analyzer, state)
 {
-    public override State ProcessRecord(RecordType recordType, byte? mosi, byte? miso)
+    public override State ProcessRecord(RecordTypes recordTypes, byte? mosi, byte? miso)
     {
-        switch (recordType)
+        switch (recordTypes)
         {
-            case RecordType.Result when !miso.HasValue:
+            case RecordTypes.Result when !miso.HasValue:
                 return new ErrorState(Analyzer, this);
 
-            case RecordType.Result:
+            case RecordTypes.Result:
                 Instructions[^1].AddData(miso.Value);
 
                 return this;
-            case RecordType.Disabled:
+            case RecordTypes.Disabled:
                 return new DisabledState(Analyzer, this);
 
             default:

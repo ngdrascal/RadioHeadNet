@@ -16,7 +16,7 @@ internal abstract class State
         Instructions = new List<Instruction>();
     }
 
-    public abstract State ProcessRecord(RecordType recordType, byte? mosi, byte? miso);
+    public abstract State ProcessRecord(RecordTypes recordTypes, byte? mosi, byte? miso);
 
     public List<Instruction> Instructions { get; }
 }

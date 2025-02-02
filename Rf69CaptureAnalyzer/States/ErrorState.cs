@@ -2,7 +2,7 @@
 
 internal class ErrorState(Analyzer analyzer, State state) : State(analyzer, state)
 {
-    public override State ProcessRecord(RecordType recordType, byte? mosi, byte? miso)
+    public override State ProcessRecord(RecordTypes recordTypes, byte? mosi, byte? miso)
     {
         return this;
     }

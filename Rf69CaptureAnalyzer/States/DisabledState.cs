@@ -2,9 +2,9 @@
 
 internal class DisabledState(Analyzer analyzer, State state) : State(analyzer, state)
 {
-    public override State ProcessRecord(RecordType recordType, byte? mosi, byte? miso)
+    public override State ProcessRecord(RecordTypes recordTypes, byte? mosi, byte? miso)
     {
-        if (recordType == RecordType.Enabled)
+        if (recordTypes == RecordTypes.Enabled)
         {
             return new EnabledState(Analyzer, this);
         }

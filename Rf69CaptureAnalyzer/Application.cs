@@ -6,7 +6,7 @@ internal class Application(Analyzer analyzer)
 {
     public void Run(FileStream fileStream, ParseOptions options)
     {
-        var fileData = ParseFile(fileStream, options);
+        var fileData = CsvFileParser.Parse(fileStream, options);
 
         foreach (var row in fileData)
         {
@@ -19,21 +19,5 @@ internal class Application(Analyzer analyzer)
         }
     }
 
-    private static List<(RecordType recordType, byte? Mosi, byte? Miso)> ParseFile(FileStream fileStream, ParseOptions options)
-    {
-        var data = new List<(RecordType RecordType, byte? Mosi, byte? Miso)>();
 
-        using StreamReader sr = new(fileStream);
-        if (!sr.EndOfStream)
-            sr.ReadLine(); // Skip header
-
-        while (!sr.EndOfStream)
-        {
-            var line = sr.ReadLine() ?? string.Empty;
-            var (recordType, mosi, miso) = line.ParseLine(options);
-            data.Add((recordType, mosi, miso));
-        }
-
-        return data;
-    }
 }
