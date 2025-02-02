@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Rf69CaptureAnalyzer;
+﻿namespace Rf69CaptureAnalyzer;
 
 internal class Application(Analyzer analyzer)
 {
@@ -18,6 +16,4 @@ internal class Application(Analyzer analyzer)
             Console.WriteLine(instruction.Print());
         }
     }
-
-
 }

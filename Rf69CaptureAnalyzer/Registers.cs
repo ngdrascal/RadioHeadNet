@@ -117,5 +117,4 @@ internal enum Registers : byte
     TestDagc,
     Unused70,
     TestAfc
-
 };
