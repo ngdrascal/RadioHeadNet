@@ -5,7 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>RF69TestDriver</RootNamespace>
+    <RootNamespace>RadioHeadIot.TestDriver</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

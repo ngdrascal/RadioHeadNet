@@ -3,23 +3,32 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadioHeadIOT", "RadioHeadIOT\RadioHeadIOT.csproj", "{0D4175D3-DAF7-4C55-B067-CC686796AEFB}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadioHeadIOT.Tests", "RadioHeadIOT.Tests\RadioHeadIOT.Tests.csproj", "{D31D2A5B-D0C0-45CF-BC97-7B7B21435DD0}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTestLogger", "UnitTestLogger\UnitTestLogger.csproj", "{AD5B9CAD-5C2E-4320-B0AE-1347C7A970F7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIOT.TestDriver", "RadioHeadIOT.TestDriver\RadioHeadIOT.TestDriver.csproj", "{CF3C23A9-C157-4A8B-8F05-4B3412A80891}"
-EndProject
-Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "RadioHeadNF", "RadioHeadNF\RadioHeadNF.nfproj", "{A55DC3E6-D5F2-4FE1-BF78-A78ABC911E87}"
-EndProject
-Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "RadioHeadNF.TestDriver", "RadioHeadNF.TestDriver\RadioHeadNF.TestDriver.nfproj", "{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NanoFramework", "NanoFramework", "{B099FDE5-0FA9-4FFA-974F-5E8BC5AB2112}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analysis", "Analysis", "{A6AFF2B5-9B19-4016-8F04-1B16DA512089}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rf69CaptureAnalyzer", "Rf69CaptureAnalyzer\Rf69CaptureAnalyzer.csproj", "{5906CE97-42DA-4CA4-8922-0225971844CF}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IOT", "IOT", "{D0D59772-536A-40AA-8A58-C285CDEDBFF4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rf69CaptureAnalyzer", "Analyzer\Rf69CaptureAnalyzer\Rf69CaptureAnalyzer.csproj", "{6B30BFE5-8A2A-42DB-B349-4660E143F841}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{0B01122C-57B5-404A-8931-89ABD515ED9C}"
+	ProjectSection(SolutionItems) = preProject
+		Analyzer\TestData\Arduino_RF69_Capture.csv = Analyzer\TestData\Arduino_RF69_Capture.csv
+		Analyzer\TestData\IOT_RF69_Capture.csv = Analyzer\TestData\IOT_RF69_Capture.csv
+		Analyzer\TestData\NF_RF69_Capture.csv = Analyzer\TestData\NF_RF69_Capture.csv
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIOT", "IOT\RadioHeadIOT\RadioHeadIOT.csproj", "{1D79C9A1-AF6F-4545-872C-5F525EE161BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIOT.TestDriver", "IOT\RadioHeadIOT.TestDriver\RadioHeadIOT.TestDriver.csproj", "{FAB44B01-C9E5-4636-8105-5205BEF64B7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIOT.Tests", "IOT\RadioHeadIOT.Tests\RadioHeadIOT.Tests.csproj", "{7FCF834E-6752-45B5-89D5-4574CBA8B4A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestLogger", "IOT\UnitTestLogger\UnitTestLogger.csproj", "{03067821-494E-45CA-B85F-67C2168863F2}"
+EndProject
+Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "RadioHeadNF", "NanoFramework\RadioHeadNF\RadioHeadNF.nfproj", "{A55DC3E6-D5F2-4FE1-BF78-A78ABC911E87}"
+EndProject
+Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "RadioHeadNF.TestDriver", "NanoFramework\RadioHeadNF.TestDriver\RadioHeadNF.TestDriver.nfproj", "{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,22 +36,26 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0D4175D3-DAF7-4C55-B067-CC686796AEFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0D4175D3-DAF7-4C55-B067-CC686796AEFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0D4175D3-DAF7-4C55-B067-CC686796AEFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0D4175D3-DAF7-4C55-B067-CC686796AEFB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D31D2A5B-D0C0-45CF-BC97-7B7B21435DD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D31D2A5B-D0C0-45CF-BC97-7B7B21435DD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D31D2A5B-D0C0-45CF-BC97-7B7B21435DD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D31D2A5B-D0C0-45CF-BC97-7B7B21435DD0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AD5B9CAD-5C2E-4320-B0AE-1347C7A970F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AD5B9CAD-5C2E-4320-B0AE-1347C7A970F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AD5B9CAD-5C2E-4320-B0AE-1347C7A970F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AD5B9CAD-5C2E-4320-B0AE-1347C7A970F7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CF3C23A9-C157-4A8B-8F05-4B3412A80891}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CF3C23A9-C157-4A8B-8F05-4B3412A80891}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CF3C23A9-C157-4A8B-8F05-4B3412A80891}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CF3C23A9-C157-4A8B-8F05-4B3412A80891}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B30BFE5-8A2A-42DB-B349-4660E143F841}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B30BFE5-8A2A-42DB-B349-4660E143F841}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B30BFE5-8A2A-42DB-B349-4660E143F841}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B30BFE5-8A2A-42DB-B349-4660E143F841}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D79C9A1-AF6F-4545-872C-5F525EE161BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D79C9A1-AF6F-4545-872C-5F525EE161BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D79C9A1-AF6F-4545-872C-5F525EE161BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D79C9A1-AF6F-4545-872C-5F525EE161BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAB44B01-C9E5-4636-8105-5205BEF64B7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAB44B01-C9E5-4636-8105-5205BEF64B7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAB44B01-C9E5-4636-8105-5205BEF64B7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAB44B01-C9E5-4636-8105-5205BEF64B7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FCF834E-6752-45B5-89D5-4574CBA8B4A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FCF834E-6752-45B5-89D5-4574CBA8B4A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FCF834E-6752-45B5-89D5-4574CBA8B4A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FCF834E-6752-45B5-89D5-4574CBA8B4A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03067821-494E-45CA-B85F-67C2168863F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03067821-494E-45CA-B85F-67C2168863F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03067821-494E-45CA-B85F-67C2168863F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03067821-494E-45CA-B85F-67C2168863F2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A55DC3E6-D5F2-4FE1-BF78-A78ABC911E87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A55DC3E6-D5F2-4FE1-BF78-A78ABC911E87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A55DC3E6-D5F2-4FE1-BF78-A78ABC911E87}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
@@ -55,18 +68,19 @@ Global
 		{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{5906CE97-42DA-4CA4-8922-0225971844CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5906CE97-42DA-4CA4-8922-0225971844CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5906CE97-42DA-4CA4-8922-0225971844CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5906CE97-42DA-4CA4-8922-0225971844CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{6B30BFE5-8A2A-42DB-B349-4660E143F841} = {A6AFF2B5-9B19-4016-8F04-1B16DA512089}
+		{0B01122C-57B5-404A-8931-89ABD515ED9C} = {A6AFF2B5-9B19-4016-8F04-1B16DA512089}
+		{1D79C9A1-AF6F-4545-872C-5F525EE161BF} = {D0D59772-536A-40AA-8A58-C285CDEDBFF4}
+		{FAB44B01-C9E5-4636-8105-5205BEF64B7B} = {D0D59772-536A-40AA-8A58-C285CDEDBFF4}
+		{7FCF834E-6752-45B5-89D5-4574CBA8B4A8} = {D0D59772-536A-40AA-8A58-C285CDEDBFF4}
+		{03067821-494E-45CA-B85F-67C2168863F2} = {D0D59772-536A-40AA-8A58-C285CDEDBFF4}
 		{A55DC3E6-D5F2-4FE1-BF78-A78ABC911E87} = {B099FDE5-0FA9-4FFA-974F-5E8BC5AB2112}
 		{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0} = {B099FDE5-0FA9-4FFA-974F-5E8BC5AB2112}
-		{5906CE97-42DA-4CA4-8922-0225971844CF} = {A6AFF2B5-9B19-4016-8F04-1B16DA512089}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {04E1449A-3F2D-41F1-BBBE-2A8F099CB48E}

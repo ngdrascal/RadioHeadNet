@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace RadioHeadNet.Tests;
+namespace RadioHeadIot.Tests;
 
 [ExcludeFromCodeCoverage]
 internal static class ByteExtensions

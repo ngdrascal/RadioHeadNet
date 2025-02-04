@@ -1,8 +1,8 @@
 ﻿using System.Device.Gpio;
 using System.Diagnostics.CodeAnalysis;
-using RadioHeadNet.RhRf69;
+using Rf69 = RadioHeadIot.RhRf69.Rf69;
 
-namespace RF69TestDriver;
+namespace RadioHeadIot.TestDriver;
 
 [ExcludeFromCodeCoverage]
 internal class Application

@@ -2,7 +2,7 @@
 using System.Device.Gpio;
 using System.Diagnostics.CodeAnalysis;
 
-namespace RadioHeadNet.Tests;
+namespace RadioHeadIot.Tests;
 
 /// <summary>
 /// GPIO driver for the unit testing

@@ -1,15 +1,15 @@
-﻿using Iot.Device.FtCommon;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Device.Gpio;
+﻿using System.Device.Gpio;
 using System.Device.Spi;
+using System.Diagnostics.CodeAnalysis;
 using Iot.Device.Board;
 using Iot.Device.Common;
+using Iot.Device.FtCommon;
 using Microsoft.Extensions.Configuration;
-using System.Diagnostics.CodeAnalysis;
-using RadioHeadNet.RhRf69;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Rf69 = RadioHeadIot.RhRf69.Rf69;
 
-namespace RF69TestDriver;
+namespace RadioHeadIot.TestDriver;
 
 [ExcludeFromCodeCoverage]
 internal static class Program

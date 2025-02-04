@@ -3,7 +3,7 @@ using System.Device.Spi;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace RadioHeadNet.RhRf69;
+namespace RadioHeadIot.RhRf69;
 
 public partial class Rf69 : RhSpiDriver
 {
@@ -47,7 +47,7 @@ public partial class Rf69 : RhSpiDriver
     public Rf69(GpioPin deviceSelectPin, SpiDevice spi, ILoggerFactory loggerFactory)
         : base(deviceSelectPin, spi)
     {
-        _logger = loggerFactory.CreateLogger<Rf69>();
+        _logger = loggerFactory.CreateLogger<RadioHeadIot.RhRf69.Rf69>();
         _idleMode = OPMODE_MODE_STDBY;
     }
 

@@ -2,7 +2,7 @@
 
 using System.Diagnostics;
 
-namespace RadioHeadNet;
+namespace RadioHeadIot;
 
 /// <summary>
 /// Abstract base class for a RadioHead driver.

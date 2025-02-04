@@ -2,10 +2,10 @@ using System.Device.Gpio;
 using System.Device.Spi;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
-using RadioHeadNet.RhRf69;
+using RadioHeadIot.RhRf69;
 using UnitTestLogger;
 
-namespace RadioHeadNet.Tests;
+namespace RadioHeadIot.Tests;
 
 [TestFixture, ExcludeFromCodeCoverage]
 public class Rf69Tests

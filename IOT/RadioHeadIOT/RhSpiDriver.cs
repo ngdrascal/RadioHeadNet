@@ -1,7 +1,7 @@
 ﻿using System.Device.Gpio;
 using System.Device.Spi;
 
-namespace RadioHeadNet;
+namespace RadioHeadIot;
 
 /// <summary>
 /// Base class for RadioHead drivers that use the SPI bus to communicate with its

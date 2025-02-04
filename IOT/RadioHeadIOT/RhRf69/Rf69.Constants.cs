@@ -4,7 +4,7 @@
 // ReSharper disable IdentifierTypo
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace RadioHeadNet.RhRf69;
+namespace RadioHeadIot.RhRf69;
 
 public partial class Rf69
 {

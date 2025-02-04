@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Device.Gpio;
+﻿using System.Device.Gpio;
 using System.Device.Spi;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 
-namespace RadioHeadNet.Tests;
+namespace RadioHeadIot.Tests;
 
 [ExcludeFromCodeCoverage]
 internal class SpiDeviceFake : SpiDevice

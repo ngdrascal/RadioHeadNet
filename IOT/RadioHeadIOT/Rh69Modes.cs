@@ -1,4 +1,4 @@
-﻿namespace RadioHeadNet;
+﻿namespace RadioHeadIot;
 
 /// <summary>
 /// These are the different values that can be adopted by the _mode variable and 
