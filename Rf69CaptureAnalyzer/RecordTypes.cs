@@ -1,3 +1,3 @@
 ﻿namespace Rf69CaptureAnalyzer;
 
-internal enum RecordTypes { Disabled, Enabled, Result }
+internal enum RecordTypes { Disabled, Enabled, Result, Error }

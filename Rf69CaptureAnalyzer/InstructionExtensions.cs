@@ -1,58 +1,71 @@
 ﻿using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Rf69CaptureAnalyzer;
 
 internal static class InstructionExtensions
 {
+    private static readonly Dictionary<Registers, int[]> Formats = new()
+    {
+        { Registers.OpMode, [1, 1, 1, 3, 2] },                // 0x01
+        { Registers.PaLevel, [1, 1, 1, 5] },                  // 0x17
+        { Registers.RxBw, [1, 1, 3, 3] },                     // 0x19
+        { Registers.AfcBw, [3, 2, 3] },                       // 0x1A
+        { Registers.IrqFlags1, [1, 1, 1, 1, 1, 1, 1, 1] },    // 0x27
+        { Registers.SyncConfig, [1, 1, 3, 3] },               // 0x2E
+        { Registers.PacketConfig1, [1, 2, 1, 1, 2, 1] },      // 0x37
+        { Registers.FifoThresh, [1, 7]},                      // 0x3c
+        { Registers.PacketConfig2, [4, 1, 1, 1, 1]},          // 0x3D
+    };
+
     public static string Print(this Instruction instruction)
     {
         var opMnemonic = instruction.Operation.ToString()[0];
         var sb = new StringBuilder($"{opMnemonic}: {instruction.RegisterName,-14}");
-        foreach (var data in instruction.Data)
+
+        sb.Append(PrintData(instruction.Register, instruction.Data[0]));
+
+        var burstReg = instruction.Register;
+        foreach (var data in instruction.Data[1..])
         {
-            switch (instruction.Register)
-            {
-                case Registers.OpMode:
-                    sb.Append($" {data.AsOpMode()}");
-                    break;
-                case Registers.IrqFlags1:
-                    sb.Append($" {data.AsIrqFlags1()}");
-                    break;
-                default:
-                    sb.Append($" {data:X2}");
-                    break;
-            }
+            if (instruction.Register != Registers.Fifo)
+               burstReg += 1;
+            sb.Append(PrintData(burstReg, data));
         }
 
         return sb.ToString();
     }
 
-    private static string AsOpMode(this byte miso)
+    private static string PrintData(Registers register, byte value)
     {
-        var binary = Convert.ToString(miso, 2).PadLeft(8, '0');
+        var sb = new StringBuilder();
+        if (Formats.TryGetValue(register, out var format0))
+            sb.Append(value.AsBitFields(format0));
+        else
+            sb.Append($" {value:X2}");
 
-        var sequenceOff = binary[..1];
-        var listenOn = binary.Substring(1, 1);
-        var listenAbort = binary.Substring(2, 1);
-        var mode = binary.Substring(3, 3);
-        var unused = binary.Substring(6, 2);
-
-        return $"[{sequenceOff} {listenOn} {listenAbort} {mode} {unused}]";
+        return sb.ToString();
     }
 
-    private static string AsIrqFlags1(this byte miso)
+    private static string AsBitFields(this byte value, int[] sizes)
     {
-        var binary = Convert.ToString(miso, 2).PadLeft(8, '0');
+        if (sizes.Sum() != 8)
+            throw new ArgumentException("The sum of the sizes must be 8.", nameof(sizes));
 
-        var modeReady = binary.Substring(0, 1);
-        var rxReady = binary.Substring(1, 1);
-        var txReady = binary.Substring(2, 1);
-        var pllLock = binary.Substring(3, 1);
-        var rssi = binary.Substring(4, 1);
-        var timeout = binary.Substring(5, 1);
-        var autoMode = binary.Substring(6, 1);
-        var syncAddressMatch = binary.Substring(7, 1);
+        var binary = Convert.ToString(value, 2).PadLeft(8, '0');
+        var sb = new StringBuilder(" [");
 
-        return $"[{modeReady} {rxReady} {txReady} {pllLock} {rssi} {timeout} {autoMode} {syncAddressMatch}]";
+        var startIndex = 0;
+        var bitStrings = new List<string>();
+        foreach (var size in sizes)
+        {
+            bitStrings.Add(binary.Substring(startIndex, size));
+            startIndex += size;
+        }
+
+        sb.AppendJoin(' ', bitStrings);
+        sb.Append(']');
+
+        return sb.ToString();
     }
 }

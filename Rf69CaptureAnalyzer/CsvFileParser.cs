@@ -45,6 +45,7 @@ internal static class CsvFileParser
             "disable" => RecordTypes.Disabled,
             "enable" => RecordTypes.Enabled,
             "result" => RecordTypes.Result,
+            "error" => RecordTypes.Error,
             _ => throw new InvalidOperationException($"Unrecognized record type: {(string.IsNullOrEmpty(str) ? "<null>" : str)}")
 
         };

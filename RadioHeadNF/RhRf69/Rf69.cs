@@ -547,7 +547,7 @@ namespace RadioHeadNF.RhRf69
         /// transmit</returns>
         public override bool Send(byte[] data)
         {
-            if (data.Length > MaxMessageLength)
+            if (data!.Length > MaxMessageLength)
                 return false;
 
             WaitPacketSent(); // Make sure we don't interrupt an outgoing message

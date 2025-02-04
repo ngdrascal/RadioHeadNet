@@ -2,7 +2,7 @@
   "profiles": {
     "Rf69CaptureAnalyzer": {
       "commandName": "Project",
-      "commandLineArgs": "--file ..\\..\\..\\TestData\\Arduino_RF69_Capture.csv"
+      "commandLineArgs": "--file ..\\..\\..\\TestData\\IOT_RF69_Capture.csv"
     }
   }
 }
