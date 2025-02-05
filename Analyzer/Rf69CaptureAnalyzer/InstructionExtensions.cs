@@ -12,6 +12,7 @@ internal static class InstructionExtensions
         { Registers.RxBw, [1, 1, 3, 3] },                     // 0x19
         { Registers.AfcBw, [3, 2, 3] },                       // 0x1A
         { Registers.IrqFlags1, [1, 1, 1, 1, 1, 1, 1, 1] },    // 0x27
+        { Registers.IrqFlags2, [1, 1, 1, 1, 1, 1, 1, 1] },    // 0x28
         { Registers.SyncConfig, [1, 1, 3, 3] },               // 0x2E
         { Registers.PacketConfig1, [1, 2, 1, 1, 2, 1] },      // 0x37
         { Registers.FifoThresh, [1, 7]},                      // 0x3c
