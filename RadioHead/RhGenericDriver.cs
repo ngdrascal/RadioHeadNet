@@ -5,7 +5,7 @@ using System.Device;
 using System.Diagnostics;
 using System.Threading;
 
-namespace RadioHeadNF
+namespace RadioHead
 {
 
     /// <summary>
@@ -117,6 +117,19 @@ namespace RadioHeadNF
         /// can be useful in multitasking environment like Linux to prevent
         /// WaitAvailableTimeout using all the CPU while polling for receiver activity.
         /// </param>
+#if NETCOREAPP1_0_OR_GREATER
+        public virtual void WaitAvailable(ushort pollDelay = 0)
+        {
+            while (!Available())
+            {
+                Thread.Yield();
+                if (pollDelay != 0)
+                {
+                    Thread.Sleep(pollDelay);
+                }
+            }
+        }
+#else
         public virtual void WaitAvailable(ushort pollDelay = 0)
         {
             while (!Available())
@@ -128,16 +141,25 @@ namespace RadioHeadNF
                 }
             }
         }
-
+#endif
         /// <summary>
         /// Blocks until the transmitter is no longer transmitting.
         /// </summary>
+#if NETCOREAPP1_1_OR_GREATER
+        public virtual bool WaitPacketSent()
+        {
+            while (Mode == Rh69Modes.Tx)
+                Thread.Yield();
+            return true;
+        }
+#else
         public virtual bool WaitPacketSent()
         {
             while (Mode == Rh69Modes.Tx)
                 DelayHelper.DelayMicroseconds(0, true);
             return true;
         }
+#endif
 
         /// <summary>
         /// Blocks until the transmitter is no longer transmitting or until the timeout
@@ -147,6 +169,19 @@ namespace RadioHeadNF
         /// <returns>true if the radio completed transmission within the timeout period.
         /// False if it timed out.
         /// </returns>
+#if NETCOREAPP1_0_OR_GREATER
+        public virtual bool WaitPacketSent(ushort timeout)
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while (Mode == Rh69Modes.Tx && stopwatch.ElapsedMilliseconds < timeout)
+            {
+                Thread.Yield();
+            }
+
+            return Mode != Rh69Modes.Tx;
+        }
+#else
         public virtual bool WaitPacketSent(ushort timeout)
         {
             var stopwatch = new Stopwatch();
@@ -158,7 +193,7 @@ namespace RadioHeadNF
 
             return Mode != Rh69Modes.Tx;
         }
-
+#endif
         /// <summary>
         /// Starts the receiver and blocks until a received message is Available or a timeout.
         /// Default implementation calls Available() repeatedly until it returns true;
@@ -169,6 +204,26 @@ namespace RadioHeadNF
         /// using all the CPU while polling for receiver activity.
         /// </param>
         /// <returns>true if a message is Available</returns>
+#if NETCOREAPP1_0_OR_GREATER
+        public virtual bool WaitAvailableTimeout(ushort timeout, ushort pollDelay = 0)
+        {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            while (stopwatch.ElapsedMilliseconds < timeout)
+            {
+                if (Available())
+                {
+                    return true;
+                }
+                Thread.Yield();
+                if (pollDelay != 0)
+                {
+                    Thread.Sleep(pollDelay);
+                }
+            }
+            return false;
+        }
+#else
         public virtual bool WaitAvailableTimeout(ushort timeout, ushort pollDelay = 0)
         {
             var stopwatch = new Stopwatch();
@@ -189,7 +244,7 @@ namespace RadioHeadNF
 
             return false;
         }
-
+#endif
         // Bent G Christensen (bentor@gmail.com), 08/15/2016
         /// <summary>
         /// Channel Activity Detection (CAD).

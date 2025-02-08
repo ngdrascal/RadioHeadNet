@@ -1,7 +1,7 @@
 ﻿using System.Device.Gpio;
 using System.Device.Spi;
 
-namespace RadioHeadNF
+namespace RadioHead
 {
 
     /// <summary>

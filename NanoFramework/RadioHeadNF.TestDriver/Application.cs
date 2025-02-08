@@ -2,7 +2,7 @@
 using System.Device;
 using System.Device.Gpio;
 using System.Diagnostics;
-using RadioHeadNF.RhRf69;
+using RadioHead.RhRf69;
 
 namespace RadioHeadNF.TestDriver
 {

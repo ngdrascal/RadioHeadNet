@@ -4,9 +4,8 @@
 // ReSharper disable IdentifierTypo
 // ReSharper disable MemberCanBePrivate.Global
 
-namespace RadioHeadNF.RhRf69
+namespace RadioHead.RhRf69
 {
-
     public partial class Rf69
     {
         // The crystal oscillator frequency of the RF69 module

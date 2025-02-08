@@ -4,7 +4,7 @@ using System.Device.Spi;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace RadioHeadNF.RhRf69
+namespace RadioHead.RhRf69
 {
     public partial class Rf69 : RhSpiDriver
     {

@@ -2,7 +2,7 @@ using System.Device.Gpio;
 using System.Device.Spi;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
-using RadioHeadIot.RhRf69;
+using RadioHead.RhRf69;
 using UnitTestLogger;
 
 namespace RadioHeadIot.Tests;
@@ -676,8 +676,8 @@ public class Rf69Tests
     }
 
     private byte[] BuildPacket(byte[] data,
-        byte toAddress = RadioHead.BroadcastAddress,
-        byte fromAddress = RadioHead.BroadcastAddress,
+        byte toAddress = RadioHead.RadioHead.BroadcastAddress,
+        byte fromAddress = RadioHead.RadioHead.BroadcastAddress,
         byte headerId = 0x00,
         byte headerFlags = 0x00)
     {

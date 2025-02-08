@@ -1,4 +1,4 @@
-﻿namespace RadioHeadIot
+﻿namespace RadioHead
 {
     internal abstract class RadioHead
     {

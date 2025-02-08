@@ -7,7 +7,7 @@ using Iot.Device.FtCommon;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Rf69 = RadioHeadIot.RhRf69.Rf69;
+using Rf69 = RadioHead.RhRf69.Rf69;
 
 namespace RadioHeadIot.TestDriver;
 

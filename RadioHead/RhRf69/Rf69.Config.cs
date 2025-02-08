@@ -3,7 +3,7 @@
 // ReSharper disable UnusedMember.Global
 // ReSharper disable IdentifierTypo
 
-namespace RadioHeadNF.RhRf69
+namespace RadioHead.RhRf69
 {
     public partial class Rf69
     {
@@ -14,28 +14,28 @@ namespace RadioHeadNF.RhRf69
         // Note that I have not had much success with FSK with Fd > ~5
         // You have to construct these by hand, using the data from the RF69 Datasheet :-(
         // or use the SX1231 starter kit software (Ctl-Alt-N to use that without a connected radio)
-        private const byte CONFIG_FSK = RadioHeadNF.RhRf69.Rf69.DATAMODUL_DATAMODE_PACKET | RadioHeadNF.RhRf69.Rf69.DATAMODUL_MODULATIONTYPE_FSK |
-                                        RadioHeadNF.RhRf69.Rf69.DATAMODUL_MODULATIONSHAPING_FSK_NONE;
+        private const byte CONFIG_FSK = DATAMODUL_DATAMODE_PACKET | DATAMODUL_MODULATIONTYPE_FSK |
+                                        DATAMODUL_MODULATIONSHAPING_FSK_NONE;
 
-        private const byte CONFIG_GFSK = RadioHeadNF.RhRf69.Rf69.DATAMODUL_DATAMODE_PACKET | RadioHeadNF.RhRf69.Rf69.DATAMODUL_MODULATIONTYPE_FSK |
-                                         RadioHeadNF.RhRf69.Rf69.DATAMODUL_MODULATIONSHAPING_FSK_BT1_0;
+        private const byte CONFIG_GFSK = DATAMODUL_DATAMODE_PACKET | DATAMODUL_MODULATIONTYPE_FSK |
+                                         DATAMODUL_MODULATIONSHAPING_FSK_BT1_0;
 
-        private const byte CONFIG_OOK = RadioHeadNF.RhRf69.Rf69.DATAMODUL_DATAMODE_PACKET | RadioHeadNF.RhRf69.Rf69.DATAMODUL_MODULATIONTYPE_OOK |
-                                        RadioHeadNF.RhRf69.Rf69.DATAMODUL_MODULATIONSHAPING_OOK_NONE;
+        private const byte CONFIG_OOK = DATAMODUL_DATAMODE_PACKET | DATAMODUL_MODULATIONTYPE_OOK |
+                                        DATAMODUL_MODULATIONSHAPING_OOK_NONE;
 
         // Choices for Reg37_PacketConfig1:
-        private const byte CONFIG_NOWHITE = RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_PACKETFORMAT_VARIABLE |
-                                            RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_DCFREE_NONE | RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_CRC_ON |
-                                            RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_ADDRESSFILTERING_NONE;
+        private const byte CONFIG_NOWHITE = PACKETCONFIG1_PACKETFORMAT_VARIABLE |
+                                            PACKETCONFIG1_DCFREE_NONE | PACKETCONFIG1_CRC_ON |
+                                            PACKETCONFIG1_ADDRESSFILTERING_NONE;
 
-        private const byte CONFIG_WHITE = RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_PACKETFORMAT_VARIABLE |
-                                          RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_DCFREE_WHITENING | RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_CRC_ON |
-                                          RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_ADDRESSFILTERING_NONE;
+        private const byte CONFIG_WHITE = PACKETCONFIG1_PACKETFORMAT_VARIABLE |
+                                          PACKETCONFIG1_DCFREE_WHITENING | PACKETCONFIG1_CRC_ON |
+                                          PACKETCONFIG1_ADDRESSFILTERING_NONE;
 
-        private const byte CONFIG_MANCHESTER = RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_PACKETFORMAT_VARIABLE |
-                                               RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_DCFREE_MANCHESTER |
-                                               RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_CRC_ON |
-                                               RadioHeadNF.RhRf69.Rf69.PACKETCONFIG1_ADDRESSFILTERING_NONE;
+        private const byte CONFIG_MANCHESTER = PACKETCONFIG1_PACKETFORMAT_VARIABLE |
+                                               PACKETCONFIG1_DCFREE_MANCHESTER |
+                                               PACKETCONFIG1_CRC_ON |
+                                               PACKETCONFIG1_ADDRESSFILTERING_NONE;
 
 
         /// Defines register values for a set of modem configuration registers

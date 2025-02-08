@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using nanoFramework.Hardware.Esp32;
 using nanoFramework.Logging.Debug;
-using RadioHeadNF.RhRf69;
+using RadioHead.RhRf69;
 
 namespace RadioHeadNF.TestDriver
 {

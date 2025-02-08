@@ -19,13 +19,6 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RadioHead.cs" />
-    <Compile Include="Rh69Modes.cs" />
-    <Compile Include="RhGenericDriver.cs" />
-    <Compile Include="RhRf69\Rf69.Config.cs" />
-    <Compile Include="RhRf69\Rf69.Constants.cs" />
-    <Compile Include="RhRf69\Rf69.cs" />
-    <Compile Include="RhSpiDriver.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib">
@@ -56,6 +49,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <Import Project="..\..\RadioHead\RadioHead.projitems" Label="Shared" />
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
   <ProjectExtensions>
     <ProjectCapabilities>
