@@ -51,11 +51,11 @@ public class Rf69Tests
 
     // GIVEN: an instance of the Rf69 class
     //        AND the radio is not initialized
-    //        AND the radio's device type is not supported
+    //        AND the radio's device type IS NOT supported
     // WHEN: Init() is call
     // THEN: return false
     [Test]
-    public void Init()
+    public void Init01()
     {
         // ARRANGE:
         const byte deviceType = 0xFF;
@@ -66,6 +66,25 @@ public class Rf69Tests
 
         // ASSERT:
         Assert.That(actual, Is.False);
+    }
+
+    // GIVEN: an instance of the Rf69 class
+    //        AND the radio is not initialized
+    //        AND the radio's device type IS supported
+    // WHEN: Init() is call
+    // THEN: return false
+    [Test]
+    public void Init02()
+    {
+        // ARRANGE:
+        const byte deviceType = 0x24;
+        _registers.Poke(Rf69.REG_10_Version, deviceType);
+
+        // ACT:
+        var actual = _radio.Init();
+
+        // ASSERT:
+        Assert.That(actual, Is.True);
     }
 
     // GIVEN: an instance of the Rf69 class
