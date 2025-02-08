@@ -183,7 +183,7 @@ namespace RadioHead
 
         /// <summary>
         /// Override this if you need an unusual way of selecting the slave before SPI
-        /// transactions.  The default uses digitalWrite(_slaveSelectPin, LOW) 
+        /// transactions.
         /// </summary>
         protected virtual void SelectDevice()
         {
@@ -192,7 +192,7 @@ namespace RadioHead
 
         /// <summary>
         /// Override this if you need an unusual way of selecting the slave before SPI
-        /// transactions. The default uses digitalWrite(_slaveSelectPin, HIGH)
+        /// transactions.
         /// </summary>
         protected virtual void DeselectDevice()
         {
