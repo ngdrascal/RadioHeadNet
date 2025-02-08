@@ -1,4 +1,5 @@
-﻿using System;
+﻿// ReSharper disable once RedundantUsingDirective
+using System;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Diagnostics;
@@ -9,6 +10,7 @@ namespace RadioHead.RhRf69
     public partial class Rf69 : RhSpiDriver
     {
         private readonly ILogger _logger;
+        // ReSharper disable once ChangeFieldTypeToSystemThreadingLock
         private static readonly object CriticalSection = new();
 
         /// The radio OP Mode to use when Mode is RHMode.Idle
@@ -547,7 +549,7 @@ namespace RadioHead.RhRf69
         /// transmit</returns>
         public override bool Send(byte[] data)
         {
-            if (data!.Length > MaxMessageLength)
+            if (data.Length > MaxMessageLength)
                 return false;
 
             WaitPacketSent(); // Make sure we don't interrupt an outgoing message
