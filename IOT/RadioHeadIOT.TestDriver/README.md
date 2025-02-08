@@ -1,4 +1,4 @@
-﻿The test driver search for input parameters in the follwoing order:
+﻿The test driver searches for input parameters in the follwoing order:
 1. Command line arguments
 1. in appsettings.json file
 1. the defaults hard coded in the app

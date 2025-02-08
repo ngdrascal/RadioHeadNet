@@ -117,7 +117,7 @@ namespace RadioHead
         /// can be useful in multitasking environment like Linux to prevent
         /// WaitAvailableTimeout using all the CPU while polling for receiver activity.
         /// </param>
-#if NETCOREAPP1_0_OR_GREATER
+#if NETSTANDARD2_1
         public virtual void WaitAvailable(ushort pollDelay = 0)
         {
             while (!Available())
@@ -145,7 +145,7 @@ namespace RadioHead
         /// <summary>
         /// Blocks until the transmitter is no longer transmitting.
         /// </summary>
-#if NETCOREAPP1_1_OR_GREATER
+#if NETSTANDARD2_1
         public virtual bool WaitPacketSent()
         {
             while (Mode == Rh69Modes.Tx)
@@ -169,7 +169,7 @@ namespace RadioHead
         /// <returns>true if the radio completed transmission within the timeout period.
         /// False if it timed out.
         /// </returns>
-#if NETCOREAPP1_0_OR_GREATER
+#if NETSTANDARD2_1
         public virtual bool WaitPacketSent(ushort timeout)
         {
             var stopwatch = new Stopwatch();
@@ -204,7 +204,7 @@ namespace RadioHead
         /// using all the CPU while polling for receiver activity.
         /// </param>
         /// <returns>true if a message is Available</returns>
-#if NETCOREAPP1_0_OR_GREATER
+#if NETSTANDARD2_1
         public virtual bool WaitAvailableTimeout(ushort timeout, ushort pollDelay = 0)
         {
             var stopwatch = new Stopwatch();

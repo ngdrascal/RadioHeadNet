@@ -28,7 +28,7 @@ namespace RadioHead
     /// </summary>
     public abstract class RhSpiDriver : RhGenericDriver
     {
-        private static readonly object CriticalSection = new();
+        private static readonly object CriticalSection = new object();
 
         private readonly GpioPin _deviceSelectPin;
         private readonly SpiDevice _spi;

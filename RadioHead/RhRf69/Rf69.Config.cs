@@ -105,49 +105,49 @@ namespace RadioHead.RhRf69
                 Reg02 = CONFIG_FSK, Reg03 = 0x3e, Reg04 = 0x80, Reg05 = 0x00, Reg06 = 0x52, Reg19 = 0xf4, Reg1A = 0xf4,
                 Reg37 = CONFIG_WHITE
             }, // FSK_Rb2Fd5      
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_FSK, Reg03 = 0x34, Reg04 = 0x15, Reg05 = 0x00, Reg06 = 0x4f, Reg19 = 0xf4, Reg1A = 0xf4,
                 Reg37 = CONFIG_WHITE
             }, // FSK_Rb2_4Fd4_8
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_FSK, Reg03 = 0x1a, Reg04 = 0x0b, Reg05 = 0x00, Reg06 = 0x9d, Reg19 = 0xf4, Reg1A = 0xf4,
                 Reg37 = CONFIG_WHITE
             }, // FSK_Rb4_8Fd9_6
 
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_FSK, Reg03 = 0x0d, Reg04 = 0x05, Reg05 = 0x01, Reg06 = 0x3b, Reg19 = 0xf4, Reg1A = 0xf4,
                 Reg37 = CONFIG_WHITE
             }, // FSK_Rb9_6Fd19_2
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_FSK, Reg03 = 0x06, Reg04 = 0x83, Reg05 = 0x02, Reg06 = 0x75, Reg19 = 0xf3, Reg1A = 0xf3,
                 Reg37 = CONFIG_WHITE
             }, // FSK_Rb19_2Fd38_4
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_FSK, Reg03 = 0x03, Reg04 = 0x41, Reg05 = 0x04, Reg06 = 0xea, Reg19 = 0xf2, Reg1A = 0xf2,
                 Reg37 = CONFIG_WHITE
             }, // FSK_Rb38_4Fd76_8
 
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_FSK, Reg03 = 0x02, Reg04 = 0x2c, Reg05 = 0x07, Reg06 = 0xae, Reg19 = 0xe2, Reg1A = 0xe2,
                 Reg37 = CONFIG_WHITE
             }, // FSK_Rb57_6Fd120
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_FSK, Reg03 = 0x01, Reg04 = 0x00, Reg05 = 0x08, Reg06 = 0x00, Reg19 = 0xe1, Reg1A = 0xe1,
                 Reg37 = CONFIG_WHITE
             }, // FSK_Rb125Fd125
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_FSK, Reg03 = 0x00, Reg04 = 0x80, Reg05 = 0x10, Reg06 = 0x00, Reg19 = 0xe0, Reg1A = 0xe0,
                 Reg37 = CONFIG_WHITE
             }, // FSK_Rb250Fd250
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_FSK, Reg03 = 0x02, Reg04 = 0x40, Reg05 = 0x03, Reg06 = 0x33, Reg19 = 0x42, Reg1A = 0x42,
                 Reg37 = CONFIG_WHITE
@@ -156,54 +156,54 @@ namespace RadioHead.RhRf69
             //  02,        03,   04,   05,   06,   19,   1a,  37
             // GFSK (BT=1.0), No Manchester, whitening, CRC, no address filtering
             // AFC BW == RX BW == 2 x bit rate
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_GFSK, Reg03 = 0x3e, Reg04 = 0x80, Reg05 = 0x00, Reg06 = 0x52, Reg19 = 0xf4, Reg1A = 0xf5,
                 Reg37 = CONFIG_WHITE
             }, // GFSK_Rb2Fd5
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_GFSK, Reg03 = 0x34, Reg04 = 0x15, Reg05 = 0x00, Reg06 = 0x4f, Reg19 = 0xf4, Reg1A = 0xf4,
                 Reg37 = CONFIG_WHITE
             }, // GFSK_Rb2_4Fd4_8
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_GFSK, Reg03 = 0x1a, Reg04 = 0x0b, Reg05 = 0x00, Reg06 = 0x9d, Reg19 = 0xf4, Reg1A = 0xf4,
                 Reg37 = CONFIG_WHITE
             }, // GFSK_Rb4_8Fd9_6
 
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_GFSK, Reg03 = 0x0d, Reg04 = 0x05, Reg05 = 0x01, Reg06 = 0x3b, Reg19 = 0xf4, Reg1A = 0xf4,
                 Reg37 = CONFIG_WHITE
             }, // GFSK_Rb9_6Fd19_2
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_GFSK, Reg03 = 0x06, Reg04 = 0x83, Reg05 = 0x02, Reg06 = 0x75, Reg19 = 0xf3, Reg1A = 0xf3,
                 Reg37 = CONFIG_WHITE
             }, // GFSK_Rb19_2Fd38_4
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_GFSK, Reg03 = 0x03, Reg04 = 0x41, Reg05 = 0x04, Reg06 = 0xea, Reg19 = 0xf2, Reg1A = 0xf2,
                 Reg37 = CONFIG_WHITE
             }, // GFSK_Rb38_4Fd76_8
 
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_GFSK, Reg03 = 0x02, Reg04 = 0x2c, Reg05 = 0x07, Reg06 = 0xae, Reg19 = 0xe2, Reg1A = 0xe2,
                 Reg37 = CONFIG_WHITE
             }, // GFSK_Rb57_6Fd120
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_GFSK, Reg03 = 0x01, Reg04 = 0x00, Reg05 = 0x08, Reg06 = 0x00, Reg19 = 0xe1, Reg1A = 0xe1,
                 Reg37 = CONFIG_WHITE
             }, // GFSK_Rb125Fd125
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_GFSK, Reg03 = 0x00, Reg04 = 0x80, Reg05 = 0x10, Reg06 = 0x00, Reg19 = 0xe0, Reg1A = 0xe0,
                 Reg37 = CONFIG_WHITE
             }, // GFSK_Rb250Fd250
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_GFSK, Reg03 = 0x02, Reg04 = 0x40, Reg05 = 0x03, Reg06 = 0x33, Reg19 = 0x42, Reg1A = 0x42,
                 Reg37 = CONFIG_WHITE
@@ -218,37 +218,37 @@ namespace RadioHead.RhRf69
             // Peak Threshold Step: 0.5dB
             // Peak threshold dec: ONce per chip
             // Fixed threshold: 6dB
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_OOK, Reg03 = 0x7d, Reg04 = 0x00, Reg05 = 0x00, Reg06 = 0x10, Reg19 = 0x88, Reg1A = 0x88,
                 Reg37 = CONFIG_WHITE
             }, // OOK_Rb1Bw1
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_OOK, Reg03 = 0x68, Reg04 = 0x2b, Reg05 = 0x00, Reg06 = 0x10, Reg19 = 0xf1, Reg1A = 0xf1,
                 Reg37 = CONFIG_WHITE
             }, // OOK_Rb1_2Bw75
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_OOK, Reg03 = 0x34, Reg04 = 0x15, Reg05 = 0x00, Reg06 = 0x10, Reg19 = 0xf5, Reg1A = 0xf5,
                 Reg37 = CONFIG_WHITE
             }, // OOK_Rb2_4Bw4_8
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_OOK, Reg03 = 0x1a, Reg04 = 0x0b, Reg05 = 0x00, Reg06 = 0x10, Reg19 = 0xf4, Reg1A = 0xf4,
                 Reg37 = CONFIG_WHITE
             }, // OOK_Rb4_8Bw9_6
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_OOK, Reg03 = 0x0d, Reg04 = 0x05, Reg05 = 0x00, Reg06 = 0x10, Reg19 = 0xf3, Reg1A = 0xf3,
                 Reg37 = CONFIG_WHITE
             }, // OOK_Rb9_6Bw19_2
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_OOK, Reg03 = 0x06, Reg04 = 0x83, Reg05 = 0x00, Reg06 = 0x10, Reg19 = 0xf2, Reg1A = 0xf2,
                 Reg37 = CONFIG_WHITE
             }, // OOK_Rb19_2Bw38_4
-            new()
+            new ModemConfig
             {
                 Reg02 = CONFIG_OOK, Reg03 = 0x03, Reg04 = 0xe8, Reg05 = 0x00, Reg06 = 0x10, Reg19 = 0xe2, Reg1A = 0xe2,
                 Reg37 = CONFIG_WHITE

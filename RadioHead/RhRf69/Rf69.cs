@@ -11,7 +11,7 @@ namespace RadioHead.RhRf69
     {
         private readonly ILogger _logger;
         // ReSharper disable once ChangeFieldTypeToSystemThreadingLock
-        private static readonly object CriticalSection = new();
+        private static readonly object CriticalSection = new object();
 
         /// The radio OP Mode to use when Mode is RHMode.Idle
         private byte _idleMode;
@@ -75,7 +75,7 @@ namespace RadioHead.RhRf69
             // Get the device type and check it. This also tests whether we are really
             // connected to a device.  My test devices return 0x24.
             _deviceType = ReadFrom(REG_10_Version);
-            if (_deviceType is 0x00 or 0xFF)
+            if (_deviceType == 0x00 || _deviceType == 0xFF)
                 return false;
 
             SetModeIdle();
@@ -187,7 +187,7 @@ namespace RadioHead.RhRf69
                 SelectDevice();
                 WriteByte(REG_00_Fifo); // Send the start address with the write mask off
                 var payloadLen = ReadByte(); // First byte is payload len (counting the headers)
-                if (payloadLen is <= MAX_ENCRYPTABLE_PAYLOAD_LEN and >= HEADER_LEN)
+                if (payloadLen <= MAX_ENCRYPTABLE_PAYLOAD_LEN && payloadLen >= HEADER_LEN)
                 {
                     RxHeaderTo = ReadByte();
                     // check the address
@@ -616,7 +616,7 @@ namespace RadioHead.RhRf69
                 throw new ArgumentException($"{nameof(SetSyncWords)}: syncWords must be 1 to 4 octets long.");
 
             var syncConfig = ReadFrom(REG_2E_SyncConfig);
-            if (syncWords.Length is >= 1 and <= 4)
+            if (syncWords.Length >= 1 && syncWords.Length <= 4)
             {
                 BurstWriteTo(REG_2F_SyncValue1, syncWords);
                 syncConfig |= SYNCCONFIG_SYNCON;
@@ -666,7 +666,7 @@ namespace RadioHead.RhRf69
         /// <exception cref="ArgumentException"></exception>
         public void SetIdleMode(byte idleMode)
         {
-            if (idleMode is OPMODE_MODE_SLEEP or OPMODE_MODE_STDBY)
+            if (idleMode == OPMODE_MODE_SLEEP || idleMode == OPMODE_MODE_STDBY)
                 _idleMode = idleMode;
             else
                 throw new ArgumentException("Only SLEEP and STANDBY modes allowed", nameof(idleMode));
