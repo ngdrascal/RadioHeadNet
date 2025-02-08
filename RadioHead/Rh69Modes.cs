@@ -1,6 +1,5 @@
 ﻿namespace RadioHead
 {
-
     /// <summary>
     /// These are the different values that can be adopted by the _mode variable and 
     /// returned by the Mode() function.

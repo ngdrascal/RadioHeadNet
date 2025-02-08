@@ -1,4 +1,5 @@
-﻿// ReSharper disable InconsistentNaming
+﻿// ReSharper disable RedundantUsingDirective
+// ReSharper disable InconsistentNaming
 
 using System;
 using System.Device;
@@ -7,7 +8,6 @@ using System.Threading;
 
 namespace RadioHead
 {
-
     /// <summary>
     /// Abstract base class for a RadioHead driver.
     ///

@@ -3,7 +3,6 @@ using System.Device.Spi;
 
 namespace RadioHead
 {
-
     /// <summary>
     /// Base class for RadioHead drivers that use the SPI bus to communicate with its
     /// transport hardware.
