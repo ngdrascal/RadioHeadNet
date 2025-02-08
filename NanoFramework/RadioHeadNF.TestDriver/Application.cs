@@ -33,24 +33,24 @@ namespace RadioHeadNF.TestDriver
                 return;
             }
 
-            Debug.WriteLine("Sending data ...");
-            SendData(12.3f, 4.56f, 7.8f);
-
-            Debug.WriteLine("Polling for data ...");
-            if (_radio.PollAvailable(5000))
-            {
-                _radio.Receive(out var receivedData);
-                var temp = BitConverter.ToSingle(receivedData, 0);
-                var hum = BitConverter.ToSingle(receivedData, 4);
-                var vol = BitConverter.ToSingle(receivedData, 8);
-                Debug.WriteLine($"{temp} C, {hum} %RH, {vol} V");
-            }
-            else
-                Debug.WriteLine("Timed out waiting for data!");
-
             while (true)
             {
-            }
+                Debug.WriteLine("Sending data ...");
+                SendData(12.3f, 4.56f, 7.8f);
+
+                Debug.WriteLine("Polling for data ...");
+                if (_radio.PollAvailable(5000))
+                {
+                    _radio.Receive(out var receivedData);
+                    var temp = BitConverter.ToSingle(receivedData, 0);
+                    var hum = BitConverter.ToSingle(receivedData, 4);
+                    var vol = BitConverter.ToSingle(receivedData, 8);
+                    Debug.WriteLine($"{temp} C, {hum} %RH, {vol} V");
+                }
+                else
+                    Debug.WriteLine("Timed out waiting for data!");
+
+            } 
         }
 
         private void SendData(float temp, float humidity, float voltage)
