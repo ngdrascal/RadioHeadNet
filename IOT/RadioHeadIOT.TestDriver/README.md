@@ -4,16 +4,16 @@
 1. the defaults hard coded in the app
 
 The following parameters are supported:
-- HostDevice
+- -- host             Host Device
   - values are Ftx232H | RPi
   - default is Ftx232H
-- DeviceSelectPin:
+- --select <pin-num>  Device Select Pin:
    - default is 5
-- ResetPin
+- --reset <pin-num>   Reset Pin
    - default is 6
-- InterruptPin
+- intr <pin-num>      Interrupt Pin
    - default is 7
-- Frequency
+- freq <frequency>    Frequency
    - default: 915.0
-- PowerLevel
+- level <power-level  PowerLevel
    - default: 20
