@@ -22,6 +22,6 @@
   </ItemGroup>
 
 
-   <Import Project="..\..\RadioHead\RadioHead.projitems" Label="Shared" />
+   <Import Project="..\..\Shared\RadioHead.projitems" Label="Shared" />
 
 </Project>

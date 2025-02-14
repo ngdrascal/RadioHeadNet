@@ -15,8 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{0B
 	ProjectSection(SolutionItems) = preProject
 		Analyzer\TestData\Arduino_RF69_Capture.csv = Analyzer\TestData\Arduino_RF69_Capture.csv
 		Analyzer\TestData\IOT_RF69_Capture.csv = Analyzer\TestData\IOT_RF69_Capture.csv
-		Analyzer\TestData\NF_FT232H_Capture.csv = Analyzer\TestData\NF_FT232H_Capture.csv
 		Analyzer\TestData\NF_Esp32_Feather_Capture.csv = Analyzer\TestData\NF_Esp32_Feather_Capture.csv
+		Analyzer\TestData\NF_FT232H_Capture.csv = Analyzer\TestData\NF_FT232H_Capture.csv
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIOT", "IOT\RadioHeadIOT\RadioHeadIOT.csproj", "{1D79C9A1-AF6F-4545-872C-5F525EE161BF}"
@@ -33,13 +33,13 @@ Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "RadioHeadNF", "NanoFramewor
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{0B1B15FA-0898-43F3-A9A9-DBAD4F84C7EF}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RadioHead", "RadioHead\RadioHead.shproj", "{55877C4D-9983-4438-AE11-51DC19846DDC}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1F1AF110-FC97-4513-A049-89B8AE94BCC1}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "RadioHead", "Shared\RadioHead.shproj", "{55877C4D-9983-4438-AE11-51DC19846DDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -98,7 +98,7 @@ Global
 		SolutionGuid = {04E1449A-3F2D-41F1-BBBE-2A8F099CB48E}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		RadioHead\RadioHead.projitems*{1d79c9a1-af6f-4545-872c-5f525ee161bf}*SharedItemsImports = 5
-		RadioHead\RadioHead.projitems*{55877c4d-9983-4438-ae11-51dc19846ddc}*SharedItemsImports = 13
+		Shared\RadioHead.projitems*{1d79c9a1-af6f-4545-872c-5f525ee161bf}*SharedItemsImports = 5
+		Shared\RadioHead.projitems*{55877c4d-9983-4438-ae11-51dc19846ddc}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal
