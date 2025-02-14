@@ -59,7 +59,8 @@ namespace RadioHeadNF.TestDriver
                 var deviceSelectPin = gpioController.OpenPin(DeviceSelectPinNum, PinMode.Output);
                 var spiDevice = (SpiDevice)provider.GetRequiredService(typeof(SpiDevice));
                 var loggerFactory = (ILoggerFactory)provider.GetRequiredService(typeof(ILoggerFactory));
-                var radio = new Rf69(deviceSelectPin, spiDevice, loggerFactory);
+                var logger = loggerFactory.CreateLogger("Rf69");
+                var radio = new Rf69(deviceSelectPin, spiDevice, logger);
                 var interruptPin = gpioController.OpenPin(InterruptPinNum, PinMode.InputPullUp);
                 interruptPin.ValueChanged += radio.HandleInterrupt;
                 return radio;

@@ -15,8 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{0B
 	ProjectSection(SolutionItems) = preProject
 		Analyzer\TestData\Arduino_RF69_Capture.csv = Analyzer\TestData\Arduino_RF69_Capture.csv
 		Analyzer\TestData\IOT_RF69_Capture.csv = Analyzer\TestData\IOT_RF69_Capture.csv
-		Analyzer\TestData\NF_RF69_Capture.csv = Analyzer\TestData\NF_RF69_Capture.csv
-		Analyzer\TestData\NF_RF69_Standalone_Capture.csv = Analyzer\TestData\NF_RF69_Standalone_Capture.csv
+		Analyzer\TestData\NF_FT232H_Capture.csv = Analyzer\TestData\NF_FT232H_Capture.csv
+		Analyzer\TestData\NF_Esp32_Feather_Capture.csv = Analyzer\TestData\NF_Esp32_Feather_Capture.csv
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIOT", "IOT\RadioHeadIOT\RadioHeadIOT.csproj", "{1D79C9A1-AF6F-4545-872C-5F525EE161BF}"

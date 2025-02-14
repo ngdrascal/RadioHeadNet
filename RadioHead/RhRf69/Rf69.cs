@@ -46,11 +46,11 @@ namespace RadioHead.RhRf69
         /// </summary>
         /// <param name="deviceSelectPin"></param>
         /// <param name="spi"></param>
-        /// <param name="loggerFactory"></param>
-        public Rf69(GpioPin deviceSelectPin, SpiDevice spi, ILoggerFactory loggerFactory)
+        /// <param name="logger"></param>
+        public Rf69(GpioPin deviceSelectPin, SpiDevice spi, ILogger logger)
             : base(deviceSelectPin, spi)
         {
-            _logger = loggerFactory.CreateLogger(nameof(Rf69));
+            _logger = logger;
             _idleMode = OPMODE_MODE_STDBY;
         }
 
@@ -281,6 +281,8 @@ namespace RadioHead.RhRf69
         /// <param name="mode">Mode RF69 OPMODE to set, one of OPMODEMode_*.</param>
         private void SetOpMode(byte mode)
         {
+            _logger.LogTrace("{0}({1})", nameof(SetOpMode), mode.ToString("X2"));
+
             var clrMask = InvertByte(OPMODE_MODE);
 
             var curValue = ReadFrom(REG_01_OpMode);
@@ -307,6 +309,8 @@ namespace RadioHead.RhRf69
         /// </summary>
         public void SetModeIdle()
         {
+            _logger.LogTrace("{0}()", nameof(SetModeIdle));
+            
             if (Mode != Rh69Modes.Idle)
             {
                 if (_power >= 18)
@@ -326,6 +330,8 @@ namespace RadioHead.RhRf69
         /// </summary>
         public void SetModeRx()
         {
+            _logger.LogTrace("{0}()", nameof(SetModeRx));
+
             if (Mode != Rh69Modes.Rx)
             {
                 if (_power >= 18)
@@ -348,6 +354,8 @@ namespace RadioHead.RhRf69
         /// </summary>
         public void SetModeTx()
         {
+            _logger.LogTrace("{0}()", nameof(SetModeTx));
+
             if (Mode != Rh69Modes.Tx)
             {
                 if (_power >= 18)
@@ -385,6 +393,8 @@ namespace RadioHead.RhRf69
         /// power module RFM69HW</param>
         public void SetTxPower(sbyte power, bool isHighPowerModule)
         {
+            _logger.LogTrace("{0}({1}, {2})", nameof(SetTxPower), power, isHighPowerModule);
+
             _power = power;
             byte paLevel;
             if (isHighPowerModule)
@@ -436,6 +446,8 @@ namespace RadioHead.RhRf69
         /// modem configuration registers.</param>
         public void SetModemRegisters(ModemConfig config)
         {
+            _logger.LogTrace("{0}()", nameof(SetModemRegisters));
+
             BurstWriteTo(REG_02_DataModul,
                 new[] { config.Reg02, config.Reg03, config.Reg04, config.Reg05, config.Reg06 });
 
@@ -453,6 +465,7 @@ namespace RadioHead.RhRf69
         /// <returns>\return true if index is a valid choice.</returns>
         public bool SetModemConfig(ModemConfigChoice choice)
         {
+            _logger.LogTrace("{0}({1})", nameof(SetModemConfig), choice);
             var idx = (byte)choice;
             if (idx > MODEM_CONFIG_TABLE.Length - 1)
                 return false;
@@ -549,6 +562,8 @@ namespace RadioHead.RhRf69
         /// transmit</returns>
         public override bool Send(byte[] data)
         {
+            _logger.LogTrace("{0}(data.Length: {1})", nameof(Send), data.Length);
+
             if (data.Length > MaxMessageLength)
                 return false;
 
