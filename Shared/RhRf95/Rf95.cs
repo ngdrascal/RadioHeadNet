@@ -99,25 +99,28 @@ namespace RadioHead.RhRf95
             // No Sync Words in LORA mode. ACTUALLY thats not correct, and for tehRF95, the default LoRaSync Word is 0x12
             // (ie a private network) and it can be changed at REG_39_SYNC_WORD
             SetModemConfig(ModemConfigChoice.Bw125Cr45Sf128); // Radio default
-            
+
             //    setModemConfig(Bw125Cr48Sf4096); // slow and reliable?
             SetPreambleLength(8); // Default is 8
-            
+
             // An innocuous ISM frequency, same as RF22's
             SetFrequency(434.0f);
-            
+
             // Lowish power
             SetTxPower(13);
 
             _logger.LogTrace("<--- {0}()", nameof(Init));
-            
+
             return true;
         }
 
+        /// <summary>
         /// Sets all the registers required to configure the data modem in the radio, including the bandwidth, 
         /// spreading factor etc. You can use this to configure the modem with custom configurations if none of the 
         /// canned configurations in ModemConfigChoice suit you.
-        /// \param[in] configuration A ModemConfiguration structure containing values for the modem configuration registers.
+        /// </summary>
+        /// <param name="configuration">A ModemConfiguration structure containing values for the modem configuration registers.
+        /// </param>
         public void SetModemRegisters(ModemConfiguration configuration)
         {
             WriteTo(REG_1D_MODEM_CONFIG1, configuration.Reg1D);
@@ -135,18 +138,21 @@ namespace RadioHead.RhRf95
         /// <returns>true if index is a valid choice.</returns>
         public bool SetModemConfig(ModemConfigChoice index)
         {
-            if ((byte)index >= MODEM_CONFIG_TABLE.Length)
+            if ((byte)index >= _modemConfigTable.Length)
                 return false;
 
-            SetModemRegisters(MODEM_CONFIG_TABLE[(byte)index]);
+            SetModemRegisters(_modemConfigTable[(byte)index]);
             return true;
         }
 
+        /// <summary>
         /// Tests whether a new message is available from the Driver. 
         /// On most drivers, this will also put the Driver into RhModes.Rx mode until
         /// a message is actually received by the transport, when it will be returned to RHModeIdle.
         /// This can be called multiple times in a timeout loop
-        /// \return true if a new, complete, error-free uncollected message is available to be retrieved by Receive()
+        /// </summary>
+        /// <returns>true if a new, complete, error-free uncollected message is available to be retrieved by Receive()
+        /// </returns>
         public override bool Available()
         {
             lock (CriticalSection)
@@ -162,15 +168,15 @@ namespace RadioHead.RhRf95
             } // Will be set by the interrupt handler when a good message is received
         }
 
+        /// <summary>
         /// Turns the receiver on if it not already on.
-        /// If there is a valid message available, copy it to buf and return true
+        /// If there is a valid message available, copy it to buffer and return true
         /// else return false.
-        /// If a message is copied, *len is set to the length (Caution, 0 length messages are permitted).
-        /// You should be sure to call this function frequently enough to not miss any messages
+        /// You should be sure to call this function frequently enough to not miss any messages.
         /// It is recommended that you call it in your main loop.
-        /// \param[in] buf Location to copy the received message
-        /// \param[in,out] len Pointer to the number of octets available in buf. The number be reset to the actual number of octets copied.
-        /// \return true if a valid message was copied to buf
+        /// </summary>
+        /// <param name="buffer"></param>Location to copy the received message
+        /// <returns>true if a valid message was copied to buffer</returns>
         public override bool Receive(out byte[] buffer)
         {
             if (!Available())
@@ -191,16 +197,18 @@ namespace RadioHead.RhRf95
             return true;
         }
 
+        /// <summary>
         /// Waits until any previous transmit packet is finished being transmitted with waitPacketSent().
         /// Then optionally waits for Channel Activity Detection (CAD) 
-        /// to show the channnel is clear (if the radio supports CAD) by calling waitCAD().
+        /// to show the channel is clear (if the radio supports CAD) by calling waitCAD().
         /// Then loads a message into the transmitter and starts the transmitter. Note that a message length
-        /// of 0 is permitted. 
-        /// \param[in] data Array of data to be sent
-        /// \param[in] len Number of bytes of data to send
+        /// of 0 is permitted.
+        /// </summary>
+        /// <param name="data">Array of data to be sent</param>
         /// specify the maximum time in ms to wait. If 0 (the default) do not wait for CAD before transmitting.
-        /// \return true if the message length was valid and it was correctly queued for transmit. Return false
+        /// <returns>true if the message length was valid and it was correctly queued for transmit. Return false
         /// if CAD was requested and the CAD timeout timed out before clear channel was detected.
+        /// </returns>
         public override bool Send(byte[] data)
         {
             if (data.Length > MAX_MESSAGE_LEN)
@@ -232,12 +240,11 @@ namespace RadioHead.RhRf95
             return true;
         }
 
-        /// Sets the length of the preamble
-        /// in bytes. 
-        /// Caution: this should be set to the same 
-        /// value on all nodes in your network. Default is 8.
-        /// Sets the message preamble length in REG_??_PREAMBLE_?SB
-        /// \param[in] bytes Preamble length in bytes.  
+        /// <summary>
+        /// Sets the length of the preamble in bytes. 
+        /// Caution: this should be set to the same value on all nodes in your network. Default is 8.
+        /// </summary>
+        /// <param name="value">Preamble length in bytes.</param>
         public void SetPreambleLength(ushort value)
         {
             WriteTo(REG_20_PREAMBLE_MSB, (byte)(value >> 8));
@@ -249,11 +256,12 @@ namespace RadioHead.RhRf95
         /// </summary>
         public override byte MaxMessageLength => MAX_MESSAGE_LEN;
 
-        /// Sets the transmitter and receiver 
-        /// centre frequency.
-        /// \param[in] centre Frequency in MHz. 137.0 to 1020.0. Caution: RFM95/96/97/98 comes in several
+        /// <summary>
+        /// Sets the transmitter and receiver center frequency.
+        /// </summary>
+        /// <param name="center">Frequency in MHz. 137.0 to 1020.0. Caution: RFM95/96/97/98 comes in several</param>
         /// different frequency ranges, and setting a frequency outside that range of your radio will probably not work
-        /// \return true if the selected frequency centre is within range
+        /// <returns>true if the selected frequency centre is within range</returns>
         public bool SetFrequency(float center)
         {
             // Frf = FRF / FSTEP
@@ -266,8 +274,10 @@ namespace RadioHead.RhRf95
             return true;
         }
 
+        /// <summary>
         /// If current mode is Rx or Tx changes it to Idle. If the transmitter or receiver is running, 
         /// disables them.
+        /// </summary>
         public void SetModeIdle()
         {
             if (Mode != RhModes.Idle)
@@ -278,8 +288,10 @@ namespace RadioHead.RhRf95
             }
         }
 
+        /// <summary>
         /// If current mode is Tx or Idle, changes it to Rx. 
         /// Starts the receiver in the RF95/96/97/98.
+        /// </summary>
         public void SetModeRx()
         {
             if (Mode != RhModes.Rx)
@@ -291,8 +303,10 @@ namespace RadioHead.RhRf95
             }
         }
 
+        /// <summary>
         /// If current mode is Rx or Idle, changes it to Rx. F
         /// Starts the transmitter in the RF95/96/97/98.
+        /// </summary>
         public void SetModeTx()
         {
             if (Mode != RhModes.Tx)
@@ -304,6 +318,7 @@ namespace RadioHead.RhRf95
             }
         }
 
+        /// <summary>
         /// Sets the transmitter power output level, and configures the transmitter pin.
         /// Be a good neighbour and set the lowest power level you need.
         /// Some SX1276/77/78/79 and compatible modules (such as RFM95/96/97/98) 
@@ -311,18 +326,21 @@ namespace RadioHead.RhRf95
         /// while some (such as the Modtronix inAir4 and inAir9) 
         /// use the RFO transmitter pin for lower power but higher efficiency.
         /// You must set the appropriate power level and useRFO argument for your module.
-        /// Check with your module manufacturer which transmtter pin is used on your module
+        /// Check with your module manufacturer which transmitter pin is used on your module
         /// to ensure you are setting useRFO correctly. 
         /// Failure to do so will result in very low 
         /// transmitter power output.
         /// Caution: legal power limits may apply in certain countries.
         /// After init(), the power will be set to 13dBm, with useRFO false (ie PA_BOOST enabled).
-        /// \param[in] power Transmitter power level in dBm. For RFM95/96/97/98 LORA with useRFO false, 
+        /// </summary>
+        /// <param name="power">Transmitter power level in dBm. For RFM95/96/97/98 LORA with useRFO false,
         /// valid values are from +2 to +20. For 18, 19 and 20, PA_DAC is enabled, 
         /// For Modtronix inAir4 and inAir9 with useRFO true (ie RFO pins in use), 
         /// valid values are from 0 to 15.
-        /// \param[in] useRFO If true, enables the use of the RFO transmitter pins instead of
+        /// </param>
+        /// <param name="useRfo">If true, enables the use of the RFO transmitter pins instead of
         /// the PA_BOOST pin (false). Choose the correct setting for your module.
+        /// </param>
         public void SetTxPower(sbyte power, bool useRfo = false)
         {
             // Sigh, different behaviours depending on whether the module use PA_BOOST or the RFO pin
@@ -365,7 +383,6 @@ namespace RadioHead.RhRf95
             }
         }
 
-
         /// <summary>
         /// Sets the radio into low-power sleep mode.
         /// If successful, the transport will stay in sleep mode until woken by 
@@ -386,13 +403,15 @@ namespace RadioHead.RhRf95
             return true;
         }
 
-        // Bent G Christensen (bentor@gmail.com), 08/15/2016
+        /// <summary>
+        /// Bent G Christensen (bentor@gmail.com), 08/15/2016
         /// Use the radio's Channel Activity Detect (CAD) function to detect channel activity.
         /// Sets the RF95 radio into CAD mode and waits until CAD detection is complete.
         /// To be used in a listen-before-talk mechanism (Collision Avoidance)
         /// with a reasonable time backoff algorithm.
         /// This is called automatically by waitCAD().
-        /// \return true if channel is in use.  
+        /// </summary>
+        /// <returns>true if channel is in use.</returns>
         public override bool IsChannelActive()
         {
             // Set mode RhModes.Cad
@@ -449,15 +468,18 @@ namespace RadioHead.RhRf95
             }
         }
 
+        /// <summary>
         /// Returns the last measured frequency error.
         /// The LoRa receiver estimates the frequency offset between the receiver centre frequency
         /// and that of the received LoRa signal. This function returns the estimates offset (in Hz) 
         /// of the last received message. Caution: this measurement is not absolute, but is measured 
-        /// relative to the local receiver's oscillator. 
+        /// relative to the local receiver's oscillator.
         /// Apparent errors may be due to the transmitter, the receiver or both.
-        /// \return The estimated centre frequency offset in Hz of the last received message. 
+        /// </summary>
+        /// <returns>The estimated centre frequency offset in Hz of the last received message. 
         /// If the modem bandwidth selector in 
         /// register REG_1D_MODEM_CONFIG1 is invalid, returns 0.
+        /// </returns>
         public int FrequencyError()
         {
             // From section 4.1.5 of SX1276/77/78/79
@@ -527,6 +549,7 @@ namespace RadioHead.RhRf95
             SetLowDataRate();
         }
 
+        /// <summary>
         /// brian.n.norman@gmail.com 9th Nov 2018
         /// Sets the radio signal bandwidth
         /// sbw ranges and resultant settings are as follows:-
@@ -543,7 +566,8 @@ namespace RadioHead.RhRf95
         /// >250000      500.0
         /// NOTE caution Earlier - Semtech do not recommend BW below 62.5 although, in testing
         /// I managed 31.25 with two devices in close proximity.
-        /// \param[in] sbw long, signal bandwidth e.g. 125000
+        /// </summary>
+        /// <param name="sbw">signal bandwidth e.g. 125000</param>
         public void SetSignalBandwidth(long sbw)
         {
             byte bw; //register bit pattern
@@ -576,13 +600,15 @@ namespace RadioHead.RhRf95
             SetLowDataRate();
         }
 
+        /// <summary>
         /// brian.n.norman@gmail.com 9th Nov 2018
         /// Sets the coding rate to 4/5, 4/6, 4/7 or 4/8.
         /// Valid denominator values are 5, 6, 7 or 8. A value of 5 sets the coding rate to 4/5 etc.
         /// Values below 5 are clamped at 5
         /// values above 8 are clamped at 8.
         /// Default for all standard modem config options is 4/5.
-        /// \param[in] denominator byte range 5..8
+        /// </summary>
+        /// <param name="denominator">denominator byte range 5..8</param>
         public void SetCodingRate4(byte denominator)
         {
             int cr = CODING_RATE_4_5;
@@ -641,7 +667,7 @@ namespace RadioHead.RhRf95
                 WriteTo(REG_26_MODEM_CONFIG3, current);
         }
 
-
+        /// <summary>
         /// brian.n.norman@gmail.com 9th Nov 2018
         /// Allows the CRC to be turned on/off. Default is true (enabled)
         /// When true, RH_RF95 sends a CRC in outgoing packets and requires a valid CRC to be
@@ -651,7 +677,8 @@ namespace RadioHead.RhRf95
         /// Normally this should be left on (the default)
         /// so that packets with a bad CRC are rejected. If turned off you will be much more likely to receive
         /// false noise packets.
-        /// \param[in] on bool, true enables CRCs in incoming and outgoing packets, false disables them
+        /// </summary>
+        /// <param name="on">true enables CRCs in incoming and outgoing packets, false disables them</param>
         public void SetPayloadCrc(bool on)
         {
             // Payload CRC is bit 2 of register 1E
@@ -664,19 +691,22 @@ namespace RadioHead.RhRf95
             _enableCrc = on;
         }
 
+        /// <summary>
         /// tilman_1@gloetzner.net
         /// Returns device version from register 42
-        /// \param none
-        /// \return byte deviceID
+        /// </summary>
+        /// <returns>The version of the device</returns> 
         public byte GetDeviceVersion()
         {
             _deviceVersion = ReadFrom(REG_42_VERSION);
             return _deviceVersion;
         }
 
+        /// <summary>
         /// This is a low level function to handle the interrupts for one instance of RH_RF95.
         /// Called automatically by isr*()
         /// Should not need to be called by user code.
+        /// </summary>
         public void HandleInterrupt(object sender, PinValueChangedEventArgs arg)
         {
             lock (CriticalSection)
@@ -710,8 +740,8 @@ namespace RadioHead.RhRf95
                 //    - timeout
                 //    - bad CRC
                 //    - CRC is required, but it is not present
-                if (Mode == RhModes.Rx && 
-                    (((irqFlags & (RX_TIMEOUT | PAYLOAD_CRC_ERROR)) != 0) || 
+                if (Mode == RhModes.Rx &&
+                    (((irqFlags & (RX_TIMEOUT | PAYLOAD_CRC_ERROR)) != 0) ||
                      (_enableCrc && (hopChannel & RX_PAYLOAD_CRC_IS_ON) == 0)))
                 {
                     RxBad++;
@@ -720,7 +750,7 @@ namespace RadioHead.RhRf95
 
                 // It is possible to get RX_DONE and CRC_ERROR and VALID_HEADER all at once
                 // so this must be an else
-                else if (Mode == RhModes.Rx && ((irqFlags & RX_DONE) !=0))
+                else if (Mode == RhModes.Rx && ((irqFlags & RX_DONE) != 0))
                 {
                     // Packet received, no CRC error
                     //	Serial.println("R");
@@ -740,7 +770,7 @@ namespace RadioHead.RhRf95
                     // this is according to the doc, but is it really correct?
                     // weakest receivable signals are reported RSSI at about -66
                     LastRssi = ReadFrom(REG_1A_PKT_RSSI_VALUE);
-                    
+
                     // Adjust the RSSI, datasheet page 87
                     if (LastSnr < 0)
                         LastRssi = (short)(LastRssi + LastSnr);
