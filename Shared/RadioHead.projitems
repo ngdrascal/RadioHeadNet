@@ -10,16 +10,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)RadioHead.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RhRf69\Rh69Modes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RhModes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RhGenericDriver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RhRf69\Rf69.Config.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RhRf69\Rf69.Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RhRf69\Rf69.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RhRf95\Rf95.Config.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)RhRf95\Rf95.Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RhRf95\Rf95.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RhSpiDriver.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)RhRf95\Rf95.Constants.cs" />
+    <None Include="$(MSBuildThisFileDirectory)RhRf95\readme.md" />
   </ItemGroup>
 </Project>

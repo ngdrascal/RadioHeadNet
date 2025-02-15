@@ -41,7 +41,7 @@ namespace RadioHead
 
         protected RhGenericDriver()
         {
-            Mode = Rh69Modes.Initialising;
+            Mode = RhModes.Initialising;
             ThisAddress = RadioHead.BroadcastAddress;
             TxHeaderTo = RadioHead.BroadcastAddress;
             TxHeaderFrom = RadioHead.BroadcastAddress;
@@ -68,8 +68,8 @@ namespace RadioHead
         /// Tests whether a new message is Available
         /// from the Driver. 
         /// On most drivers, if there is an uncollected received message, and there is no message
-        /// currently bing transmitted, this will also put the Driver into Rh69Modes.Rx Mode until
-        /// a message is actually received by the transport, when it will be returned to Rh69Modes.Idle.
+        /// currently bing transmitted, this will also put the Driver into RhModes.Rx Mode until
+        /// a message is actually received by the transport, when it will be returned to RhModes.Idle.
         /// This can be called multiple times in a timeout loop.
         /// </summary>
         /// <return>true if a new, complete, error-free uncollected message is Available to be
@@ -117,49 +117,27 @@ namespace RadioHead
         /// can be useful in multitasking environment like Linux to prevent
         /// WaitAvailableTimeout using all the CPU while polling for receiver activity.
         /// </param>
-#if NETSTANDARD2_1
         public virtual void WaitAvailable(ushort pollDelay = 0)
         {
             while (!Available())
             {
-                Thread.Yield();
+                RadioHead.Yield();
                 if (pollDelay != 0)
                 {
                     Thread.Sleep(pollDelay);
                 }
             }
         }
-#else
-        public virtual void WaitAvailable(ushort pollDelay = 0)
-        {
-            while (!Available())
-            {
-                DelayHelper.DelayMicroseconds(0, true);
-                if (pollDelay != 0)
-                {
-                    Thread.Sleep(pollDelay);
-                }
-            }
-        }
-#endif
+
         /// <summary>
         /// Blocks until the transmitter is no longer transmitting.
         /// </summary>
-#if NETSTANDARD2_1
         public virtual bool WaitPacketSent()
         {
-            while (Mode == Rh69Modes.Tx)
-                Thread.Yield();
+            while (Mode == RhModes.Tx)
+                RadioHead.Yield();
             return true;
         }
-#else
-        public virtual bool WaitPacketSent()
-        {
-            while (Mode == Rh69Modes.Tx)
-                DelayHelper.DelayMicroseconds(0, true);
-            return true;
-        }
-#endif
 
         /// <summary>
         /// Blocks until the transmitter is no longer transmitting or until the timeout
@@ -169,31 +147,17 @@ namespace RadioHead
         /// <returns>true if the radio completed transmission within the timeout period.
         /// False if it timed out.
         /// </returns>
-#if NETSTANDARD2_1
         public virtual bool WaitPacketSent(ushort timeout)
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
-            while (Mode == Rh69Modes.Tx && stopwatch.ElapsedMilliseconds < timeout)
+            while (Mode == RhModes.Tx && stopwatch.ElapsedMilliseconds < timeout)
             {
-                Thread.Yield();
+                RadioHead.Yield();
             }
 
-            return Mode != Rh69Modes.Tx;
+            return Mode != RhModes.Tx;
         }
-#else
-        public virtual bool WaitPacketSent(ushort timeout)
-        {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            while (Mode == Rh69Modes.Tx && stopwatch.ElapsedMilliseconds < timeout)
-            {
-                DelayHelper.DelayMicroseconds(0, true);
-            }
-
-            return Mode != Rh69Modes.Tx;
-        }
-#endif
         /// <summary>
         /// Starts the receiver and blocks until a received message is Available or a timeout.
         /// Default implementation calls Available() repeatedly until it returns true;
@@ -204,26 +168,6 @@ namespace RadioHead
         /// using all the CPU while polling for receiver activity.
         /// </param>
         /// <returns>true if a message is Available</returns>
-#if NETSTANDARD2_1
-        public virtual bool WaitAvailableTimeout(ushort timeout, ushort pollDelay = 0)
-        {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            while (stopwatch.ElapsedMilliseconds < timeout)
-            {
-                if (Available())
-                {
-                    return true;
-                }
-                Thread.Yield();
-                if (pollDelay != 0)
-                {
-                    Thread.Sleep(pollDelay);
-                }
-            }
-            return false;
-        }
-#else
         public virtual bool WaitAvailableTimeout(ushort timeout, ushort pollDelay = 0)
         {
             var stopwatch = new Stopwatch();
@@ -235,16 +179,21 @@ namespace RadioHead
                     return true;
                 }
 
-                DelayHelper.DelayMicroseconds(0, true);
+                RadioHead.Yield();
+
                 if (pollDelay != 0)
                 {
                     Thread.Sleep(pollDelay);
                 }
             }
-
             return false;
         }
-#endif
+
+        /// <summary>
+        /// Channel activity detected
+        /// </summary>
+        protected bool Cad { get;  set; }
+
         // Bent G Christensen (bentor@gmail.com), 08/15/2016
         /// <summary>
         /// Channel Activity Detection (CAD).
@@ -356,7 +305,7 @@ namespace RadioHead
         public short LastRssi { get; protected set; }
 
         /// <summary>The current transport operating Mode</summary>
-        protected Rh69Modes Mode { get; set; }
+        protected RhModes Mode { get; set; }
 
         /// <summary>
         /// Sets the transport hardware into low-power Sleep Mode (if supported). May be

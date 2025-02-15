@@ -1,4 +1,6 @@
-﻿// ReSharper disable once RedundantUsingDirective
+﻿#pragma warning disable CA1825
+// ReSharper disable UseArrayEmptyMethod
+
 using System;
 using System.Device.Gpio;
 using System.Device.Spi;
@@ -150,7 +152,7 @@ namespace RadioHead.RhRf69
             _logger.LogTrace("-->{0}(): mode={1}, IrqFlags2={2}", nameof(HandleInterrupt), Mode.ToString(),
                 irqFlags2.ToString());
 
-            if (Mode == Rh69Modes.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
+            if (Mode == RhModes.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
             {
                 // A transmitter message has been fully sent
                 SetModeIdle(); // Clears FIFO
@@ -159,7 +161,7 @@ namespace RadioHead.RhRf69
 
             // Must look for PAYLOADREADY, not CRCOK, since only PAYLOADREADY occurs _after_
             // AES decryption has been done
-            if (Mode == Rh69Modes.Rx && (irqFlags2 & IRQFLAGS2_PAYLOADREADY) != 0)
+            if (Mode == RhModes.Rx && (irqFlags2 & IRQFLAGS2_PAYLOADREADY) != 0)
             {
                 // A complete message has been received with good CRC
                 // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
@@ -310,8 +312,8 @@ namespace RadioHead.RhRf69
         public void SetModeIdle()
         {
             _logger.LogTrace("{0}()", nameof(SetModeIdle));
-            
-            if (Mode != Rh69Modes.Idle)
+
+            if (Mode != RhModes.Idle)
             {
                 if (_power >= 18)
                 {
@@ -321,7 +323,7 @@ namespace RadioHead.RhRf69
                 }
 
                 SetOpMode(_idleMode);
-                Mode = Rh69Modes.Idle;
+                Mode = RhModes.Idle;
             }
         }
 
@@ -332,7 +334,7 @@ namespace RadioHead.RhRf69
         {
             _logger.LogTrace("{0}()", nameof(SetModeRx));
 
-            if (Mode != Rh69Modes.Rx)
+            if (Mode != RhModes.Rx)
             {
                 if (_power >= 18)
                 {
@@ -345,7 +347,7 @@ namespace RadioHead.RhRf69
                 WriteTo(REG_25_DioMapping1, DIOMAPPING1_DIO0MAPPING_01);
 
                 SetOpMode(OPMODE_MODE_RX); // Clears FIFO
-                Mode = Rh69Modes.Rx;
+                Mode = RhModes.Rx;
             }
         }
 
@@ -356,7 +358,7 @@ namespace RadioHead.RhRf69
         {
             _logger.LogTrace("{0}()", nameof(SetModeTx));
 
-            if (Mode != Rh69Modes.Tx)
+            if (Mode != RhModes.Tx)
             {
                 if (_power >= 18)
                 {
@@ -370,7 +372,7 @@ namespace RadioHead.RhRf69
                 WriteTo(REG_25_DioMapping1, DIOMAPPING1_DIO0MAPPING_00);
 
                 SetOpMode(OPMODE_MODE_TX); // Clears FIFO
-                Mode = Rh69Modes.Tx;
+                Mode = RhModes.Tx;
             }
         }
 
@@ -484,7 +486,7 @@ namespace RadioHead.RhRf69
         /// </returns>
         public override bool Available()
         {
-            if (Mode == Rh69Modes.Tx)
+            if (Mode == RhModes.Tx)
                 return false;
 
             // Make sure we are receiving
@@ -529,7 +531,7 @@ namespace RadioHead.RhRf69
         /// <returns></returns>
         public bool PollAvailable(int timeout)
         {
-            if (Mode == Rh69Modes.Tx)
+            if (Mode == RhModes.Tx)
                 return false;
 
             SetModeRx();
@@ -696,10 +698,10 @@ namespace RadioHead.RhRf69
         /// <returns>true if Sleep Mode was successfully entered</returns>
         public override bool Sleep()
         {
-            if (Mode != Rh69Modes.Sleep)
+            if (Mode != RhModes.Sleep)
             {
                 WriteTo(REG_01_OpMode, OPMODE_MODE_SLEEP);
-                Mode = Rh69Modes.Sleep;
+                Mode = RhModes.Sleep;
             }
 
             return true;
