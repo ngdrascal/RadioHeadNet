@@ -9,6 +9,7 @@
 
    <PropertyGroup>
       <EnableNETAnalyzers>true</EnableNETAnalyzers>
+      <LangVersion>latest</LangVersion>
    </PropertyGroup>
 
    <ItemGroup>

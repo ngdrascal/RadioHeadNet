@@ -18,11 +18,11 @@ namespace RadioHead.RhRf69
         private const byte SPI_WRITE_MASK = 0x80;
 
         // Maximum encrypt-able payload length the RF69 can support
-        internal const byte MAX_ENCRYPTABLE_PAYLOAD_LEN = 64;
+        public const byte MAX_ENCRYPTABLE_PAYLOAD_LEN = 64;
 
         // The length of the headers we add.
         // The headers are inside the RF69's payload and are therefore encrypted if encryption is enabled
-        internal const byte HEADER_LEN = 4;
+        public const byte HEADER_LEN = 4;
 
         // This is the maximum message length that can be supported by this driver. Limited by
         // the size of the FIFO, since we are unable to support on-the-fly filling and emptying 
@@ -30,7 +30,7 @@ namespace RadioHead.RhRf69
         // Can be pre-defined to a smaller size (to save SRAM) prior to including this header
         // Here we allow for 4 bytes of address and header and payload to be included in the 64 byte encryption limit.
         // the one byte payload length is not encrypted
-        private const byte MAX_MESSAGE_LEN = MAX_ENCRYPTABLE_PAYLOAD_LEN - HEADER_LEN;
+        public const byte MAX_MESSAGE_LEN = MAX_ENCRYPTABLE_PAYLOAD_LEN - HEADER_LEN;
 
         // Register names
         internal const byte REG_00_Fifo = 0x00;
