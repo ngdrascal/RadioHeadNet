@@ -1,11 +1,12 @@
 ﻿using System.Device.Gpio;
 using System.Text;
+using Microsoft.Extensions.Options;
 using RadioHead.RhRf69;
 using RadioHeadIot.Examples.Shared;
 
 namespace Rf69Client;
 
-internal class Application(GpioPin resetPin, Rf69 radio, RadioConfiguration radioConfig)
+internal class Application(GpioPin resetPin, Rf69 radio, IOptions<RadioConfiguration> radioConfig)
 {
     public void Run()
     {
@@ -41,7 +42,7 @@ internal class Application(GpioPin resetPin, Rf69 radio, RadioConfiguration radi
         //    - power: +13dbM (for low power module)
         //    - encryption: none
 
-        if (!radio.SetFrequency(radioConfig.Frequency))
+        if (!radio.SetFrequency(radioConfig.Value.Frequency))
         {
             Console.WriteLine("SetFrequency failed");
             return false;
@@ -49,7 +50,7 @@ internal class Application(GpioPin resetPin, Rf69 radio, RadioConfiguration radi
 
         // If you are using a high power RF69 eg RFM69HW, you *must* set a Tx power with the
         // isHighPowerModule flag set like this:
-        radio.SetTxPower(radioConfig.PowerLevel, radioConfig.IsHighPowered);
+        radio.SetTxPower(radioConfig.Value.PowerLevel, radioConfig.Value.IsHighPowered);
 
         // The encryption key has to be the same as the one in the server
         byte[] key = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,

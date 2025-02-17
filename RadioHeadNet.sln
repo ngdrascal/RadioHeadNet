@@ -51,6 +51,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{C42839
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIOT.Examples.Shared", "IOT\Examples\Shared\RadioHeadIOT.Examples.Shared\RadioHeadIOT.Examples.Shared.csproj", "{85F927ED-DE54-4BEC-938C-B28E83E26A0D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rf69Server", "IOT\Examples\Rf69\Rf69Server\Rf69Server.csproj", "{7BBF9AF8-3C61-406F-9613-F51BF5D26AFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +99,10 @@ Global
 		{85F927ED-DE54-4BEC-938C-B28E83E26A0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{85F927ED-DE54-4BEC-938C-B28E83E26A0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{85F927ED-DE54-4BEC-938C-B28E83E26A0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BBF9AF8-3C61-406F-9613-F51BF5D26AFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BBF9AF8-3C61-406F-9613-F51BF5D26AFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BBF9AF8-3C61-406F-9613-F51BF5D26AFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BBF9AF8-3C61-406F-9613-F51BF5D26AFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -116,6 +122,7 @@ Global
 		{094432A5-9697-4D7A-8B42-83F984AD0C46} = {7DD886B5-4E5D-4108-8FDB-9FEEAE691D24}
 		{C4283931-B0AF-4F8C-9286-0480374A7979} = {9385BFF6-AE92-4C73-B509-48B139CAF521}
 		{85F927ED-DE54-4BEC-938C-B28E83E26A0D} = {C4283931-B0AF-4F8C-9286-0480374A7979}
+		{7BBF9AF8-3C61-406F-9613-F51BF5D26AFB} = {7DD886B5-4E5D-4108-8FDB-9FEEAE691D24}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {04E1449A-3F2D-41F1-BBBE-2A8F099CB48E}

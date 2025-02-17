@@ -8,17 +8,30 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadioHead.RhRf69;
-using RadioHeadIot;
-using RadioHeadIot.Examples.Shared;
 
-namespace Rf69Client;
+namespace RadioHeadIot.Examples.Shared;
 
-internal static class HostExtensions
+public static class HostExtensions
 {
     public static HostApplicationBuilder AddConfigurationOptions(this HostApplicationBuilder builder)
     {
-        builder.Services.Configure<RadioConfiguration>(
-            builder.Configuration.GetSection(RadioConfiguration.SectionName));
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Gpio:HostDevice"] = SupportedBoards.Ftx232H.ToString(),
+            ["Gpio:DeviceSelectPin"] = "5",
+            ["Gpio:ResetPin"] = "6",
+            ["Gpio:InterruptPin"] = "7",
+            ["Radio:Frequency"] = "915.0",
+            ["Radio:PowerLevel"] = "20",
+        });
+
+        builder
+            .Services
+            .AddOptionsWithValidateOnStart<GpioConfiguration>(GpioConfiguration.SectionName);
+
+        builder
+            .Services
+            .AddOptionsWithValidateOnStart<RadioConfiguration>(RadioConfiguration.SectionName);
 
         return builder;
     }
@@ -30,7 +43,7 @@ internal static class HostExtensions
             .GetSection(GpioConfiguration.SectionName)
             .Get<GpioConfiguration>();
 
-        if (gpioConfig is not null && !gpioConfig.IsValid())
+        if (gpioConfig is null || !gpioConfig.IsValid())
             throw new ArgumentException("Invalid GPIO configuration.");
 
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
@@ -51,14 +64,14 @@ internal static class HostExtensions
 
         builder.Services.AddSingleton<GpioController>(provider =>
         {
-            var hostBoard = provider.GetRequiredKeyedService<Board>(gpioConfig!.HostDevice);
+            var hostBoard = provider.GetRequiredKeyedService<Board>(gpioConfig.HostDevice);
             var gpioController = hostBoard.CreateGpioController();
             return gpioController;
         });
 
         builder.Services.AddKeyedSingleton<GpioPin>("DeviceSelectPin", (provider, _) =>
         {
-            var pinNumber = gpioConfig!.DeviceSelectPin;
+            var pinNumber = gpioConfig.DeviceSelectPin;
             var gpioController = provider.GetRequiredService<GpioController>();
             var pin = gpioController.OpenPin(pinNumber, PinMode.Output);
             return pin;
@@ -66,7 +79,8 @@ internal static class HostExtensions
 
         builder.Services.AddKeyedSingleton<GpioPin>("ResetPin", (provider, _) =>
         {
-            var pinNumber = gpioConfig!.ResetPin;
+            var gpioConfigOptions = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
+            var pinNumber = gpioConfigOptions.ResetPin;
             var gpioController = provider.GetRequiredService<GpioController>();
             var pin = gpioController.OpenPin(pinNumber, PinMode.Output);
             return pin;
@@ -82,7 +96,7 @@ internal static class HostExtensions
                 Mode = SpiMode.Mode0
             };
 
-            var hostBoard = provider.GetRequiredKeyedService<Board>(gpioConfig!.HostDevice);
+            var hostBoard = provider.GetRequiredKeyedService<Board>(gpioConfig.HostDevice);
             var spiDevice = hostBoard.CreateSpiDevice(spiSettings);
             return spiDevice;
         });
@@ -97,18 +111,18 @@ internal static class HostExtensions
             return radio;
         });
 
-        builder.Services.AddSingleton<Application>(provider =>
-        {
-            var resetPin = provider.GetRequiredKeyedService<GpioPin>("ResetPin");
-            var radio = provider.GetRequiredService<Rf69>();
-
-            var radioConfigOptions = provider.GetRequiredService<IOptions<RadioConfiguration>>().Value;
-            if (!radioConfigOptions.IsValid())
-                throw new ArgumentException("Invalid radio configuration.");
-
-            var app = new Application(resetPin, radio, radioConfigOptions);
-            return app;
-        });
+        // builder.Services.AddSingleton<Application>(provider =>
+        // {
+        //     var resetPin = provider.GetRequiredKeyedService<GpioPin>("ResetPin");
+        //     var radio = provider.GetRequiredService<Rf69>();
+        //
+        //     var radioConfigOptions = provider.GetRequiredService<IOptions<RadioConfiguration>>().Value;
+        //     if (!radioConfigOptions.IsValid())
+        //         throw new ArgumentException("Invalid radio configuration.");
+        //
+        //     var app = new Application(resetPin, radio, radioConfigOptions);
+        //     return app;
+        // });
 
         return builder;
     }
@@ -119,7 +133,7 @@ internal static class HostExtensions
                configuration is { DeviceSelectPin: >= 0, ResetPin: >= 0, InterruptPin: >= 0 };
     }
 
-    private static bool IsValid(this RadioConfiguration settings)
+    public static bool IsValid(this RadioConfiguration settings)
     {
         return settings is { Frequency: > 0, PowerLevel: >= 0 };
     }
