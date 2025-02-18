@@ -1,31 +1,27 @@
-﻿using System.Device.Gpio;
-using System.Text;
+﻿using System.Text;
 using Microsoft.Extensions.Options;
 using RadioHead.RhRf69;
 using RadioHeadIot.Examples.Shared;
+using RadioHeadIOT.Examples.Shared;
 
 namespace Rf69Client;
 
-internal class Application(GpioPin resetPin, Rf69 radio, IOptions<RadioConfiguration> radioConfig)
+internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
+    Rf69RadioResetter resetter)
 {
-    public void Run()
+    public void Run(CancellationToken cancellationToken)
     {
-        ResetRadio();
-        if (!ConfigureRadio())
+        if (!Init())
             return;
 
-        Loop();
+        while (!cancellationToken.IsCancellationRequested)
+            Loop();
     }
 
-    private void ResetRadio()
+    private bool Init()
     {
-        resetPin.Write(PinValue.Low);
-
-        resetPin.Write(PinValue.High);
-        Thread.Sleep(TimeSpan.FromMicroseconds(100));
-
-        resetPin.Write(PinValue.Low);
-        Thread.Sleep(TimeSpan.FromMilliseconds(5));
+        resetter.ResetRadio();
+        return ConfigureRadio();
     }
 
     private bool ConfigureRadio()
@@ -53,9 +49,9 @@ internal class Application(GpioPin resetPin, Rf69 radio, IOptions<RadioConfigura
         radio.SetTxPower(radioConfig.Value.PowerLevel, radioConfig.Value.IsHighPowered);
 
         // // The encryption key has to be the same as the one in the server
-        // byte[] key = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-        //     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
-        // radio.SetEncryptionKey(key);
+        byte[] key = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                      0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+        radio.SetEncryptionKey(key);
 
         return true;
     }
@@ -83,6 +79,6 @@ internal class Application(GpioPin resetPin, Rf69 radio, IOptions<RadioConfigura
             Console.WriteLine("No reply, is Rf69Server running?");
         }
 
-        Thread.Sleep(400);
+        Thread.Sleep(3000);
     }
 }

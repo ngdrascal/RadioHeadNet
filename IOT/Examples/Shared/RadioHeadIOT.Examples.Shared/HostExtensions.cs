@@ -7,11 +7,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RadioHead.RhRf69;
+using RadioHeadIOT.Examples.Shared;
 
 namespace RadioHeadIot.Examples.Shared;
 
 public static class HostExtensions
 {
+    public static HostApplicationBuilder ConfigureConfigurations(this HostApplicationBuilder builder)
+    {
+        builder.Configuration.Sources.Clear();
+        builder.Configuration.AddJsonFile("appSettings.json", false);
+
+        return builder;
+    }
+
     public static HostApplicationBuilder AddConfigurationOptions(this HostApplicationBuilder builder)
     {
         builder.Configuration.Sources.Clear();
@@ -30,7 +39,8 @@ public static class HostExtensions
         return builder;
     }
 
-    public static HostApplicationBuilder ConfigureDependencyInjection(this HostApplicationBuilder builder)
+    public static HostApplicationBuilder ConfigureDependencyInjection<TApp>(this HostApplicationBuilder builder)
+       where TApp : class
     {
         var gpioConfig = builder
             .Configuration
@@ -104,18 +114,13 @@ public static class HostExtensions
             return radio;
         });
 
-        // builder.Services.AddSingleton<Application>(provider =>
-        // {
-        //     var resetPin = provider.GetRequiredKeyedService<GpioPin>("ResetPin");
-        //     var radio = provider.GetRequiredService<Rf69>();
-        //
-        //     var radioConfigOptions = provider.GetRequiredService<IOptions<RadioConfiguration>>().Value;
-        //     if (!radioConfigOptions.IsValid())
-        //         throw new ArgumentException("Invalid radio configuration.");
-        //
-        //     var app = new Application(resetPin, radio, radioConfigOptions);
-        //     return app;
-        // });
+        builder.Services.AddSingleton<Rf69RadioResetter>(provider =>
+        {
+            var resetPin = provider.GetRequiredKeyedService<GpioPin>("ResetPin");
+            return new Rf69RadioResetter(resetPin);
+        });
+
+        builder.Services.AddSingleton<TApp>();
 
         return builder;
     }
