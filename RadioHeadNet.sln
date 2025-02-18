@@ -53,6 +53,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIOT.Examples.Share
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rf69Server", "IOT\Examples\Rf69\Rf69Server\Rf69Server.csproj", "{7BBF9AF8-3C61-406F-9613-F51BF5D26AFB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{F1314E58-CC5B-4E15-A368-6148364F8546}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DataSheets", "DataSheets", "{5DEDB972-9246-483A-A730-A3A377DF1E6A}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\Datasheets\RFM69HCW-V1.1.pdf = Docs\Datasheets\RFM69HCW-V1.1.pdf
+		Docs\Datasheets\RFM96W-V2.0_1695351477.pdf = Docs\Datasheets\RFM96W-V2.0_1695351477.pdf
+		Docs\Datasheets\sx1231.pdf = Docs\Datasheets\sx1231.pdf
+		Docs\Datasheets\sx1276_77_78_79.pdf = Docs\Datasheets\sx1276_77_78_79.pdf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -123,6 +133,7 @@ Global
 		{C4283931-B0AF-4F8C-9286-0480374A7979} = {9385BFF6-AE92-4C73-B509-48B139CAF521}
 		{85F927ED-DE54-4BEC-938C-B28E83E26A0D} = {C4283931-B0AF-4F8C-9286-0480374A7979}
 		{7BBF9AF8-3C61-406F-9613-F51BF5D26AFB} = {7DD886B5-4E5D-4108-8FDB-9FEEAE691D24}
+		{5DEDB972-9246-483A-A730-A3A377DF1E6A} = {F1314E58-CC5B-4E15-A368-6148364F8546}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {04E1449A-3F2D-41F1-BBBE-2A8F099CB48E}
