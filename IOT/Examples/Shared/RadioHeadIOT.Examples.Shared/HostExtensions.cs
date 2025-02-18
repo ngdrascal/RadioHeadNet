@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using RadioHead.RhRf69;
 
 namespace RadioHeadIot.Examples.Shared;
@@ -15,23 +14,18 @@ public static class HostExtensions
 {
     public static HostApplicationBuilder AddConfigurationOptions(this HostApplicationBuilder builder)
     {
-        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
-        {
-            ["Gpio:HostDevice"] = SupportedBoards.Ftx232H.ToString(),
-            ["Gpio:DeviceSelectPin"] = "5",
-            ["Gpio:ResetPin"] = "6",
-            ["Gpio:InterruptPin"] = "7",
-            ["Radio:Frequency"] = "915.0",
-            ["Radio:PowerLevel"] = "20",
-        });
+        builder.Configuration.Sources.Clear();
+        builder.Configuration.AddJsonFile("appSettings.json", false);
 
         builder
             .Services
-            .AddOptionsWithValidateOnStart<GpioConfiguration>(GpioConfiguration.SectionName);
+            .Configure<GpioConfiguration>(
+                builder.Configuration.GetSection(GpioConfiguration.SectionName));
 
         builder
             .Services
-            .AddOptionsWithValidateOnStart<RadioConfiguration>(RadioConfiguration.SectionName);
+            .Configure<RadioConfiguration>(
+                builder.Configuration.GetSection(RadioConfiguration.SectionName));
 
         return builder;
     }
@@ -79,8 +73,7 @@ public static class HostExtensions
 
         builder.Services.AddKeyedSingleton<GpioPin>("ResetPin", (provider, _) =>
         {
-            var gpioConfigOptions = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
-            var pinNumber = gpioConfigOptions.ResetPin;
+            var pinNumber = gpioConfig.ResetPin;
             var gpioController = provider.GetRequiredService<GpioController>();
             var pin = gpioController.OpenPin(pinNumber, PinMode.Output);
             return pin;

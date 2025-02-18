@@ -52,10 +52,10 @@ internal class Application(GpioPin resetPin, Rf69 radio, IOptions<RadioConfigura
         // isHighPowerModule flag set like this:
         radio.SetTxPower(radioConfig.Value.PowerLevel, radioConfig.Value.IsHighPowered);
 
-        // The encryption key has to be the same as the one in the server
-        byte[] key = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
-        radio.SetEncryptionKey(key);
+        // // The encryption key has to be the same as the one in the server
+        // byte[] key = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+        //     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+        // radio.SetEncryptionKey(key);
 
         return true;
     }
@@ -74,14 +74,9 @@ internal class Application(GpioPin resetPin, Rf69 radio, IOptions<RadioConfigura
         if (radio.WaitAvailableTimeout(500))
         {
             // Should be a reply message for us now   
-            if (radio.Receive(out var buf))
-            {
-                Console.WriteLine($"got reply: {buf}");
-            }
-            else
-            {
-                Console.WriteLine("Received failed");
-            }
+
+            Console.WriteLine(radio.Receive(out var buf) ? $"Got reply: {buf}" :
+                                                                   "Received failed");
         }
         else
         {

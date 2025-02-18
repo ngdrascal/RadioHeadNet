@@ -602,6 +602,18 @@ namespace RadioHead.RhRf69
             return true;
         }
 
+        public override bool WaitPacketSent()
+        {
+            var args = new PinValueChangedEventArgs(PinEventTypes.Falling, -1);
+            HandleInterrupt(null, args);
+            while (Mode == RhModes.Tx)
+            {
+                RadioHead.Yield();
+                HandleInterrupt(null, args);
+            }
+            return true;
+        }
+
         /// <summary>
         /// Sets the length of the preamble in bytes. 
         /// Caution: this should be set to the same value on all nodes in your network.

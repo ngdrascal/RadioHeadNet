@@ -30,6 +30,10 @@ namespace RadioHead
     /// </summary>
     public abstract class RhGenericDriver
     {
+        private readonly object _criticalSection = new object();
+        private RhModes _mode;
+        private ushort _txGood;
+
         // Defines bits of the FLAGS header reserved for use by the RadioHead library and 
         // the flags Available for use by applications
         protected const byte RH_FLAGS_RESERVED = 0xf0;
@@ -192,7 +196,7 @@ namespace RadioHead
         /// <summary>
         /// Channel activity detected
         /// </summary>
-        protected bool Cad { get;  set; }
+        protected bool Cad { get; set; }
 
         // Bent G Christensen (bentor@gmail.com), 08/15/2016
         /// <summary>
@@ -305,7 +309,23 @@ namespace RadioHead
         public short LastRssi { get; protected set; }
 
         /// <summary>The current transport operating Mode</summary>
-        protected RhModes Mode { get; set; }
+        protected RhModes Mode
+        {
+            get
+            {
+                lock (_criticalSection)
+                {
+                    return _mode;
+                }
+            }
+            set
+            {
+                lock (_criticalSection)
+                {
+                    _mode = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Sets the transport hardware into low-power Sleep Mode (if supported). May be
@@ -337,6 +357,22 @@ namespace RadioHead
         /// The count of the number of packets successfully transmitted (though not
         /// necessarily received by the destination)
         /// </summary>
-        public ushort TxGood { get; protected set; }
+        public ushort TxGood
+        {
+            get
+            {
+                lock (_criticalSection)
+                {
+                    return _txGood;
+                }
+            }
+            protected set
+            {
+                lock (_criticalSection)
+                {
+                    _txGood = value;
+                }
+            }
+        }
     }
 }
