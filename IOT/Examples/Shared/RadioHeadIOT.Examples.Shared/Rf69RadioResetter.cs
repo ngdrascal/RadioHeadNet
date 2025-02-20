@@ -1,4 +1,5 @@
-﻿using System.Device.Gpio;
+﻿
+using System.Device.Gpio;
 
 namespace RadioHeadIOT.Examples.Shared;
 
