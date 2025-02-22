@@ -7,7 +7,7 @@ public class GpioConfiguration
     public const string SectionName = "Gpio";
 
     [Required]
-    [RegularExpression("^FTX232H|RPI$",
+    [RegularExpression("(?i)^(FTX232H|RPi)",
         ErrorMessage = "Supported boards are FTX232H and Raspberry Pi.")]
     public string HostDevice { get; set; } = string.Empty;
 

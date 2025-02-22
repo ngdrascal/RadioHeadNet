@@ -10,7 +10,9 @@ namespace RadioHeadIot.Tests;
 public class GpioConfigurationTests
 {
     [TestCase("RPI", 1, 2, 3)]
+    [TestCase("rPi", 1, 2, 3)]
     [TestCase("FTX232H", 1, 2, -1)]
+    [TestCase("fTx232h", 1, 2, -1)]
     public void Test01(string hostDevice, int selectPin, int resetPin, int intrPin)
     {
         // ARRANGE:
