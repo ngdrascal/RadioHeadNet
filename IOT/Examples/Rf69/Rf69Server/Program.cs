@@ -10,9 +10,9 @@ internal static class Program
         var builder = Host.CreateApplicationBuilder(args);
 
         var host = builder
-            .ConfigureConfigurations()
+            .AddConfigurationSources()
             .AddConfigurationOptions()
-            .ConfigureDependencyInjection<Application>()
+            .AddServices<Application>()
             .Build();
 
         var ct = CancellationToken.None;

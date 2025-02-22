@@ -13,7 +13,7 @@ namespace RadioHeadIot.Examples.Shared;
 
 public static class HostExtensions
 {
-    public static HostApplicationBuilder ConfigureConfigurations(this HostApplicationBuilder builder)
+    public static HostApplicationBuilder AddConfigurationSources(this HostApplicationBuilder builder)
     {
         builder.Configuration.Sources.Clear();
         builder.Configuration.AddJsonFile("appSettings.json", false);
@@ -23,32 +23,24 @@ public static class HostExtensions
 
     public static HostApplicationBuilder AddConfigurationOptions(this HostApplicationBuilder builder)
     {
-        builder.Configuration.Sources.Clear();
-        builder.Configuration.AddJsonFile("appSettings.json", false);
+        builder
+            .Services
+            .Configure<GpioConfiguration>(builder.Configuration.GetSection(GpioConfiguration.SectionName));
 
         builder
             .Services
-            .Configure<GpioConfiguration>(
-                builder.Configuration.GetSection(GpioConfiguration.SectionName));
-
-        builder
-            .Services
-            .Configure<RadioConfiguration>(
-                builder.Configuration.GetSection(RadioConfiguration.SectionName));
+            .Configure<RadioConfiguration>(builder.Configuration.GetSection(RadioConfiguration.SectionName));
 
         return builder;
     }
 
-    public static HostApplicationBuilder ConfigureDependencyInjection<TApp>(this HostApplicationBuilder builder)
+    public static HostApplicationBuilder AddServices<TApp>(this HostApplicationBuilder builder)
        where TApp : class
     {
-        var gpioConfig = builder
-            .Configuration
+        var gpioConfig = new GpioConfiguration();
+        builder.Configuration
             .GetSection(GpioConfiguration.SectionName)
-            .Get<GpioConfiguration>();
-
-        if (gpioConfig is null || !gpioConfig.IsValid())
-            throw new ArgumentException("Invalid GPIO configuration.");
+            .Bind(gpioConfig);
 
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 
@@ -125,7 +117,7 @@ public static class HostExtensions
         return builder;
     }
 
-    private static bool IsValid(this GpioConfiguration configuration)
+    public static bool IsValid(this GpioConfiguration configuration)
     {
         return !string.IsNullOrEmpty(configuration.HostDevice) &&
                configuration is { DeviceSelectPin: >= 0, ResetPin: >= 0, InterruptPin: >= 0 };
