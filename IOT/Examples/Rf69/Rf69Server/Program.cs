@@ -5,7 +5,8 @@ using RadioHeadIot.Examples.Shared;
 namespace Rf69Server;
 
 internal static class Program
-{ internal static void Main(string[] args)
+{
+    internal static void Main(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
 

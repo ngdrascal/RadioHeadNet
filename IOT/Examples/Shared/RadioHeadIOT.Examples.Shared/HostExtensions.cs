@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RadioHead.RhRf69;
-using RadioHeadIOT.Examples.Shared;
 
 namespace RadioHeadIot.Examples.Shared;
 
@@ -23,13 +22,22 @@ public static class HostExtensions
 
     public static HostApplicationBuilder AddConfigurationOptions(this HostApplicationBuilder builder)
     {
-        builder
-            .Services
-            .Configure<GpioConfiguration>(builder.Configuration.GetSection(GpioConfiguration.SectionName));
+        builder.Services
+            .AddOptions<GpioConfiguration>()
+            .Bind(builder.Configuration.GetSection(GpioConfiguration.SectionName))
+            .ValidateDataAnnotations();
 
-        builder
-            .Services
-            .Configure<RadioConfiguration>(builder.Configuration.GetSection(RadioConfiguration.SectionName));
+        builder.Services
+            .AddOptions<RadioConfiguration>()
+            .Bind(builder.Configuration.GetSection(RadioConfiguration.SectionName))
+            .ValidateDataAnnotations()
+            .Validate(options =>
+            {
+                if (options.IsHighPowered)
+                    return options.PowerLevel is >= -2 and <= 20;
+                else
+                    return options.PowerLevel is >= -18 and <= 13;
+            }, "PowerLevel is out of range. High-Power: -2 to 20.  Low-Power: -18 to 13.");
 
         return builder;
     }
@@ -115,16 +123,5 @@ public static class HostExtensions
         builder.Services.AddSingleton<TApp>();
 
         return builder;
-    }
-
-    public static bool IsValid(this GpioConfiguration configuration)
-    {
-        return !string.IsNullOrEmpty(configuration.HostDevice) &&
-               configuration is { DeviceSelectPin: >= 0, ResetPin: >= 0, InterruptPin: >= 0 };
-    }
-
-    public static bool IsValid(this RadioConfiguration settings)
-    {
-        return settings is { Frequency: > 0, PowerLevel: >= 0 };
     }
 }
