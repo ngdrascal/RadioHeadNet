@@ -33,7 +33,7 @@ namespace RadioHead.RhRf69
         // True when there is a valid message in the Rx buffer
         private bool _rxBufValid;
 
-        private SentDetectionMode _sentDetectionMode = SentDetectionMode.Interrupt;
+        private ChangeDetectionMode _changeDetectionMode = ChangeDetectionMode.Interrupt;
 
         // <summary>
         // Time in millis since the last preamble was received (and the last time the RSSI
@@ -149,8 +149,8 @@ namespace RadioHead.RhRf69
             // Get the interrupt cause
             var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
 
-            _logger.LogTrace("-->{0}(): mode={1}, IrqFlags2={2}", nameof(HandleInterrupt), Mode.ToString(),
-                irqFlags2.ToString());
+            _logger.LogTrace("-->{0}(): mode={1}, IrqFlags2={2}", nameof(HandleInterrupt),
+                Mode.ToString(), irqFlags2.ToString());
 
             if (Mode == RhModes.Tx && (irqFlags2 & IRQFLAGS2_PACKETSENT) != 0)
             {
@@ -492,6 +492,25 @@ namespace RadioHead.RhRf69
             // Make sure we are receiving
             SetModeRx();
 
+            if (_changeDetectionMode == ChangeDetectionMode.Interrupt) 
+                return _rxBufValid;
+
+            // Poll for received data
+            var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
+            if ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0)
+                return false;
+
+            // A complete message has been received with good CRC
+            // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
+            LastRssi = (short)-(ReadFrom(REG_24_RssiValue) >> 1);
+
+            LastPreambleTime = DateTime.UtcNow.Ticks;
+
+            SetModeIdle();
+
+            // save it in our buffer
+            ReadFifo();
+
             return _rxBufValid;
         }
 
@@ -604,19 +623,19 @@ namespace RadioHead.RhRf69
 
         /// <summary>
         /// Determines how the driver detects when the radio completed sending a packet.
-        /// If set to SentDetectionMode.Interrupt, the driver will wait for an interrupt to signal
-        /// the send operation is complete. If set to SentDetectionMode.Poll, the driver will
+        /// If set to ChangeDetectionMode.Interrupt, the driver will wait for an interrupt to signal
+        /// the send operation is complete. If set to ChangeDetectionMode.Poll, the driver will
         /// poll the device to determine if the send operation is complete.
         /// </summary>
         /// <param name="mode"></param>
-        public void SetSentDetectionMode(SentDetectionMode mode)
+        public void SetChangeDetectionMode(ChangeDetectionMode mode)
         {
-            _sentDetectionMode = mode;
+            _changeDetectionMode = mode;
         }
 
         public override bool WaitPacketSent()
         {
-            return _sentDetectionMode == SentDetectionMode.Interrupt ? 
+            return _changeDetectionMode == ChangeDetectionMode.Interrupt ?
                 base.WaitPacketSent() : PollPacketSent();
         }
 

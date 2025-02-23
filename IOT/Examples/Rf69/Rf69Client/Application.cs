@@ -53,9 +53,9 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
         if (key.Length > 0)
             radio.SetEncryptionKey(key);
 
-        // read the SentDetectionMode from the configuration and convert it to an enum
-        if (Enum.TryParse(radioConfig.Value.SentDetectionMode, true, out SentDetectionMode sentDetectionMode))
-            radio.SetSentDetectionMode(sentDetectionMode);
+        // read the ChangeDetectionMode from the configuration and convert it to an enum
+        if (Enum.TryParse(radioConfig.Value.SentDetectionMode, true, out ChangeDetectionMode sentDetectionMode))
+            radio.SetChangeDetectionMode(sentDetectionMode);
 
         return true;
     }

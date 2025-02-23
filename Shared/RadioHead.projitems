@@ -19,7 +19,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)RhRf95\Rf95.Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RhRf95\Rf95.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RhSpiDriver.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SentDetectionMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ChangeDetectionMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)RhRf95\readme.md" />
