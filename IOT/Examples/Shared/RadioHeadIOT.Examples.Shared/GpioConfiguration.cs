@@ -20,6 +20,6 @@ public class GpioConfiguration
     public int ResetPin { get; set; } = -1;
 
     [Required]
-    [Range(-1, 27, ErrorMessage = "Pin number must be between -1 and 27.")]
+    [Range(-1, 27, ErrorMessage = "Pin number must be between 0 and 27.")]
     public int InterruptPin { get; set; } = -1;
 }

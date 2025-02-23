@@ -59,7 +59,6 @@ public class GpioConfigurationTests
             { $"{GpioConfiguration.SectionName}:ResetPin", resetPin.ToString() },
             { $"{GpioConfiguration.SectionName}:InterruptPin", intrPin.ToString() }
         }!);
-
         var configRoot = configBuilder.Build();
 
         var services = new ServiceCollection();

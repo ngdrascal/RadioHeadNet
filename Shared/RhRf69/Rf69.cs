@@ -15,36 +15,36 @@ namespace RadioHead.RhRf69
         // ReSharper disable once ChangeFieldTypeToSystemThreadingLock
         private static readonly object CriticalSection = new object();
 
-        /// The radio OP Mode to use when Mode is RHMode.Idle
+        // The radio OP Mode to use when Mode is RHMode.Idle
         private byte _idleMode;
 
-        /// The reported device type
+        // The reported device type
         private byte _deviceType;
 
-        /// The selected output power in dBm
+        // The selected output power in dBm
         private sbyte _power;
 
-        /// The message length in _rxBuf
+        // The message length in _rxBuf
         private byte _rxBufLen;
 
-        /// Array of octets of the last received message or the next to transmit message
+        // Array of octets of the last received message or the next to transmit message
         private readonly byte[] _rxBuf = new byte[MAX_MESSAGE_LEN];
 
-        /// True when there is a valid message in the Rx buffer
+        // True when there is a valid message in the Rx buffer
         private bool _rxBufValid;
 
-        /// <summary>
-        /// Time in millis since the last preamble was received (and the last time the RSSI
-        /// was measured)
-        /// </summary>
+        private SentDetectionMode _sentDetectionMode = SentDetectionMode.Interrupt;
+
+        // <summary>
+        // Time in millis since the last preamble was received (and the last time the RSSI
+        // was measured)
+        // </summary>
         public long LastPreambleTime { get; private set; }
 
         /// <summary>
         /// Constructor. You can have multiple instances, but each instance must have its own
         /// interrupt and device select pin. After constructing, you must call Init() to
-        /// initialise the interface and the radio module. A maximum of 3 instances can
-        /// co-exist on one processor, provided there are sufficient distinct interrupt lines,
-        /// one for each instance.
+        /// initialise the interface and the radio module.
         /// </summary>
         /// <param name="deviceSelectPin"></param>
         /// <param name="spi"></param>
@@ -602,7 +602,25 @@ namespace RadioHead.RhRf69
             return true;
         }
 
+        /// <summary>
+        /// Determines how the driver detects when the radio completed sending a packet.
+        /// If set to SentDetectionMode.Interrupt, the driver will wait for an interrupt to signal
+        /// the send operation is complete. If set to SentDetectionMode.Poll, the driver will
+        /// poll the device to determine if the send operation is complete.
+        /// </summary>
+        /// <param name="mode"></param>
+        public void SetSentDetectionMode(SentDetectionMode mode)
+        {
+            _sentDetectionMode = mode;
+        }
+
         public override bool WaitPacketSent()
+        {
+            return _sentDetectionMode == SentDetectionMode.Interrupt ? 
+                base.WaitPacketSent() : PollPacketSent();
+        }
+
+        private bool PollPacketSent()
         {
             var args = new PinValueChangedEventArgs(PinEventTypes.Falling, -1);
             HandleInterrupt(null, args);

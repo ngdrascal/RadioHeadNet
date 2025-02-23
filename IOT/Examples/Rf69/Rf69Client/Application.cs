@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Options;
+using RadioHead;
 using RadioHead.RhRf69;
 using RadioHeadIot.Examples.Shared;
 
@@ -47,10 +48,14 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
         // isHighPowerModule flag set like this:
         radio.SetTxPower(radioConfig.Value.PowerLevel, radioConfig.Value.IsHighPowered);
 
-        // // The encryption key has to be the same as the one in the server
-        byte[] key = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                      0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
-        radio.SetEncryptionKey(key);
+        // The encryption key has to be the same as the one in the server
+        var key = radioConfig.Value.EncryptionKey;
+        if (key.Length > 0)
+            radio.SetEncryptionKey(key);
+
+        // read the SentDetectionMode from the configuration and convert it to an enum
+        if (Enum.TryParse(radioConfig.Value.SentDetectionMode, true, out SentDetectionMode sentDetectionMode))
+            radio.SetSentDetectionMode(sentDetectionMode);
 
         return true;
     }
