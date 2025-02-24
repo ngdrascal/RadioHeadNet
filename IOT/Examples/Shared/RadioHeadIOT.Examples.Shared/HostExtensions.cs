@@ -52,7 +52,7 @@ public static class HostExtensions
 
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 
-        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.Ftx232H.ToString(), (_, _) =>
+        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.Ftx232H.ToString().ToLower(), (_, _) =>
         {
             var allFtx232H = Ftx232HDevice.GetFtx232H();
             if (allFtx232H.Count == 0)
@@ -63,12 +63,12 @@ public static class HostExtensions
             return hostBoard;
         });
 
-        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.RPi.ToString(), (_, _) =>
+        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.RPi.ToString().ToLower(), (_, _) =>
             new RaspberryPiBoard());
 
         builder.Services.AddSingleton<GpioController>(provider =>
         {
-            var hostBoard = provider.GetRequiredKeyedService<Board>(gpioConfig.HostDevice);
+            var hostBoard = provider.GetRequiredKeyedService<Board>(gpioConfig.HostDevice.ToLower());
             var gpioController = hostBoard.CreateGpioController();
             return gpioController;
         });
