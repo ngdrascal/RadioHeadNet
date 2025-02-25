@@ -21,16 +21,23 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
     private bool Init()
     {
         resetter.ResetRadio();
-        return ConfigureRadio();
+        if (ConfigureRadio())
+        {
+            Console.WriteLine("Server: radio successfully configured.");
+            Console.WriteLine("Server: waiting for incoming packet.");
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Server: radio configuration failed.");
+            return false;
+        }
     }
-
+    
     private bool ConfigureRadio()
     {
         if (!radio.Init())
-        {
-            Console.WriteLine("Radio initialization failed.");
             return false;
-        }
 
         // Defaults after init are
         //    - frequency: 434.0MHz
@@ -60,7 +67,6 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
         return true;
     }
 
-
     private void Loop()
     {
         if (radio.Available())
@@ -68,23 +74,21 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
             // Should be a message for us now   
             if (radio.Receive(out var inBuffer))
             {
-                var str = Encoding.UTF8.GetString(inBuffer);
-                Console.WriteLine($"got request: {str}");
-
-                Console.WriteLine($"RSSI: {radio.LastRssi}");
+                var inStr = Encoding.UTF8.GetString(inBuffer);
+                Console.WriteLine($"Server received: {inStr}");
+                Console.WriteLine($"Server RSSI: {radio.LastRssi}");
 
                 // Send a reply
-                var outBuffer = Encoding.UTF8.GetBytes("And hello back to you");
+                var outStr = inStr.ToUpper();
+                var outBuffer = Encoding.UTF8.GetBytes(outStr);
                 radio.Send(outBuffer);
                 radio.WaitPacketSent();
-                Console.WriteLine("Sent a reply");
+                Console.WriteLine($"Sent: {outStr}");
             }
             else
             {
-                Console.WriteLine("Receive failed");
+                Console.WriteLine("Server receive failed");
             }
         }
-
-        Thread.Sleep(3000);
     }
 }

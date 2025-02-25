@@ -62,27 +62,30 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
 
     private void Loop()
     {
-        Console.WriteLine("Sending to rf69_server");
+        var outStr = "Hello World!";
+        Console.WriteLine($"Client sending {outStr}");
 
-        // Send a message to rf69_server
-        var data = Encoding.UTF8.GetBytes("Hello World!");
+        var data = Encoding.UTF8.GetBytes(outStr);
         radio.Send(data);
 
         radio.WaitPacketSent();
 
         // Now wait for a reply
-        if (radio.WaitAvailableTimeout(500))
+        if (radio.WaitAvailableTimeout(1000))
         {
-            // Should be a reply message for us now   
-
-            Console.WriteLine(radio.Receive(out var buf) ? $"Got reply: {buf}" :
-                                                                   "Received failed");
+            if (radio.Receive(out var inBuffer))
+            {
+                var inStr = Encoding.UTF8.GetString(inBuffer);
+                Console.WriteLine($"Client received: {inStr}");
+            }
+            else
+            {
+                Console.WriteLine("Client: receive failed.");
+            }
         }
         else
         {
-            Console.WriteLine("No reply, is Rf69Server running?");
+            Console.WriteLine("Client: timed out waiting for response.");
         }
-
-        Thread.Sleep(3000);
     }
 }
