@@ -4,7 +4,7 @@ using RadioHead;
 using RadioHead.RhRf69;
 using RadioHeadIot.Examples.Shared;
 
-namespace Rf69Client;
+namespace RadioHeadIot.Examples.Rf69Client;
 
 internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
     Rf69RadioResetter resetter)
