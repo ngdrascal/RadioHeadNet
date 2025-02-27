@@ -1,5 +1,7 @@
-using System.Diagnostics;
 using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using nanoFramework.Hosting;
+using RadioHeadNf.Examples.Rf69Shared;
 
 namespace RadioHeadNf.Examples.Rf69Client
 {
@@ -7,9 +9,13 @@ namespace RadioHeadNf.Examples.Rf69Client
     {
         public static void Main()
         {
-            Debug.WriteLine("Hello from nanoFramework!");
+            var hostBuilder = Host.CreateDefaultBuilder();
+            hostBuilder.AddServices<Application>();
+            var host = hostBuilder.Build();
 
-            Thread.Sleep(Timeout.Infinite);
+            var app = (Application)host.Services.GetRequiredService(typeof(Application));
+
+            app.Run(CancellationToken.None);
         }
     }
 }
