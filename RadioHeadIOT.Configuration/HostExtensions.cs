@@ -111,22 +111,13 @@ public static class HostExtensions
         builder.Services.AddSingleton<SpiDevice>(provider =>
         {
             var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
-            int chipSelectLine;
-            switch (hostConfig.HostDevice)
+            var chipSelectLine = hostConfig.HostDevice switch
             {
-                case HostDevices.Ftx232H:
-                    chipSelectLine = 3;
-                    break;
-                case HostDevices.RPi when gpioConfig.DeviceSelectPin == 8:
-                    chipSelectLine = 0;
-                    break;
-                case HostDevices.RPi when gpioConfig.DeviceSelectPin == 7:
-                    chipSelectLine = 1;
-                    break;
-                default:
-                    chipSelectLine = -1;
-                    break;
-            }
+                HostDevices.Ftx232H => 3,
+                HostDevices.RPi when gpioConfig.DeviceSelectPin == 8 => 0,
+                HostDevices.RPi when gpioConfig.DeviceSelectPin == 7 => 1,
+                _ => -1
+            };
 
             var spiSettings = new SpiConnectionSettings(0)
             {
@@ -144,7 +135,11 @@ public static class HostExtensions
 
         builder.Services.AddSingleton<Rf69>(provider =>
         {
-            var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
+            var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
+
+            var deviceSelectPin = hostConfig.HostDevice == HostDevices.RPi ? null:
+                provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
+
             var spiDevice = provider.GetRequiredService<SpiDevice>();
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<Rf69>();

@@ -187,7 +187,7 @@ namespace RadioHead
         /// </summary>
         protected virtual void SelectDevice()
         {
-            _deviceSelectPin.Write(PinValue.Low);
+            _deviceSelectPin?.Write(PinValue.Low);
         }
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace RadioHead
         /// </summary>
         protected virtual void DeselectDevice()
         {
-            _deviceSelectPin.Write(PinValue.High);
+            _deviceSelectPin?.Write(PinValue.High);
         }
     }
 }
