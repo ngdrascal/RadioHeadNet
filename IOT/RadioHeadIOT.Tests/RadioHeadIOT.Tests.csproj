@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Examples\IOT\Rf69\Rf69Shared\Rf69Shared.csproj" />
+    <ProjectReference Include="..\..\RadioHeadIOT.Configuration\RadioHeadIOT.Configuration.csproj" />
     <ProjectReference Include="..\RadioHeadIOT\RadioHeadIOT.csproj" />
     <ProjectReference Include="..\UnitTestLogger\UnitTestLogger.csproj" />
   </ItemGroup>

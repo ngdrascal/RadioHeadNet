@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RadioHeadIot.Examples.Rf69Shared;
+namespace RadioHeadIot.Configuration;
 
 public class RadioConfiguration
 {

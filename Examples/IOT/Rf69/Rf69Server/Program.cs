@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using RadioHeadIot.Examples.Rf69Shared;
+using RadioHeadIot.Configuration;
 
 namespace RadioHeadIot.Examples.Rf69Server;
 

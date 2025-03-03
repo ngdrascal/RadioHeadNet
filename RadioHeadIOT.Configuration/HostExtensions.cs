@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RadioHead.RhRf69;
 
-namespace RadioHeadIot.Examples.Rf69Shared;
+namespace RadioHeadIot.Configuration;
 
 public static class HostExtensions
 {
@@ -21,8 +21,8 @@ public static class HostExtensions
         if (string.IsNullOrEmpty(hostDevice))
             throw new ApplicationException("HostDevice must be specified in appSettings.json.");
 
-        if (!hostDevice.Equals(SupportedBoards.Ftx232H.ToString(), StringComparison.CurrentCultureIgnoreCase) &&
-            !hostDevice.Equals(SupportedBoards.RPi.ToString(), StringComparison.InvariantCultureIgnoreCase))
+        if (!hostDevice.Equals(HostDevices.Ftx232H.ToString(), StringComparison.CurrentCultureIgnoreCase) &&
+            !hostDevice.Equals(HostDevices.RPi.ToString(), StringComparison.InvariantCultureIgnoreCase))
         {
             throw new ApplicationException("HostDevice must be either 'FTX232H' or 'RPi'.");
         }
@@ -64,7 +64,7 @@ public static class HostExtensions
 
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 
-        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.Ftx232H.ToString().ToLower(), (_, _) =>
+        builder.Services.AddKeyedSingleton<Board>(HostDevices.Ftx232H.ToString().ToLower(), (_, _) =>
         {
             var allFtx232H = Ftx232HDevice.GetFtx232H();
             if (allFtx232H.Count == 0)
@@ -75,7 +75,7 @@ public static class HostExtensions
             return hostBoard;
         });
 
-        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.RPi.ToString().ToLower(), (_, _) =>
+        builder.Services.AddKeyedSingleton<Board>(HostDevices.RPi.ToString().ToLower(), (_, _) =>
             new RaspberryPiBoard());
 
         builder.Services.AddSingleton<GpioController>(provider =>
@@ -104,10 +104,11 @@ public static class HostExtensions
 
         builder.Services.AddSingleton<SpiDevice>(provider =>
         {
-            var spiSettings = new SpiConnectionSettings(0, 3)
+            var spiSettings = new SpiConnectionSettings(0)
             {
                 ClockFrequency = 1_000_000,
                 DataBitLength = 8,
+                ChipSelectLine = 3, //gpioConfig.DeviceSelectPin,
                 ChipSelectLineActiveState = PinValue.Low,
                 Mode = SpiMode.Mode0
             };

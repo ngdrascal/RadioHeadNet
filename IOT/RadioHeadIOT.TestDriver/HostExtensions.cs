@@ -7,6 +7,7 @@ using RadioHead.RhRf69;
 using System.Device.Gpio;
 using System.Device.Spi;
 using Microsoft.Extensions.Hosting;
+using RadioHeadIot.Configuration;
 
 namespace RadioHeadIot.TestDriver;
 
@@ -16,7 +17,7 @@ internal static class HostExtensions
     {
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["Gpio:HostDevice"] = SupportedBoards.Ftx232H.ToString(),
+            ["Gpio:HostDevice"] = HostDevices.Ftx232H.ToString(),
             ["Gpio:DeviceSelectPin"] = "5",
             ["Gpio:ResetPin"] = "6",
             ["Gpio:InterruptPin"] = "7",
@@ -47,7 +48,7 @@ internal static class HostExtensions
 
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 
-        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.Ftx232H.ToString(), (_, _) =>
+        builder.Services.AddKeyedSingleton<Board>(HostDevices.Ftx232H.ToString(), (_, _) =>
         {
             var allFtx232H = Ftx232HDevice.GetFtx232H();
             if (allFtx232H.Count == 0)
@@ -58,7 +59,7 @@ internal static class HostExtensions
             return hostBoard;
         });
 
-        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.RPi.ToString(), (_, _) =>
+        builder.Services.AddKeyedSingleton<Board>(HostDevices.RPi.ToString(), (_, _) =>
             new RaspberryPiBoard());
 
         builder.Services.AddSingleton<GpioController>(provider =>

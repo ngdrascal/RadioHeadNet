@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using RadioHeadIot.Examples.Rf69Shared;
+using RadioHeadIot.Configuration;
 
 namespace RadioHeadIot.Tests;
 
