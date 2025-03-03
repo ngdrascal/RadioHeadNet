@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using RadioHeadIot.Examples.Shared;
+using RadioHeadIot.Examples.Rf69Shared;
 
 namespace RadioHeadIot.Tests;
 
@@ -19,7 +19,7 @@ public class GpioConfigurationTests
         var configBuilder = new ConfigurationBuilder();
         configBuilder.AddInMemoryCollection(new Dictionary<string, string>
         {
-            { $"{GpioConfiguration.SectionName}:HostDevice", hostDevice },
+            { $"HostDevice", hostDevice },
             { $"{GpioConfiguration.SectionName}:DeviceSelectPin", selectPin.ToString() },
             { $"{GpioConfiguration.SectionName}:ResetPin", resetPin.ToString() },
             { $"{GpioConfiguration.SectionName}:InterruptPin", intrPin.ToString() }
@@ -38,13 +38,12 @@ public class GpioConfigurationTests
         var configuration = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
 
         // ASSERT:
-        Assert.That(configuration.HostDevice, Is.EqualTo(hostDevice));
+        Assert.That(configRoot["HostDevice"], Is.EqualTo(hostDevice));
         Assert.That(configuration.DeviceSelectPin, Is.EqualTo(selectPin));
         Assert.That(configuration.ResetPin, Is.EqualTo(resetPin));
         Assert.That(configuration.InterruptPin, Is.EqualTo(intrPin));
     }
 
-    [TestCase("FluxCapacitor", 0, 1, 2)]
     [TestCase("RPI", -1, 1, 2)]
     [TestCase("RPI", 0, -1, 2)]
     [TestCase("RPI", 0, 1, -2)]
@@ -54,7 +53,7 @@ public class GpioConfigurationTests
         var configBuilder = new ConfigurationBuilder();
         configBuilder.AddInMemoryCollection(new Dictionary<string, string>
         {
-            { $"{GpioConfiguration.SectionName}:HostDevice", hostDevice },
+            { "HostDevice", hostDevice },
             { $"{GpioConfiguration.SectionName}:DeviceSelectPin", selectPin.ToString() },
             { $"{GpioConfiguration.SectionName}:ResetPin", resetPin.ToString() },
             { $"{GpioConfiguration.SectionName}:InterruptPin", intrPin.ToString() }

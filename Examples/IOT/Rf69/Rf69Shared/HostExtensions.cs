@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using RadioHead.RhRf69;
 
-namespace RadioHeadIot.Examples.Shared;
+namespace RadioHeadIot.Examples.Rf69Shared;
 
 public static class HostExtensions
 {
@@ -16,6 +16,18 @@ public static class HostExtensions
     {
         builder.Configuration.Sources.Clear();
         builder.Configuration.AddJsonFile("appSettings.json", false);
+
+        var hostDevice = builder.Configuration["HostDevice"];
+        if (string.IsNullOrEmpty(hostDevice))
+            throw new ApplicationException("HostDevice must be specified in appSettings.json.");
+
+        if (!hostDevice.Equals(SupportedBoards.Ftx232H.ToString(), StringComparison.CurrentCultureIgnoreCase) &&
+            !hostDevice.Equals(SupportedBoards.RPi.ToString(), StringComparison.InvariantCultureIgnoreCase))
+        {
+            throw new ApplicationException("HostDevice must be either 'FTX232H' or 'RPi'.");
+        }
+
+        builder.Configuration.AddJsonFile($"appsettings.{hostDevice}.json", false);
 
         return builder;
     }
@@ -52,7 +64,7 @@ public static class HostExtensions
 
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 
-        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.Ftx232H.ToString(), (_, _) =>
+        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.Ftx232H.ToString().ToLower(), (_, _) =>
         {
             var allFtx232H = Ftx232HDevice.GetFtx232H();
             if (allFtx232H.Count == 0)
@@ -63,12 +75,13 @@ public static class HostExtensions
             return hostBoard;
         });
 
-        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.RPi.ToString(), (_, _) =>
+        builder.Services.AddKeyedSingleton<Board>(SupportedBoards.RPi.ToString().ToLower(), (_, _) =>
             new RaspberryPiBoard());
 
         builder.Services.AddSingleton<GpioController>(provider =>
         {
-            var hostBoard = provider.GetRequiredKeyedService<Board>(gpioConfig.HostDevice);
+            var hostDevice = builder.Configuration["HostDevice"]?.ToLower();
+            var hostBoard = provider.GetRequiredKeyedService<Board>(hostDevice);
             var gpioController = hostBoard.CreateGpioController();
             return gpioController;
         });
@@ -99,7 +112,8 @@ public static class HostExtensions
                 Mode = SpiMode.Mode0
             };
 
-            var hostBoard = provider.GetRequiredKeyedService<Board>(gpioConfig.HostDevice);
+            var hostDevice = builder.Configuration["HostDevice"]?.ToLower();
+            var hostBoard = provider.GetRequiredKeyedService<Board>(hostDevice);
             var spiDevice = hostBoard.CreateSpiDevice(spiSettings);
             return spiDevice;
         });

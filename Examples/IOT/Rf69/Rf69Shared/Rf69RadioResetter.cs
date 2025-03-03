@@ -1,7 +1,7 @@
 ﻿
 using System.Device.Gpio;
 
-namespace RadioHeadIot.Examples.Shared;
+namespace RadioHeadIot.Examples.Rf69Shared;
 
 public class Rf69RadioResetter(GpioPin resetPin)
 {
