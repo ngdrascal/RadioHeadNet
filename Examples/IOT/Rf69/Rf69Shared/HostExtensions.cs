@@ -17,7 +17,7 @@ public static class HostExtensions
         builder.Configuration.Sources.Clear();
         builder.Configuration.AddJsonFile("appSettings.json", false);
 
-        var hostDevice = builder.Configuration["HostDevice"];
+        var hostDevice = builder.Configuration["HostDevice"]?.ToLower();
         if (string.IsNullOrEmpty(hostDevice))
             throw new ApplicationException("HostDevice must be specified in appSettings.json.");
 
