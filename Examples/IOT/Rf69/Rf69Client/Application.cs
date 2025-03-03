@@ -71,7 +71,7 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
         radio.WaitPacketSent();
 
         // Now wait for a reply
-        if (radio.WaitAvailableTimeout(1000))
+        if (radio.WaitAvailableTimeout(5000))
         {
             if (radio.Receive(out var inBuffer))
             {
