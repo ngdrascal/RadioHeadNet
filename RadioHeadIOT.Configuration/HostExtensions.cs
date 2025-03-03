@@ -111,7 +111,22 @@ public static class HostExtensions
         builder.Services.AddSingleton<SpiDevice>(provider =>
         {
             var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
-            var chipSelectLine = hostConfig.HostDevice == HostDevices.Ftx232H ? 3 : gpioConfig.DeviceSelectPin;
+            int chipSelectLine;
+            switch (hostConfig.HostDevice)
+            {
+                case HostDevices.Ftx232H:
+                    chipSelectLine = 3;
+                    break;
+                case HostDevices.RPi when gpioConfig.DeviceSelectPin == 8:
+                    chipSelectLine = 0;
+                    break;
+                case HostDevices.RPi when gpioConfig.DeviceSelectPin == 7:
+                    chipSelectLine = 1;
+                    break;
+                default:
+                    chipSelectLine = -1;
+                    break;
+            }
 
             var spiSettings = new SpiConnectionSettings(0)
             {
