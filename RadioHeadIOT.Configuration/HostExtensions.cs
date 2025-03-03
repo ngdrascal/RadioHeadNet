@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RadioHead.RhRf69;
 
 namespace RadioHeadIot.Configuration;
@@ -34,6 +35,11 @@ public static class HostExtensions
 
     public static HostApplicationBuilder AddConfigurationOptions(this HostApplicationBuilder builder)
     {
+        builder.Services
+            .AddOptions<HostDeviceConfiguration>()
+            .Bind(builder.Configuration)
+            .ValidateDataAnnotations();
+
         builder.Services
             .AddOptions<GpioConfiguration>()
             .Bind(builder.Configuration.GetSection(GpioConfiguration.SectionName))
@@ -64,7 +70,7 @@ public static class HostExtensions
 
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 
-        builder.Services.AddKeyedSingleton<Board>(HostDevices.Ftx232H.ToString().ToLower(), (_, _) =>
+        builder.Services.AddKeyedSingleton<Board>(HostDevices.Ftx232H, (_, _) =>
         {
             var allFtx232H = Ftx232HDevice.GetFtx232H();
             if (allFtx232H.Count == 0)
@@ -75,13 +81,13 @@ public static class HostExtensions
             return hostBoard;
         });
 
-        builder.Services.AddKeyedSingleton<Board>(HostDevices.RPi.ToString().ToLower(), (_, _) =>
+        builder.Services.AddKeyedSingleton<Board>(HostDevices.RPi, (_, _) =>
             new RaspberryPiBoard());
 
         builder.Services.AddSingleton<GpioController>(provider =>
         {
-            var hostDevice = builder.Configuration["HostDevice"]?.ToLower();
-            var hostBoard = provider.GetRequiredKeyedService<Board>(hostDevice);
+            var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
+            var hostBoard = provider.GetRequiredKeyedService<Board>(hostConfig.HostDevice);
             var gpioController = hostBoard.CreateGpioController();
             return gpioController;
         });
@@ -104,17 +110,19 @@ public static class HostExtensions
 
         builder.Services.AddSingleton<SpiDevice>(provider =>
         {
+            var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
+            var chipSelectLine = hostConfig.HostDevice == HostDevices.Ftx232H ? 3 : gpioConfig.DeviceSelectPin;
+
             var spiSettings = new SpiConnectionSettings(0)
             {
                 ClockFrequency = 1_000_000,
                 DataBitLength = 8,
-                ChipSelectLine = 3, //gpioConfig.DeviceSelectPin,
+                ChipSelectLine = chipSelectLine,
                 ChipSelectLineActiveState = PinValue.Low,
                 Mode = SpiMode.Mode0
             };
 
-            var hostDevice = builder.Configuration["HostDevice"]?.ToLower();
-            var hostBoard = provider.GetRequiredKeyedService<Board>(hostDevice);
+            var hostBoard = provider.GetRequiredKeyedService<Board>(hostConfig.HostDevice);
             var spiDevice = hostBoard.CreateSpiDevice(spiSettings);
             return spiDevice;
         });
