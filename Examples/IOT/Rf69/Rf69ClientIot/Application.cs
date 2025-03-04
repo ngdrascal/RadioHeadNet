@@ -38,12 +38,12 @@ internal class Application
 
         if (ConfigureRadio())
         {
-            Console.WriteLine("Server: radio successfully configured.");
+            Console.WriteLine("Client: radio successfully configured.");
             return true;
         }
         else
         {
-            Console.WriteLine("Server: radio configuration failed.");
+            Console.WriteLine("Client: radio configuration failed.");
             return false;
         }
     }

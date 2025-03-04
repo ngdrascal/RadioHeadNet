@@ -2,9 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using RadioHeadIot.Configuration;
 
-namespace RadioHeadIot.Tests;
+namespace RadioHeadIot.Configuration.Tests;
 
 [TestFixture, ExcludeFromCodeCoverage]
 public class GpioConfigurationTests
