@@ -67,7 +67,7 @@ internal class Application
             return false;
         }
 
-        // If you are using a high power RF69 eg RFM69HW, you *must* set a Tx power with the
+        // If you are using a high power RF69 e.g. - RFM69HW, you *must* set a Tx power with the
         // isHighPowerModule flag set like this:
         _radio.SetTxPower(_radioConfig.PowerLevel, _radioConfig.IsHighPowered);
 
