@@ -13,6 +13,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\IOT\RadioHeadIot.Configuration\RadioHeadIot.Configuration.csproj" />
+    <ProjectReference Include="..\..\..\..\IOT\RadioHeadIot\RadioHeadIot.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="appsettings.ftx232h.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
