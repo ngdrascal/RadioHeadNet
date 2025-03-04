@@ -1,14 +1,24 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Options;
-using RadioHead;
 using RadioHead.RhRf69;
 using RadioHeadIot.Configuration;
 
 namespace RadioHeadIot.Examples.Rf69Client;
 
-internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
-    Rf69RadioResetter resetter)
+internal class Application
 {
+    private readonly Rf69 _radio;
+    private readonly RadioConfiguration _radioConfig;
+    private readonly Rf69RadioResetter _resetter;
+
+    public Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
+        Rf69RadioResetter resetter)
+    {
+        _radio = radio;
+        _resetter = resetter;
+        _radioConfig = radioConfig.Value;
+    }
+
     public void Run(CancellationToken cancellationToken)
     {
         if (!Init())
@@ -20,13 +30,26 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
 
     private bool Init()
     {
-        resetter.ResetRadio();
-        return ConfigureRadio();
+        Console.WriteLine("Radio Configuration:");
+        Console.WriteLine(_radioConfig.Dump());
+
+        _resetter.ResetRadio();
+
+        if (ConfigureRadio())
+        {
+            Console.WriteLine("Server: radio successfully configured.");
+            return true;
+        }
+        else
+        {
+            Console.WriteLine("Server: radio configuration failed.");
+            return false;
+        }
     }
 
     private bool ConfigureRadio()
     {
-        if (!radio.Init())
+        if (!_radio.Init())
         {
             Console.WriteLine("Radio initialization failed.");
             return false;
@@ -38,7 +61,7 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
         //    - power: +13dbM (for low power module)
         //    - encryption: none
 
-        if (!radio.SetFrequency(radioConfig.Value.Frequency))
+        if (!_radio.SetFrequency(_radioConfig.Frequency))
         {
             Console.WriteLine("SetFrequency failed");
             return false;
@@ -46,16 +69,14 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
 
         // If you are using a high power RF69 eg RFM69HW, you *must* set a Tx power with the
         // isHighPowerModule flag set like this:
-        radio.SetTxPower(radioConfig.Value.PowerLevel, radioConfig.Value.IsHighPowered);
+        _radio.SetTxPower(_radioConfig.PowerLevel, _radioConfig.IsHighPowered);
 
         // The encryption key has to be the same as the one in the server
-        var key = radioConfig.Value.EncryptionKey;
+        var key = _radioConfig.EncryptionKey;
         if (key.Length > 0)
-            radio.SetEncryptionKey(key);
+            _radio.SetEncryptionKey(key);
 
-        // read the ChangeDetectionMode from the configuration and convert it to an enum
-        if (Enum.TryParse(radioConfig.Value.SentDetectionMode, true, out ChangeDetectionMode sentDetectionMode))
-            radio.SetChangeDetectionMode(sentDetectionMode);
+        _radio.SetChangeDetectionMode(_radioConfig.ChangeDetectionMode);
 
         return true;
     }
@@ -66,14 +87,14 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
         Console.WriteLine($"Client sending {outStr}");
 
         var data = Encoding.UTF8.GetBytes(outStr);
-        radio.Send(data);
+        _radio.Send(data);
 
-        radio.WaitPacketSent();
+        _radio.WaitPacketSent();
 
         // Now wait for a reply
-        if (radio.WaitAvailableTimeout(5000))
+        if (_radio.WaitAvailableTimeout(5000))
         {
-            if (radio.Receive(out var inBuffer))
+            if (_radio.Receive(out var inBuffer))
             {
                 var inStr = Encoding.UTF8.GetString(inBuffer);
                 Console.WriteLine($"Client received: {inStr}");

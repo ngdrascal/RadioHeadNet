@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using RadioHead;
 
 namespace RadioHeadIot.Configuration;
 
@@ -15,11 +16,8 @@ public class RadioConfiguration
     [Required]
     public sbyte PowerLevel { get; set; } = 0;
 
-    [Required]
-    [RegularExpression("(?i)^(interrupt|polling)",
-        ErrorMessage = "Supported modes are 'interrupt' and 'polling'.")]
-    public string SentDetectionMode { get; set; } = "poll";
+    [Required] public ChangeDetectionMode ChangeDetectionMode { get; set; } = ChangeDetectionMode.Polling;
 
     [MaxLength(16)]
-    public byte[] EncryptionKey { get; set; } = Array.Empty<byte>();
+    public byte[] EncryptionKey { get; set; } = [];
 }

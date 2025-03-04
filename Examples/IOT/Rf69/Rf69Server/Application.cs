@@ -1,14 +1,24 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Options;
-using RadioHead;
 using RadioHead.RhRf69;
 using RadioHeadIot.Configuration;
 
 namespace RadioHeadIot.Examples.Rf69Server;
 
-internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
-    Rf69RadioResetter resetter)
+internal class Application
 {
+    private readonly Rf69 _radio;
+    private readonly RadioConfiguration _radioConfig;
+    private readonly Rf69RadioResetter _resetter;
+
+    public Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
+        Rf69RadioResetter resetter)
+    {
+        _radio = radio;
+        _resetter = resetter;
+        _radioConfig = radioConfig.Value;
+    }
+
     public void Run(CancellationToken cancellationToken)
     {
         if (!Init())
@@ -20,11 +30,14 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
 
     private bool Init()
     {
-        resetter.ResetRadio();
+        Console.WriteLine("Radio Configuration:");
+        Console.WriteLine(_radioConfig.Dump());
+
+        _resetter.ResetRadio();
+
         if (ConfigureRadio())
         {
             Console.WriteLine("Server: radio successfully configured.");
-            Console.WriteLine("Server: waiting for incoming packet.");
             return true;
         }
         else
@@ -33,10 +46,10 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
             return false;
         }
     }
-    
+
     private bool ConfigureRadio()
     {
-        if (!radio.Init())
+        if (!_radio.Init())
             return false;
 
         // Defaults after init are
@@ -45,50 +58,51 @@ internal class Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
         //    - power: +13dbM (for low power module)
         //    - encryption: none
 
-        if (!radio.SetFrequency(radioConfig.Value.Frequency))
+        if (!_radio.SetFrequency(_radioConfig.Frequency))
         {
             Console.WriteLine("SetFrequency failed");
             return false;
         }
 
-        // If you are using a high power RF69 eg RFM69HW, you *must* set a Tx power with the
+        // If you are using a high power RF69 e.g. - RFM69HW, you *must* set a Tx power with the
         // isHighPowerModule flag set like this:
-        radio.SetTxPower(radioConfig.Value.PowerLevel, radioConfig.Value.IsHighPowered);
+        _radio.SetTxPower(_radioConfig.PowerLevel, _radioConfig.IsHighPowered);
 
         // The encryption key has to be the same as the one in the client
-        var key = radioConfig.Value.EncryptionKey;
+        var key = _radioConfig.EncryptionKey;
         if (key.Length > 0)
-            radio.SetEncryptionKey(key);
+            _radio.SetEncryptionKey(key);
 
-        // read the ChangeDetectionMode from the configuration and convert it to an enum
-        if (Enum.TryParse(radioConfig.Value.SentDetectionMode, true, out ChangeDetectionMode sentDetectionMode))
-            radio.SetChangeDetectionMode(sentDetectionMode);
+        _radio.SetChangeDetectionMode(_radioConfig.ChangeDetectionMode);
 
         return true;
     }
 
     private void Loop()
     {
-        if (radio.Available())
+        if (!_radio.Available())
         {
-            // Should be a message for us now   
-            if (radio.Receive(out var inBuffer))
-            {
-                var inStr = Encoding.UTF8.GetString(inBuffer);
-                Console.WriteLine($"Server received: {inStr}");
-                Console.WriteLine($"Server RSSI: {radio.LastRssi}");
+            Console.WriteLine("Server: no message received.");
+            return;
+        }
 
-                // Send a reply
-                var outStr = inStr.ToUpper();
-                var outBuffer = Encoding.UTF8.GetBytes(outStr);
-                radio.Send(outBuffer);
-                radio.WaitPacketSent();
-                Console.WriteLine($"Sent: {outStr}");
-            }
-            else
-            {
-                Console.WriteLine("Server receive failed");
-            }
+        // Should be a message for us now   
+        if (_radio.Receive(out var inBuffer))
+        {
+            var inStr = Encoding.UTF8.GetString(inBuffer);
+            Console.WriteLine($"Server received: {inStr}");
+            Console.WriteLine($"Server RSSI: {_radio.LastRssi}");
+
+            // Send a reply
+            var outStr = inStr.ToUpper();
+            var outBuffer = Encoding.UTF8.GetBytes(outStr);
+            _radio.Send(outBuffer);
+            _radio.WaitPacketSent();
+            Console.WriteLine($"Sent: {outStr}");
+        }
+        else
+        {
+            Console.WriteLine("Server receive failed");
         }
     }
 }
