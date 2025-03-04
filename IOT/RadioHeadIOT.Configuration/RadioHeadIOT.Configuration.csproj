@@ -14,7 +14,7 @@
    </ItemGroup>
 
    <ItemGroup>
-      <ProjectReference Include="..\IOT\RadioHeadIOT\RadioHeadIOT.csproj" />
+     <ProjectReference Include="..\RadioHeadIOT\RadioHeadIOT.csproj" />
    </ItemGroup>
 
 </Project>
