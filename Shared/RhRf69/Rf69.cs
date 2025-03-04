@@ -47,20 +47,6 @@ namespace RadioHead.RhRf69
         /// interrupt and device select pin. After constructing, you must call Init() to
         /// initialise the interface and the radio module.
         /// </summary>
-        /// <param name="spi"></param>
-        /// <param name="logger"></param>
-        public Rf69(SpiDevice spi, ILogger logger)
-            : base(spi)
-        {
-            _logger = logger;
-            _idleMode = OPMODE_MODE_STDBY;
-        }
-
-        /// <summary>
-        /// Constructor. You can have multiple instances, but each instance must have its own
-        /// interrupt and device select pin. After constructing, you must call Init() to
-        /// initialise the interface and the radio module.
-        /// </summary>
         /// <param name="deviceSelectPin"></param>
         /// <param name="spi"></param>
         /// <param name="logger"></param>
