@@ -41,9 +41,21 @@ public static class HostExtensions
             .ValidateDataAnnotations();
 
         builder.Services
+            .AddOptions<SpiConfiguration>()
+            .Bind(builder.Configuration.GetSection(SpiConfiguration.SectionName))
+            .ValidateDataAnnotations();
+
+        builder.Services
             .AddOptions<GpioConfiguration>()
             .Bind(builder.Configuration.GetSection(GpioConfiguration.SectionName))
-            .ValidateDataAnnotations();
+            .ValidateDataAnnotations()
+            .Validate<IOptions<HostDeviceConfiguration>>((gpioConfig, hostConfig) =>
+            {
+                if (hostConfig.Value.HostDevice == HostDevices.RPi)
+                    return gpioConfig.DeviceSelectPin is 7 or 8;
+
+                return true;
+            }, "Invalid DeviceSelectPin configuration. Valid values for RPi are 8 for (CD0) and 7 for (CE1)");
 
         builder.Services
             .AddOptions<RadioConfiguration>()
@@ -63,11 +75,6 @@ public static class HostExtensions
     public static HostApplicationBuilder AddServices<TApp>(this HostApplicationBuilder builder)
        where TApp : class
     {
-        var gpioConfig = new GpioConfiguration();
-        builder.Configuration
-            .GetSection(GpioConfiguration.SectionName)
-            .Bind(gpioConfig);
-
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 
         builder.Services.AddKeyedSingleton<Board>(HostDevices.Ftx232H, (_, _) =>
@@ -94,6 +101,7 @@ public static class HostExtensions
 
         builder.Services.AddKeyedSingleton<GpioPin>("DeviceSelectPin", (provider, _) =>
         {
+            var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
             var pinNumber = gpioConfig.DeviceSelectPin;
             var gpioController = provider.GetRequiredService<GpioController>();
             var pin = gpioController.OpenPin(pinNumber, PinMode.Output);
@@ -102,6 +110,7 @@ public static class HostExtensions
 
         builder.Services.AddKeyedSingleton<GpioPin>("ResetPin", (provider, _) =>
         {
+            var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
             var pinNumber = gpioConfig.ResetPin;
             var gpioController = provider.GetRequiredService<GpioController>();
             var pin = gpioController.OpenPin(pinNumber, PinMode.Output);
@@ -111,6 +120,8 @@ public static class HostExtensions
         builder.Services.AddSingleton<SpiDevice>(provider =>
         {
             var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
+            var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
+
             var chipSelectLine = hostConfig.HostDevice switch
             {
                 HostDevices.Ftx232H => 3,
@@ -119,10 +130,11 @@ public static class HostExtensions
                 _ => -1
             };
 
-            var spiSettings = new SpiConnectionSettings(0)
+            var spiConfig = provider.GetRequiredService<IOptions<SpiConfiguration>>().Value;
+            var spiSettings = new SpiConnectionSettings(spiConfig.BusId)
             {
-                ClockFrequency = 1_000_000,
-                DataBitLength = 8,
+                ClockFrequency = spiConfig.ClockFrequency,
+                DataBitLength = spiConfig.DataBitLength,
                 ChipSelectLine = chipSelectLine,
                 ChipSelectLineActiveState = PinValue.Low,
                 Mode = SpiMode.Mode0
