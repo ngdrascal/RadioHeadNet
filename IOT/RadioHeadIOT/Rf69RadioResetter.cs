@@ -1,6 +1,4 @@
-﻿using System;
-using System.Device.Gpio;
-using System.Threading;
+﻿using System.Device.Gpio;
 
 namespace RadioHeadIot;
 
@@ -14,8 +12,7 @@ public class Rf69RadioResetter(GpioPin resetPin)
         resetPin.Write(PinValue.Low);
 
         resetPin.Write(PinValue.High);
-        // Thread.Sleep(TimeSpan.FromMicroseconds(100));
-        Thread.Sleep(TimeSpan.FromMilliseconds(1));
+        Thread.Sleep(TimeSpan.FromMicroseconds(100));
 
         resetPin.Write(PinValue.Low);
         Thread.Sleep(TimeSpan.FromMilliseconds(5));

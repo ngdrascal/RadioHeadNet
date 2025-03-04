@@ -76,9 +76,9 @@ public static class HostExtensions
             if (allFtx232H.Count == 0)
                 throw new ApplicationException("No FT232 device found.");
 
-            var hostBoard = allFtx232H[0];
-            hostBoard.Reset();
-            return hostBoard;
+            var fxt232H = allFtx232H[0];
+            fxt232H.Reset();
+            return fxt232H;
         });
 
         builder.Services.AddKeyedSingleton<Board>(HostDevices.RPi, (_, _) =>
@@ -135,15 +135,21 @@ public static class HostExtensions
 
         builder.Services.AddSingleton<Rf69>(provider =>
         {
-            var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
-
-            var deviceSelectPin = hostConfig.HostDevice == HostDevices.RPi ? null:
-                provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
-
             var spiDevice = provider.GetRequiredService<SpiDevice>();
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<Rf69>();
-            var radio = new Rf69(deviceSelectPin, spiDevice, logger);
+
+            Rf69 radio;
+            var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
+            if (hostConfig.HostDevice == HostDevices.RPi)
+            {
+                radio = new Rf69(spiDevice, logger);
+            }
+            else
+            {
+                var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
+                radio = new Rf69(deviceSelectPin, spiDevice, logger);
+            }
             return radio;
         });
 
