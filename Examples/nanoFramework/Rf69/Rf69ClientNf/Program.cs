@@ -1,9 +1,9 @@
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using nanoFramework.Hosting;
-using Rf69.Examples.Rf69SharedNf;
+using RadioHead.Examples.Rf69SharedNf;
 
-namespace Rf69.Examples.Rf69ClientNf
+namespace RadioHead.Examples.Rf69ClientNf
 {
     public static class Program
     {

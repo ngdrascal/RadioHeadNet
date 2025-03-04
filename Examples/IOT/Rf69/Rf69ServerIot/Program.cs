@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using RadioHeadIot.Configuration;
 
-namespace RadioHeadIot.Examples.Rf69Server;
+namespace RadioHead.Examples.Rf69ServerIot;
 
 internal static class Program
 {

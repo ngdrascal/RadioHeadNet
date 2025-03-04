@@ -12,7 +12,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <FileAlignment>512</FileAlignment>
-    <RootNamespace>Rf69.Examples.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <RootNamespace>RadioHead.Examples.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <AssemblyName>Rf69ServerNf</AssemblyName>
     <TargetFrameworkVersion>v1.0</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>

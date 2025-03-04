@@ -1,9 +1,10 @@
 ﻿using System.Text;
 using Microsoft.Extensions.Options;
 using RadioHead.RhRf69;
+using RadioHeadIot;
 using RadioHeadIot.Configuration;
 
-namespace RadioHeadIot.Examples.Rf69Client;
+namespace RadioHead.Examples.Rf69ClientIot;
 
 internal class Application
 {
