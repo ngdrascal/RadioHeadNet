@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "RF69TestDriver": {
-      "commandName": "Project",
-      "commandLineArgs": "Power=19"
-    }
-  }
-}
