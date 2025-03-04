@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\IOT\RadioHeadIOT.Configuration\RadioHeadIOT.Configuration.csproj" />
-    <ProjectReference Include="..\..\..\..\IOT\RadioHeadIOT\RadioHeadIOT.csproj" />
+    <ProjectReference Include="..\..\..\..\IOT\RadioHeadIot.Configuration\RadioHeadIot.Configuration.csproj" />
+    <ProjectReference Include="..\..\..\..\IOT\RadioHeadIot\RadioHeadIot.csproj" />
   </ItemGroup>
 
   <ItemGroup>
