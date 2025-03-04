@@ -30,13 +30,25 @@ namespace RadioHead
     {
         private static readonly object CriticalSection = new object();
 
-        private readonly GpioPin _deviceSelectPin;
+        private readonly GpioPin? _deviceSelectPin;
         private readonly SpiDevice _spi;
 
         /// <summary>
         /// This is the bit in the SPI address that marks it as a write operation
         /// </summary>
         private const byte RhSpiWriteMask = 0x80;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="spi">Reference to the SPI interface to use. The default is to use a
+        /// default built-in Hardware interface.
+        /// </param>
+        protected RhSpiDriver(SpiDevice spi)
+        {
+            _deviceSelectPin = null;
+            _spi = spi;
+        }
 
         /// <summary>
         /// Constructor
@@ -48,7 +60,7 @@ namespace RadioHead
         /// <param name="spi">Reference to the SPI interface to use. The default is to use a
         /// default built-in Hardware interface.
         /// </param>
-        protected RhSpiDriver(GpioPin deviceSelectPin, SpiDevice spi)
+        protected RhSpiDriver(GpioPin? deviceSelectPin, SpiDevice spi)
         {
             _deviceSelectPin = deviceSelectPin;
             _spi = spi;

@@ -1,5 +1,6 @@
 ﻿#pragma warning disable CA1825
 // ReSharper disable UseArrayEmptyMethod
+// ReSharper disable once RedundantUsingDirective
 
 using System;
 using System.Device.Gpio;
@@ -49,8 +50,10 @@ namespace RadioHead.RhRf69
         /// <param name="spi"></param>
         /// <param name="logger"></param>
         public Rf69(SpiDevice spi, ILogger logger)
-            : this(null, spi, logger)
+            : base(spi)
         {
+            _logger = logger;
+            _idleMode = OPMODE_MODE_STDBY;
         }
 
         /// <summary>
@@ -654,11 +657,11 @@ namespace RadioHead.RhRf69
         private bool PollPacketSent()
         {
             var args = new PinValueChangedEventArgs(PinEventTypes.Falling, -1);
-            HandleInterrupt(null, args);
+            HandleInterrupt(this, args);
             while (Mode == RhModes.Tx)
             {
                 RadioHead.Yield();
-                HandleInterrupt(null, args);
+                HandleInterrupt(this, args);
             }
             return true;
         }
