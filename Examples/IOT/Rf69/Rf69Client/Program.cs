@@ -17,6 +17,13 @@ internal static class Program
             .Build();
 
         var ct = CancellationToken.None;
-        host.Services.GetRequiredService<Application>().Run(ct);
+        try
+        {
+            host.Services.GetRequiredService<Application>().Run(ct);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
 }

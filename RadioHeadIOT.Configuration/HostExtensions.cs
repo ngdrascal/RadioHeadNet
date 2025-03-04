@@ -135,9 +135,10 @@ public static class HostExtensions
             {
                 ClockFrequency = spiConfig.ClockFrequency,
                 DataBitLength = spiConfig.DataBitLength,
+                DataFlow = spiConfig.DataFlow,
                 ChipSelectLine = chipSelectLine,
                 ChipSelectLineActiveState = PinValue.Low,
-                Mode = SpiMode.Mode0
+                Mode = spiConfig.Mode
             };
 
             var hostBoard = provider.GetRequiredKeyedService<Board>(hostConfig.HostDevice);
