@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
-using RadioHeadNf.Examples.Rf69Shared;
+using Rf69.Examples.Rf69SharedNf;
 
-namespace RadioHeadNf.Examples.Rf69Client
+namespace Rf69.Examples.Rf69ClientNf
 {
     internal class Application : ApplicationBase
     {

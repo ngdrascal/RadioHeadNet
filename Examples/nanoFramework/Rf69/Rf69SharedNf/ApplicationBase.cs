@@ -1,21 +1,20 @@
 ﻿using System.Device;
-using System.Threading;
 using System.Device.Gpio;
 using System.Diagnostics;
-using RadioHead.RhRf69;
+using System.Threading;
 
-namespace RadioHeadNf.Examples.Rf69Shared
+namespace Rf69.Examples.Rf69SharedNf
 {
     public class ApplicationBase
     {
         protected GpioPin ResetPin { get; }
-        protected Rf69 Radio { get; }
+        protected RadioHead.RhRf69.Rf69 Radio { get; }
         protected float Frequency { get; }
         protected sbyte Power { get; }
 
         protected ApplicationBase() { }
 
-        public ApplicationBase(GpioPin resetPin, Rf69 radio, float frequency, sbyte power)
+        public ApplicationBase(GpioPin resetPin, RadioHead.RhRf69.Rf69 radio, float frequency, sbyte power)
         {
             ResetPin = resetPin;
             Radio = radio;

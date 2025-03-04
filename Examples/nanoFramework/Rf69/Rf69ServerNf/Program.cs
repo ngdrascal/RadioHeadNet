@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Threading;
 
-namespace RadioHeadNf.Examples.Rf69Server
+namespace Rf69.Examples.Rf69ServerNf
 {
     public static class Program
     {
