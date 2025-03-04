@@ -71,10 +71,6 @@ Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "RadioHeadNf.TestDriver", "n
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIot.Configuration.Tests", "RadioHeadIot.Configuration.Tests\RadioHeadIot.Configuration.Tests.csproj", "{E917D0C9-7AD9-46E7-994B-030C44DA0F1D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIot.Configuration", "IOT\RadioHeadIot.Configuration\RadioHeadIot.Configuration.csproj", "{ED4C589A-AC57-4854-B415-E53F8E54494C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadioHeadIot", "IOT\RadioHeadIot\RadioHeadIot.csproj", "{7A9E9894-185C-83CB-4D89-F6177A938487}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -135,14 +131,6 @@ Global
 		{E917D0C9-7AD9-46E7-994B-030C44DA0F1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E917D0C9-7AD9-46E7-994B-030C44DA0F1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E917D0C9-7AD9-46E7-994B-030C44DA0F1D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ED4C589A-AC57-4854-B415-E53F8E54494C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ED4C589A-AC57-4854-B415-E53F8E54494C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ED4C589A-AC57-4854-B415-E53F8E54494C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ED4C589A-AC57-4854-B415-E53F8E54494C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7A9E9894-185C-83CB-4D89-F6177A938487}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7A9E9894-185C-83CB-4D89-F6177A938487}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7A9E9894-185C-83CB-4D89-F6177A938487}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7A9E9894-185C-83CB-4D89-F6177A938487}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -166,14 +154,11 @@ Global
 		{A55DC3E6-D5F2-4FE1-BF78-A78ABC911E87} = {B099FDE5-0FA9-4FFA-974F-5E8BC5AB2112}
 		{EC4DED8A-7A2B-46D7-BC59-F8364E5FADB0} = {B099FDE5-0FA9-4FFA-974F-5E8BC5AB2112}
 		{E917D0C9-7AD9-46E7-994B-030C44DA0F1D} = {CE8724E7-D27C-4D8A-AE77-153E2E55600B}
-		{ED4C589A-AC57-4854-B415-E53F8E54494C} = {D0D59772-536A-40AA-8A58-C285CDEDBFF4}
-		{7A9E9894-185C-83CB-4D89-F6177A938487} = {D0D59772-536A-40AA-8A58-C285CDEDBFF4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {04E1449A-3F2D-41F1-BBBE-2A8F099CB48E}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Shared\RadioHead.projitems*{55877c4d-9983-4438-ae11-51dc19846ddc}*SharedItemsImports = 13
-		Shared\RadioHead.projitems*{7a9e9894-185c-83cb-4d89-f6177a938487}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal
