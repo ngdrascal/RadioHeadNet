@@ -120,13 +120,11 @@ public static class HostExtensions
         builder.Services.AddSingleton<SpiDevice>(provider =>
         {
             var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
-            var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
 
             var chipSelectLine = hostConfig.HostDevice switch
             {
                 HostDevices.Ftx232H => 3,
-                HostDevices.RPi when gpioConfig.DeviceSelectPin == 8 => 0,
-                HostDevices.RPi when gpioConfig.DeviceSelectPin == 7 => 1,
+                HostDevices.RPi => -1,
                 _ => -1
             };
 
@@ -152,17 +150,8 @@ public static class HostExtensions
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<Rf69>();
 
-            Rf69 radio;
-            var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
-            if (hostConfig.HostDevice == HostDevices.RPi)
-            {
-                radio = new Rf69(spiDevice, logger);
-            }
-            else
-            {
-                var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
-                radio = new Rf69(deviceSelectPin, spiDevice, logger);
-            }
+            var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
+            var radio = new Rf69(deviceSelectPin, spiDevice, logger);
             return radio;
         });
 
