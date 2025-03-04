@@ -81,29 +81,29 @@ internal class Application
 
     private void Loop()
     {
-        if (!_radio.Available())
+        if (_radio.WaitAvailableTimeout(5000))
         {
-            Console.WriteLine("Server: no message received.");
-            return;
-        }
+            if (_radio.Receive(out var inBuffer))
+            {
+                var inStr = Encoding.UTF8.GetString(inBuffer);
+                Console.WriteLine($"Server received: {inStr}");
+                Console.WriteLine($"Server RSSI: {_radio.LastRssi}");
 
-        // Should be a message for us now   
-        if (_radio.Receive(out var inBuffer))
-        {
-            var inStr = Encoding.UTF8.GetString(inBuffer);
-            Console.WriteLine($"Server received: {inStr}");
-            Console.WriteLine($"Server RSSI: {_radio.LastRssi}");
-
-            // Send a reply
-            var outStr = inStr.ToUpper();
-            var outBuffer = Encoding.UTF8.GetBytes(outStr);
-            _radio.Send(outBuffer);
-            _radio.WaitPacketSent();
-            Console.WriteLine($"Sent: {outStr}");
+                // Send a reply
+                var outStr = inStr.ToUpper();
+                var outBuffer = Encoding.UTF8.GetBytes(outStr);
+                _radio.Send(outBuffer);
+                _radio.WaitPacketSent();
+                Console.WriteLine($"Server: sent: {outStr}");
+            }
+            else
+            {
+                Console.WriteLine("Server: receive failed.");
+            }
         }
         else
         {
-            Console.WriteLine("Server receive failed");
+            Console.WriteLine("Server: timed out waiting for response.");
         }
     }
 }
