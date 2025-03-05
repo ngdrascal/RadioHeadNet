@@ -104,7 +104,7 @@ public static class HostExtensions
             var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
             var pinNumber = gpioConfig.DeviceSelectPin;
             var gpioController = provider.GetRequiredService<GpioController>();
-            var pin = gpioController.OpenPin(pinNumber, PinMode.Output);
+            var pin = gpioController.OpenPin(pinNumber, PinMode.Output, PinValue.High);
             return pin;
         });
 
@@ -113,7 +113,7 @@ public static class HostExtensions
             var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
             var pinNumber = gpioConfig.ResetPin;
             var gpioController = provider.GetRequiredService<GpioController>();
-            var pin = gpioController.OpenPin(pinNumber, PinMode.Output);
+            var pin = gpioController.OpenPin(pinNumber, PinMode.Output, PinValue.Low);
             return pin;
         });
 

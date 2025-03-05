@@ -103,7 +103,7 @@ internal class Application
         }
         else
         {
-            Console.WriteLine("Server: timed out waiting for response.");
+            Console.WriteLine("Server: timed out waiting for request.");
         }
     }
 }
