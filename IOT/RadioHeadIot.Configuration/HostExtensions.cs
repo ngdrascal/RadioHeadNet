@@ -103,27 +103,24 @@ public static class HostExtensions
         builder.Services.AddKeyedSingleton<GpioPin>("DeviceSelectPin", (provider, _) =>
         {
             var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
-            var pinNumber = gpioConfig.DeviceSelectPin;
             var gpioController = provider.GetRequiredService<GpioController>();
-            var pin = gpioController.OpenPin(pinNumber, PinMode.Output, PinValue.High);
+            var pin = gpioController.OpenPin(gpioConfig.DeviceSelectPin, PinMode.Output, PinValue.High);
             return pin;
         });
 
         builder.Services.AddKeyedSingleton<GpioPin>("ResetPin", (provider, _) =>
         {
             var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
-            var pinNumber = gpioConfig.ResetPin;
             var gpioController = provider.GetRequiredService<GpioController>();
-            var pin = gpioController.OpenPin(pinNumber, PinMode.Output, PinValue.Low);
+            var pin = gpioController.OpenPin(gpioConfig.ResetPin, PinMode.Output, PinValue.Low);
             return pin;
         });
 
         builder.Services.AddKeyedSingleton<GpioPin>("InterruptPin", (provider, _) =>
         {
             var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
-            var pinNumber = gpioConfig.InterruptPin;
             var gpioController = provider.GetRequiredService<GpioController>();
-            var pin = gpioController.OpenPin(pinNumber, PinMode.Input);
+            var pin = gpioController.OpenPin(gpioConfig.InterruptPin, PinMode.Input);
             return pin;
         });
 
@@ -167,11 +164,8 @@ public static class HostExtensions
             if (radioConfig.ChangeDetectionMode == ChangeDetectionMode.Polling)
                 return radio;
 
-            var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
-            var pinNumber = gpioConfig.ResetPin;
-            var gpioController = provider.GetRequiredService<GpioController>();
-            var pin = gpioController.OpenPin(pinNumber, PinMode.Input);
-            pin.ValueChanged += radio.HandleInterrupt;
+            var interruptPin = provider.GetRequiredKeyedService<GpioPin>("InterruptPin");
+            interruptPin.ValueChanged += radio.HandleInterrupt;
             return radio;
         });
 
