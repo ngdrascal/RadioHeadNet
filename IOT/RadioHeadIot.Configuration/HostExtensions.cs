@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RadioHead;
 using RadioHead.RhRf69;
 
 namespace RadioHeadIot.Configuration;
@@ -117,6 +118,15 @@ public static class HostExtensions
             return pin;
         });
 
+        builder.Services.AddKeyedSingleton<GpioPin>("InterruptPin", (provider, _) =>
+        {
+            var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
+            var pinNumber = gpioConfig.InterruptPin;
+            var gpioController = provider.GetRequiredService<GpioController>();
+            var pin = gpioController.OpenPin(pinNumber, PinMode.Input);
+            return pin;
+        });
+
         builder.Services.AddSingleton<SpiDevice>(provider =>
         {
             var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
@@ -152,6 +162,16 @@ public static class HostExtensions
 
             var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
             var radio = new Rf69(deviceSelectPin, spiDevice, logger);
+
+            var radioConfig = provider.GetRequiredService<IOptions<RadioConfiguration>>().Value;
+            if (radioConfig.ChangeDetectionMode == ChangeDetectionMode.Polling)
+                return radio;
+
+            var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
+            var pinNumber = gpioConfig.ResetPin;
+            var gpioController = provider.GetRequiredService<GpioController>();
+            var pin = gpioController.OpenPin(pinNumber, PinMode.Input);
+            pin.ValueChanged += radio.HandleInterrupt;
             return radio;
         });
 
