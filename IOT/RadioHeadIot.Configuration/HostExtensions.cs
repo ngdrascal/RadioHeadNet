@@ -95,8 +95,7 @@ public static class HostExtensions
         builder.Services.AddSingleton<GpioController>(provider =>
         {
             var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
-            var hostBoard = provider.GetRequiredKeyedService<Board>(hostConfig.HostDevice);
-            var gpioController = hostBoard.CreateGpioController();
+            var gpioController = new GpioController(PinNumberingScheme.Logical);
             return gpioController;
         });
 
