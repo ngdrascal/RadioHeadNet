@@ -145,7 +145,7 @@ namespace RadioHead.RhRf69
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="arg"></param>
-        public void HandleInterrupt(object sender, PinValueChangedEventArgs arg)
+        public void HandleInterrupt(object sender, PinValueChangedEventArgs args)
         {
             // Get the interrupt cause
             var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
