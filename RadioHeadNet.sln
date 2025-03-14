@@ -43,7 +43,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{02
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IOT", "IOT", "{ECBE0F43-EDA8-4806-AC4B-72D73D4DC758}"
 	ProjectSection(SolutionItems) = preProject
-		readme.md = readme.md
+		Examples\IOT\readme.md = Examples\IOT\readme.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nanoFramework", "nanoFramework", "{4E46E2EB-1447-4142-9146-5AFB088A60F0}"
