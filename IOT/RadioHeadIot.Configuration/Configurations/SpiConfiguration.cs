@@ -22,5 +22,7 @@ namespace RadioHeadIot.Configuration
         public int ChipSelectLineActiveState { get; set; } = 0;
 
         public SpiMode Mode { get; set; } = SpiMode.Mode0;
+
+        public RPiChipSelectLines ChipSelectLine {get; set;} = RPiChipSelectLines.Disabled;
     }
 }

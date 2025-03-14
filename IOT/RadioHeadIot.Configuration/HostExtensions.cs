@@ -50,14 +50,14 @@ public static class HostExtensions
         builder.Services
             .AddOptions<GpioConfiguration>()
             .Bind(builder.Configuration.GetSection(GpioConfiguration.SectionName))
-            .ValidateDataAnnotations()
-            .Validate<IOptions<HostDeviceConfiguration>>((gpioConfig, hostConfig) =>
-            {
-                if (hostConfig.Value.HostDevice == HostDevices.RPi)
-                    return gpioConfig.DeviceSelectPin is 7 or 8;
+            .ValidateDataAnnotations();
+        // .Validate<IOptions<HostDeviceConfiguration>>((gpioConfig, hostConfig) =>
+        // {
+        //     if (hostConfig.Value.HostDevice == HostDevices.RPi)
+        //         return gpioConfig.DeviceSelectPin is 7 or 8;
 
-                return true;
-            }, "Invalid DeviceSelectPin configuration. Valid values for RPi are 8 for (CD0) and 7 for (CE1)");
+        //     return true;
+        // }, "Invalid DeviceSelectPin configuration. Valid values for RPi are 8 for (CD0) and 7 for (CE1)");
 
         builder.Services
             .AddOptions<RadioConfiguration>()
@@ -95,17 +95,24 @@ public static class HostExtensions
 
         builder.Services.AddSingleton<GpioController>(provider =>
         {
-            #pragma warning disable SDGPIO0001
+#pragma warning disable SDGPIO0001
             var gpioController = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver(0));
-            #pragma warning restore SDGPIO0001
+#pragma warning restore SDGPIO0001
             return gpioController;
         });
 
         builder.Services.AddKeyedSingleton<GpioPin>("DeviceSelectPin", (provider, _) =>
         {
+            var spiConfig = provider.GetRequiredService<IOptions<SpiConfiguration>>().Value;
             var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
+
             var gpioController = provider.GetRequiredService<GpioController>();
-            var pin = gpioController.OpenPin(gpioConfig.DeviceSelectPin, PinMode.Output, PinValue.High);
+            GpioPin pin;
+            if (spiConfig.ChipSelectLine == RPiChipSelectLines.Disabled)
+                pin = gpioController.OpenPin(gpioConfig.DeviceSelectPin, PinMode.Output, PinValue.High);
+            else
+                pin = gpioController.OpenPin(27, PinMode.Output, PinValue.High);
+
             return pin;
         });
 
@@ -128,15 +135,16 @@ public static class HostExtensions
         builder.Services.AddSingleton<SpiDevice>(provider =>
         {
             var hostConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
+            var spiConfig = provider.GetRequiredService<IOptions<SpiConfiguration>>().Value;
 
             var chipSelectLine = hostConfig.HostDevice switch
             {
                 HostDevices.Ftx232H => 3,
-                HostDevices.RPi => -1,
+                HostDevices.RPi => (int)spiConfig.ChipSelectLine,
                 _ => -1
+
             };
 
-            var spiConfig = provider.GetRequiredService<IOptions<SpiConfiguration>>().Value;
             var spiSettings = new SpiConnectionSettings(spiConfig.BusId)
             {
                 ClockFrequency = spiConfig.ClockFrequency,
