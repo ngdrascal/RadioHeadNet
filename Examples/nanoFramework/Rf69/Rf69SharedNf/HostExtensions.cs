@@ -40,14 +40,14 @@ namespace RadioHead.Examples.Rf69SharedNf
                     return spiDevice;
                 });
 
-                context.AddSingleton(typeof(global::RadioHead.RhRf69.Rf69), provider =>
+                context.AddSingleton(typeof(RhRf69.Rf69), provider =>
                 {
                     var gpioController = (GpioController)provider.GetRequiredService(typeof(GpioController));
                     var deviceSelectPin = gpioController.OpenPin(DeviceSelectPinNum, PinMode.Output);
                     var spiDevice = (SpiDevice)provider.GetRequiredService(typeof(SpiDevice));
                     var loggerFactory = (ILoggerFactory)provider.GetRequiredService(typeof(ILoggerFactory));
                     var logger = loggerFactory.CreateLogger("Rf69");
-                    var radio = new global::RadioHead.RhRf69.Rf69(deviceSelectPin, spiDevice, logger);
+                    var radio = new RhRf69.Rf69(deviceSelectPin, spiDevice, logger);
                     var interruptPin = gpioController.OpenPin(InterruptPinNum, PinMode.InputPullUp);
                     interruptPin.ValueChanged += radio.HandleInterrupt;
                     return radio;
@@ -57,7 +57,7 @@ namespace RadioHead.Examples.Rf69SharedNf
                 {
                     var gpioController = (GpioController)provider.GetRequiredService(typeof(GpioController));
                     var resetPin = gpioController.OpenPin(ResetPinNum, PinMode.Output);
-                    var radio = (global::RadioHead.RhRf69.Rf69)provider.GetRequiredService(typeof(global::RadioHead.RhRf69.Rf69));
+                    var radio = (RhRf69.Rf69)provider.GetRequiredService(typeof(RhRf69.Rf69));
                     var app = new ApplicationBase(resetPin, radio, 915.0f, 13);
                     return app as TApp;
                 });

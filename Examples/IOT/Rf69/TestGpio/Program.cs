@@ -1,13 +1,11 @@
 ﻿using System.Device.Gpio;
 using System.Device.Spi;
-using System.Runtime.Serialization;
-using Iot.Device.Board;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RadioHeadIot.Configuration;
 
 namespace TestGpio;
-internal class Program
+internal static class Program
 {
     private static void Main(string[] args)
     {
@@ -22,6 +20,7 @@ internal class Program
         // var gpioController = new GpioController(PinNumberingScheme.Logical);
         // gpioController.OpenPin(17, PinMode.Output);
         // var board = new RaspberryPiBoard();
+
         var spiSettings = new SpiConnectionSettings(0)
         {
             ClockFrequency = 500000,
@@ -31,10 +30,11 @@ internal class Program
             ChipSelectLineActiveState = PinValue.Low,
             Mode = SpiMode.Mode0
         };
-        var spiDevice = SpiDevice.Create(spiSettings);
-        // var spiDevice = host.Services.GetRequiredService<SpiDevice>();
 
+        // var spiDevice = SpiDevice.Create(spiSettings);
         // var spiDevice = new UnixSpiDevice(spiSettings);
+        var spiDevice = host.Services.GetRequiredService<SpiDevice>();
+
         try
         {
             spiDevice.WriteByte(3);

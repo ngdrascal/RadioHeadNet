@@ -44,7 +44,7 @@ public class GpioConfigurationTests
     }
 
     [TestCase("RPI", -1, 1, 2)]
-    [TestCase("RPI", 0, -1, 2)]
+    [TestCase("RPI", 0, -2, 2)]
     [TestCase("RPI", 0, 1, -2)]
     public void Test02(string hostDevice, int selectPin, int resetPin, int intrPin)
     {

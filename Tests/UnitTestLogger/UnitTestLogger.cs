@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices.Marshalling;
 using Microsoft.Extensions.Logging;
 
 namespace UnitTestLogger;
@@ -16,7 +15,7 @@ public class UnitTestLogger : ILogger
         _getCurrentConfig = getCurrentConfig ?? throw new ArgumentNullException(nameof(getCurrentConfig));
     }
 
-    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => default!;
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull => default!;
 
     public bool IsEnabled(LogLevel logLevel)
     {

@@ -144,7 +144,7 @@ namespace RadioHead.RhRf69
         /// line to get PACKETSENT and PAYLOADREADY interrupts.
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="arg"></param>
+        /// <param name="args"></param>
         public void HandleInterrupt(object sender, PinValueChangedEventArgs args)
         {
             // Get the interrupt cause
