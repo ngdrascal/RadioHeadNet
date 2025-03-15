@@ -27,12 +27,12 @@ internal class Program
             ClockFrequency = 500000,
             DataBitLength = 8,
             DataFlow = DataFlow.MsbFirst,
-            ChipSelectLine = 1,
+            ChipSelectLine = 0,
             ChipSelectLineActiveState = PinValue.Low,
             Mode = SpiMode.Mode0
         };
-        // var spiDevice = SpiDevice.Create(spiSettings);
-        var spiDevice = host.Services.GetRequiredService<SpiDevice>();
+        var spiDevice = SpiDevice.Create(spiSettings);
+        // var spiDevice = host.Services.GetRequiredService<SpiDevice>();
 
         // var spiDevice = new UnixSpiDevice(spiSettings);
         try

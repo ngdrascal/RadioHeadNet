@@ -140,7 +140,8 @@ public static class HostExtensions
             var chipSelectLine = hostConfig.HostDevice switch
             {
                 HostDevices.Ftx232H => 3,
-                HostDevices.RPi => (int)spiConfig.ChipSelectLine,
+                HostDevices.RPi => spiConfig.ChipSelectLine == RPiChipSelectLines.Disabled ?
+                     (int)RPiChipSelectLines.CS1 : (int)spiConfig.ChipSelectLine,
                 _ => -1
 
             };
