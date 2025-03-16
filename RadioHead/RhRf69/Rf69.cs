@@ -14,7 +14,8 @@ namespace RadioHead.RhRf69
     {
         private readonly ILogger _logger;
         // ReSharper disable once ChangeFieldTypeToSystemThreadingLock
-        private static readonly object CriticalSection = new object();
+        private static readonly object RxLock = new object();
+        private static readonly object TxLock = new object();
 
         // The radio OP Mode to use when Mode is RHMode.Idle
         private byte _idleMode;
@@ -185,7 +186,7 @@ namespace RadioHead.RhRf69
         // Performance issue?
         private void ReadFifo()
         {
-            lock (CriticalSection)
+            lock (RxLock)
             {
                 SelectDevice();
                 WriteByte(REG_00_Fifo); // Send the start address with the write mask off
@@ -496,6 +497,10 @@ namespace RadioHead.RhRf69
             if (_changeDetectionMode == ChangeDetectionMode.Interrupt) 
                 return _rxBufValid;
 
+            // We are in polling mode, so check if we have a valid message
+            if (_rxBufValid)
+                return true;
+
             // Poll for received data
             var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
             if ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0)
@@ -534,7 +539,7 @@ namespace RadioHead.RhRf69
             }
 
             buffer = new byte[_rxBufLen];
-            lock (CriticalSection)
+            lock (RxLock)
             {
                 Array.Copy(_rxBuf, buffer, _rxBufLen);
                 _rxBufValid = false; // Got the most recent message
@@ -595,7 +600,7 @@ namespace RadioHead.RhRf69
             if (!WaitCAD())
                 return false; // Check channel activity
 
-            lock (CriticalSection)
+            lock (TxLock)
             {
                 SelectDevice();
 
