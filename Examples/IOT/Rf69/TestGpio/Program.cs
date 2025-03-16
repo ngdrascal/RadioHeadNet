@@ -15,7 +15,7 @@ internal static class Program
         var host = builder
             .AddConfigurationSources()
             .AddConfigurationOptions()
-            .AddServices<Application>()
+            .AddIotServices()
             .Build();
 
         // var gpioController = new GpioController(PinNumberingScheme.Logical);

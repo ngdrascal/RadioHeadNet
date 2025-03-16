@@ -66,8 +66,7 @@ public static class HostExtensions
         return builder;
     }
 
-    public static HostApplicationBuilder AddServices<TApp>(this HostApplicationBuilder builder)
-       where TApp : class
+    public static HostApplicationBuilder AddIotServices(this HostApplicationBuilder builder)
     {
         builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
 
@@ -171,6 +170,11 @@ public static class HostExtensions
             return spiDevice;
         });
 
+        return builder;
+    }
+
+    public static HostApplicationBuilder AddRf69Services(this HostApplicationBuilder builder)
+    {
         builder.Services.AddSingleton<Rf69>(provider =>
         {
             var spiDevice = provider.GetRequiredService<SpiDevice>();
@@ -194,8 +198,6 @@ public static class HostExtensions
             var resetPin = provider.GetRequiredKeyedService<GpioPin>("ResetPin");
             return new Rf69RadioResetter(resetPin);
         });
-
-        builder.Services.AddSingleton<TApp>();
 
         return builder;
     }

@@ -13,7 +13,9 @@ internal static class Program
         var host = builder
             .AddConfigurationSources()
             .AddConfigurationOptions()
-            .AddServices<Application>()
+            .AddIotServices()
+            .AddRf69Services()
+            .AddApplicationServices()
             .Build();
 
         var ct = CancellationToken.None;
