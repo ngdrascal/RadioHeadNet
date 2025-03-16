@@ -18,6 +18,9 @@
      </ItemGroup>
 
        <ItemGroup>
+    <None Update="appSettings.ftx232h.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="appSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

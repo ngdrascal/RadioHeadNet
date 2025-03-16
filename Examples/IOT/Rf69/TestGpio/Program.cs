@@ -1,5 +1,6 @@
 ﻿using System.Device.Gpio;
 using System.Device.Spi;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RadioHeadIot.Configuration;
@@ -26,10 +27,13 @@ internal static class Program
             ClockFrequency = 500000,
             DataBitLength = 8,
             DataFlow = DataFlow.MsbFirst,
-            ChipSelectLine = 0,
+            ChipSelectLine = 3,
             ChipSelectLineActiveState = PinValue.Low,
             Mode = SpiMode.Mode0
         };
+
+        // var board = host.Services.GetRequiredKeyedService<Iot.Device.Board.Board>(HostDevices.Ftx232H);
+        // var spiDevice = board.CreateSpiDevice(spiSettings);
 
         // var spiDevice = SpiDevice.Create(spiSettings);
         // var spiDevice = new UnixSpiDevice(spiSettings);

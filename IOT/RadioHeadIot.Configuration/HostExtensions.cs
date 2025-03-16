@@ -1,5 +1,4 @@
 ﻿using System.Device.Gpio;
-using System.Device.Gpio.Drivers;
 using System.Device.Spi;
 using Iot.Device.Board;
 using Iot.Device.FtCommon;
@@ -51,13 +50,6 @@ public static class HostExtensions
             .AddOptions<GpioConfiguration>()
             .Bind(builder.Configuration.GetSection(GpioConfiguration.SectionName))
             .ValidateDataAnnotations();
-        // .Validate<IOptions<HostDeviceConfiguration>>((gpioConfig, hostConfig) =>
-        // {
-        //     if (hostConfig.Value.HostDevice == HostDevices.RPi)
-        //         return gpioConfig.DeviceSelectPin is 7 or 8;
-
-        //     return true;
-        // }, "Invalid DeviceSelectPin configuration. Valid values for RPi are 8 for (CD0) and 7 for (CE1)");
 
         builder.Services
             .AddOptions<RadioConfiguration>()
@@ -95,10 +87,20 @@ public static class HostExtensions
 
         builder.Services.AddSingleton<GpioController>(provider =>
         {
-#pragma warning disable SDGPIO0001
-            var gpioController = new GpioController(PinNumberingScheme.Logical, new LibGpiodDriver(0));
-#pragma warning restore SDGPIO0001
-            return gpioController;
+            var deviceSetting = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>();
+
+            GpioController controller;
+            if (deviceSetting.Value.HostDevice == HostDevices.RPi)
+            {
+                controller = new GpioController(PinNumberingScheme.Logical);
+            }
+            else
+            {
+                var board = provider.GetRequiredKeyedService<Board>(HostDevices.Ftx232H);
+                controller = board.CreateGpioController();
+            }
+
+            return controller;
         });
 
         builder.Services.AddKeyedSingleton<GpioPin>("DeviceSelectPin", (provider, _) =>
@@ -107,11 +109,10 @@ public static class HostExtensions
             var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
 
             var gpioController = provider.GetRequiredService<GpioController>();
-            GpioPin pin;
-            if (spiConfig.ChipSelectLine == RPiChipSelectLines.Disabled)
-                pin = gpioController.OpenPin(gpioConfig.DeviceSelectPin, PinMode.Output, PinValue.High);
-            else
-                pin = gpioController.OpenPin(27, PinMode.Output, PinValue.High);
+            var deviceSelectPin = spiConfig.ChipSelectLine == RPiChipSelectLines.Disabled ? 
+                gpioConfig.DeviceSelectPin : 27;
+
+            var pin = gpioController.OpenPin(deviceSelectPin, PinMode.Output, PinValue.High);
 
             return pin;
         });
@@ -156,9 +157,9 @@ public static class HostExtensions
                 Mode = spiConfig.Mode
             };
 
-            // var hostBoard = provider.GetRequiredKeyedService<Board>(hostConfig.HostDevice);
-            // var spiDevice = hostBoard.CreateSpiDevice(spiSettings);
-            var spiDevice = SpiDevice.Create(spiSettings);
+            var hostBoard = provider.GetRequiredKeyedService<Board>(hostConfig.HostDevice);
+            var spiDevice = hostBoard.CreateSpiDevice(spiSettings);
+            // var spiDevice = SpiDevice.Create(spiSettings);
             return spiDevice;
         });
 
