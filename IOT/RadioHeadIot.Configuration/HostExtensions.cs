@@ -87,10 +87,10 @@ public static class HostExtensions
 
         builder.Services.AddSingleton<GpioController>(provider =>
         {
-            var deviceSetting = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>();
+            var deviceConfig = provider.GetRequiredService<IOptions<HostDeviceConfiguration>>().Value;
 
             GpioController controller;
-            if (deviceSetting.Value.HostDevice == HostDevices.RPi)
+            if (deviceConfig.HostDevice == HostDevices.RPi)
             {
                 controller = new GpioController(PinNumberingScheme.Logical);
             }
@@ -157,9 +157,17 @@ public static class HostExtensions
                 Mode = spiConfig.Mode
             };
 
-            var hostBoard = provider.GetRequiredKeyedService<Board>(hostConfig.HostDevice);
-            var spiDevice = hostBoard.CreateSpiDevice(spiSettings);
-            // var spiDevice = SpiDevice.Create(spiSettings);
+            SpiDevice spiDevice;
+            if (hostConfig.HostDevice == HostDevices.RPi)
+            {
+                spiDevice = SpiDevice.Create(spiSettings);
+            }
+            else
+            {
+                var board = provider.GetRequiredKeyedService<Board>(HostDevices.Ftx232H);
+                spiDevice = board.CreateSpiDevice(spiSettings);
+            }
+
             return spiDevice;
         });
 
