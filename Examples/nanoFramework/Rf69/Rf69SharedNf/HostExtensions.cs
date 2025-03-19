@@ -1,5 +1,6 @@
 ﻿using System.Device.Gpio;
 using System.Device.Spi;
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using nanoFramework.Hardware.Esp32;
@@ -47,7 +48,7 @@ namespace RadioHead.Examples.Rf69SharedNf
                     var spiDevice = (SpiDevice)provider.GetRequiredService(typeof(SpiDevice));
                     var loggerFactory = (ILoggerFactory)provider.GetRequiredService(typeof(ILoggerFactory));
                     var logger = loggerFactory.CreateLogger("Rf69");
-                    var radio = new RhRf69.Rf69(deviceSelectPin, spiDevice, logger);
+                    var radio = new RhRf69.Rf69(deviceSelectPin, spiDevice, ChangeDetectionMode.Interrupt, logger);
                     var interruptPin = gpioController.OpenPin(InterruptPinNum, PinMode.InputPullUp);
                     interruptPin.ValueChanged += radio.HandleInterrupt;
                     return radio;

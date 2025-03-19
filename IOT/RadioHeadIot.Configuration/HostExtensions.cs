@@ -177,14 +177,15 @@ public static class HostExtensions
     {
         builder.Services.AddSingleton<Rf69>(provider =>
         {
+            var radioConfig = provider.GetRequiredService<IOptions<RadioConfiguration>>().Value;
+
             var spiDevice = provider.GetRequiredService<SpiDevice>();
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<Rf69>();
 
             var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
-            var radio = new Rf69(deviceSelectPin, spiDevice, logger);
+            var radio = new Rf69(deviceSelectPin, spiDevice, radioConfig.ChangeDetectionMode, logger);
 
-            var radioConfig = provider.GetRequiredService<IOptions<RadioConfiguration>>().Value;
             if (radioConfig.ChangeDetectionMode == ChangeDetectionMode.Polling)
                 return radio;
 

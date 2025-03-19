@@ -4,7 +4,7 @@ using RadioHead.RhRf69;
 using RadioHeadIot;
 using RadioHeadIot.Configuration;
 
-namespace Rf69ExamplesShared
+namespace Rf69SharedIot
 {
     public abstract class ApplicationBase
     {

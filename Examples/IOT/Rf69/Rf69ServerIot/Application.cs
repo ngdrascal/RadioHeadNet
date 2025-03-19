@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using RadioHead.RhRf69;
 using RadioHeadIot;
 using RadioHeadIot.Configuration;
-using Rf69ExamplesShared;
+using Rf69SharedIot;
 
 namespace RadioHead.Examples.Rf69ServerIot;
 

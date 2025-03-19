@@ -7,15 +7,18 @@ using System.Device.Gpio;
 using System.Device.Spi;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+// ReSharper disable RedundantNameQualifier
 
 namespace RadioHead.RhRf69
 {
     public partial class Rf69 : RhSpiDriver
     {
         private readonly ILogger _logger;
-        // ReSharper disable once ChangeFieldTypeToSystemThreadingLock
+
+        // ReSharper disable ChangeFieldTypeToSystemThreadingLock
         private static readonly object RxLock = new object();
         private static readonly object TxLock = new object();
+        // ReSharper restore ChangeFieldTypeToSystemThreadingLock
 
         // The radio OP Mode to use when Mode is RHMode.Idle
         private byte _idleMode;
@@ -35,7 +38,9 @@ namespace RadioHead.RhRf69
         // True when there is a valid message in the Rx buffer
         private bool _rxBufValid;
 
-        private ChangeDetectionMode _changeDetectionMode = ChangeDetectionMode.Interrupt;
+        private ChangeDetectionMode _changeDetectionMode;
+
+        private readonly System.Threading.Timer _changePollingTimer;
 
         // <summary>
         // Time in millis since the last preamble was received (and the last time the RSSI
@@ -50,12 +55,15 @@ namespace RadioHead.RhRf69
         /// </summary>
         /// <param name="deviceSelectPin"></param>
         /// <param name="spi"></param>
+        /// <param name="changeDetectionMode"></param>
         /// <param name="logger"></param>
-        public Rf69(GpioPin deviceSelectPin, SpiDevice spi, ILogger logger)
-            : base(deviceSelectPin, spi)
+        public Rf69(GpioPin deviceSelectPin, SpiDevice spi, ChangeDetectionMode changeDetectionMode,
+            ILogger logger) : base(deviceSelectPin, spi)
         {
+            _changeDetectionMode = changeDetectionMode;
             _logger = logger;
             _idleMode = OPMODE_MODE_STDBY;
+            _changePollingTimer = new System.Threading.Timer(PollIrqFlags2, null, -1, -1);
         }
 
         /// <summary>
@@ -134,6 +142,11 @@ namespace RadioHead.RhRf69
             // +13dBm, same as power-on default
             SetTxPower(13, false);
 
+            if (_changeDetectionMode == ChangeDetectionMode.Polling)
+            {
+                // Start a timer to check for interrupts every millisecond
+                // _changePollingTimer.Change(0, 1);
+            }
             _logger.LogTrace("<--- {0}()", nameof(Init));
 
             return true;
@@ -178,6 +191,16 @@ namespace RadioHead.RhRf69
             }
 
             _logger.LogTrace("<--{0}()", nameof(HandleInterrupt));
+        }
+
+        private void PollIrqFlags2(object? state)
+        {
+            var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
+            // if ((irqFlags2 & (IRQFLAGS2_PAYLOADREADY | IRQFLAGS2_PACKETSENT)) != 0)
+            if (irqFlags2 != 0)
+            {
+                HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
+            }
         }
 
         // Low level function reads the FIFO and checks the address
@@ -494,7 +517,7 @@ namespace RadioHead.RhRf69
             // Make sure we are receiving
             SetModeRx();
 
-            if (_changeDetectionMode == ChangeDetectionMode.Interrupt) 
+            if (_changeDetectionMode == ChangeDetectionMode.Interrupt)
                 return _rxBufValid;
 
             // We are in polling mode, so check if we have a valid message
@@ -644,7 +667,7 @@ namespace RadioHead.RhRf69
             return _changeDetectionMode == ChangeDetectionMode.Interrupt ?
                 base.WaitPacketSent() : PollPacketSent();
         }
-
+        
         private bool PollPacketSent()
         {
             var args = new PinValueChangedEventArgs(PinEventTypes.Falling, -1);

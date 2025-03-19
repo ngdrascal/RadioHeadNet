@@ -2,6 +2,7 @@ using System.Device.Gpio;
 using System.Device.Spi;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
+using RadioHead;
 using RadioHead.RhRf69;
 using UnitTestLogger;
 
@@ -38,7 +39,7 @@ public class Rf69Tests
         var spiConnSetting = new SpiConnectionSettings(0);
         var spiDevice = new SpiDeviceFake(spiConnSetting, controller, _registers, _loggerFactory);
         var logger = _loggerFactory.CreateLogger<Rf69>();
-        _radio = new Rf69(deviceSelectPin, spiDevice, logger);
+        _radio = new Rf69(deviceSelectPin, spiDevice, ChangeDetectionMode.Interrupt, logger);
 
         _interruptPin = controller.OpenPin(6);
         _interruptPin.ValueChanged += _radio.HandleInterrupt;

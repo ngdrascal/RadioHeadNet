@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using nanoFramework.Hardware.Esp32;
 using nanoFramework.Logging.Debug;
+using RadioHead;
 using RadioHead.RhRf69;
 
 namespace RadioHeadNF.TestDriver
@@ -60,7 +61,7 @@ namespace RadioHeadNF.TestDriver
                 var spiDevice = (SpiDevice)provider.GetRequiredService(typeof(SpiDevice));
                 var loggerFactory = (ILoggerFactory)provider.GetRequiredService(typeof(ILoggerFactory));
                 var logger = loggerFactory.CreateLogger("Rf69");
-                var radio = new Rf69(deviceSelectPin, spiDevice, logger);
+                var radio = new Rf69(deviceSelectPin, spiDevice, ChangeDetectionMode.Interrupt, logger);
                 var interruptPin = gpioController.OpenPin(InterruptPinNum, PinMode.InputPullUp);
                 interruptPin.ValueChanged += radio.HandleInterrupt;
                 return radio;
