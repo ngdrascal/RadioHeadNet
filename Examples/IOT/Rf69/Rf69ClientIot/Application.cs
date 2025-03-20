@@ -17,7 +17,7 @@ internal class Application : ApplicationBase
 
     protected override void Loop()
     {
-        var outStr = "Hello World!";
+        var outStr = TimeOnly.FromDateTime(DateTime.Now).ToString("HH:mm:ss");
         Console.WriteLine($"Client: sending {outStr}");
 
         var data = Encoding.UTF8.GetBytes(outStr);

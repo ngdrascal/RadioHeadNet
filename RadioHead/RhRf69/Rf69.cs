@@ -40,7 +40,7 @@ namespace RadioHead.RhRf69
 
         private ChangeDetectionMode _changeDetectionMode;
 
-        private readonly System.Threading.Timer _changePollingTimer;
+        // private readonly System.Threading.Timer _changePollingTimer;
 
         // <summary>
         // Time in millis since the last preamble was received (and the last time the RSSI
@@ -63,7 +63,7 @@ namespace RadioHead.RhRf69
             _changeDetectionMode = changeDetectionMode;
             _logger = logger;
             _idleMode = OPMODE_MODE_STDBY;
-            _changePollingTimer = new System.Threading.Timer(PollIrqFlags2, null, -1, -1);
+            // _changePollingTimer = new System.Threading.Timer(PollIrqFlags2, null, -1, -1);
         }
 
         /// <summary>
@@ -193,15 +193,15 @@ namespace RadioHead.RhRf69
             _logger.LogTrace("<--{0}()", nameof(HandleInterrupt));
         }
 
-        private void PollIrqFlags2(object? state)
-        {
-            var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
-            // if ((irqFlags2 & (IRQFLAGS2_PAYLOADREADY | IRQFLAGS2_PACKETSENT)) != 0)
-            if (irqFlags2 != 0)
-            {
-                HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
-            }
-        }
+        // private void PollIrqFlags2(object? state)
+        // {
+        //     var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
+        //     // if ((irqFlags2 & (IRQFLAGS2_PAYLOADREADY | IRQFLAGS2_PACKETSENT)) != 0)
+        //     if (irqFlags2 != 0)
+        //     {
+        //         HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
+        //     }
+        // }
 
         // Low level function reads the FIFO and checks the address
         // Caution: since we put our headers in what the RH_RF69 considers to be the payload, if encryption is enabled
