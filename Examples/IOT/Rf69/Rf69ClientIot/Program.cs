@@ -13,6 +13,7 @@ internal static class Program
         var host = builder
             .AddConfigurationSources()
             .AddConfigurationOptions()
+            .AddLogging()
             .AddIotServices()
             .AddRf69Services()
             .AddApplicationServices()

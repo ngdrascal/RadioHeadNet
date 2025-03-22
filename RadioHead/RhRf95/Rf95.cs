@@ -12,7 +12,7 @@ namespace RadioHead.RhRf95
     {
         private static readonly object CriticalSection = new object();
 
-        private ILogger _logger;
+        private readonly ILogger<Rf95> _logger;
 
         // Number of octets in the buffer
         private byte _bufLen;
@@ -48,7 +48,7 @@ namespace RadioHead.RhRf95
         /// Defaults to the standard Arduino hardware SPI interface
         /// </param>
         /// <param name="logger"></param>
-        public Rf95(GpioPin deviceSelectPin, SpiDevice spi, ILogger logger)
+        public Rf95(GpioPin deviceSelectPin, SpiDevice spi, ILogger<Rf95> logger)
             : base(deviceSelectPin, spi)
         {
             _logger = logger;

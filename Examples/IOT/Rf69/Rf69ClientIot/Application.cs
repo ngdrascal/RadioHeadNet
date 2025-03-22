@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadioHead.RhRf69;
@@ -10,23 +11,34 @@ namespace RadioHead.Examples.Rf69ClientIot;
 
 internal class Application : ApplicationBase
 {
+    private readonly Stopwatch _stopwatch;
+
     public Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
         Rf69RadioResetter resetter, ILogger<Rf69> logger) : base(radio, radioConfig, resetter, logger)
     {
+        _stopwatch = new Stopwatch();
+        _stopwatch.Start();
     }
 
     protected override void Loop()
     {
-        var outStr = TimeOnly.FromDateTime(DateTime.Now).ToString("HH:mm:ss");
-        Console.WriteLine($"Client: sending {outStr}");
+        if (_stopwatch.ElapsedMilliseconds >= 3000)
+        {
+            var outStr = TimeOnly.FromDateTime(DateTime.Now).ToString("HH:mm:ss");
+            Console.WriteLine($"Client: sending {outStr}");
 
-        var data = Encoding.UTF8.GetBytes(outStr);
-        Radio.Send(data);
+            var data = Encoding.UTF8.GetBytes(outStr);
+            Radio.Send(data);
 
-        Radio.WaitPacketSent();
+            Radio.WaitPacketSent();
+
+            _stopwatch.Restart();
+        }
 
         // Now wait for a reply
-        if (Radio.WaitAvailableTimeout(5000))
+        // if (Radio.WaitAvailableTimeout(5000))
+
+        if (Radio.Available())
         {
             if (Radio.Receive(out var inBuffer))
             {
@@ -40,7 +52,7 @@ internal class Application : ApplicationBase
         }
         else
         {
-            Console.WriteLine("Client: timed out waiting for response.");
+            // Console.WriteLine("Client: timed out waiting for response.");
         }
     }
 }

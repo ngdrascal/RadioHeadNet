@@ -1,24 +1,26 @@
 ﻿#pragma warning disable CA1825
+// ReSharper disable RedundantNameQualifier
 // ReSharper disable UseArrayEmptyMethod
-// ReSharper disable once RedundantUsingDirective
+// ReSharper disable UseCollectionExpression
+// ReSharper disable ArrangeObjectCreationWhenTypeEvident
+// ReSharper disable ChangeFieldTypeToSystemThreadingLock
+// ReSharper disable MergeIntoPattern
 
+// ReSharper disable once RedundantUsingDirective
 using System;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-// ReSharper disable RedundantNameQualifier
 
 namespace RadioHead.RhRf69
 {
     public partial class Rf69 : RhSpiDriver
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<Rf69> _logger;
 
-        // ReSharper disable ChangeFieldTypeToSystemThreadingLock
         private static readonly object RxLock = new object();
         private static readonly object TxLock = new object();
-        // ReSharper restore ChangeFieldTypeToSystemThreadingLock
 
         // The radio OP Mode to use when Mode is RHMode.Idle
         private byte _idleMode;
@@ -58,7 +60,7 @@ namespace RadioHead.RhRf69
         /// <param name="changeDetectionMode"></param>
         /// <param name="logger"></param>
         public Rf69(GpioPin deviceSelectPin, SpiDevice spi, ChangeDetectionMode changeDetectionMode,
-            ILogger logger) : base(deviceSelectPin, spi)
+            ILogger<Rf69> logger) : base(deviceSelectPin, spi)
         {
             _changeDetectionMode = changeDetectionMode;
             _logger = logger;
@@ -142,11 +144,11 @@ namespace RadioHead.RhRf69
             // +13dBm, same as power-on default
             SetTxPower(13, false);
 
-            if (_changeDetectionMode == ChangeDetectionMode.Polling)
-            {
-                // Start a timer to check for interrupts every millisecond
-                // _changePollingTimer.Change(0, 1);
-            }
+            // if (_changeDetectionMode == ChangeDetectionMode.Polling)
+            // {
+            //     // Start a timer to check for interrupts every millisecond
+            //     _changePollingTimer.Change(0, 1);
+            // }
             _logger.LogTrace("<--- {0}()", nameof(Init));
 
             return true;
@@ -502,6 +504,13 @@ namespace RadioHead.RhRf69
             return true;
         }
 
+        public void PollChanges()
+        {
+            var args = new PinValueChangedEventArgs(PinEventTypes.Rising, -1);
+            
+            HandleInterrupt(this, args);
+        }
+
         /// <summary>
         /// Starts the receiver and checks whether a received message is Available.
         /// This can be called multiple times in a timeout loop
@@ -517,58 +526,35 @@ namespace RadioHead.RhRf69
             // Make sure we are receiving
             SetModeRx();
 
-            if (_changeDetectionMode == ChangeDetectionMode.Interrupt)
-                return _rxBufValid;
+            // if (_changeDetectionMode == ChangeDetectionMode.Interrupt)
+            //     return _rxBufValid;
+            //
+            // // We are in polling mode, so check if we have a valid message
+            // if (_rxBufValid)
+            //     return true;
+            //
+            // // Poll for received data
+            // var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
+            // if ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0)
+            //     return false;
+            //
+            // // A complete message has been received with good CRC
+            // // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
+            // LastRssi = (short)-(ReadFrom(REG_24_RssiValue) >> 1);
+            //
+            // LastPreambleTime = DateTime.UtcNow.Ticks;
+            //
+            // SetModeIdle();
+            //
+            // // save it in our buffer
+            // ReadFifo();
 
-            // We are in polling mode, so check if we have a valid message
-            if (_rxBufValid)
-                return true;
-
-            // Poll for received data
-            var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
-            if ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0)
-                return false;
-
-            // A complete message has been received with good CRC
-            // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
-            LastRssi = (short)-(ReadFrom(REG_24_RssiValue) >> 1);
-
-            LastPreambleTime = DateTime.UtcNow.Ticks;
-
-            SetModeIdle();
-
-            // save it in our buffer
-            ReadFifo();
+            if (_changeDetectionMode == ChangeDetectionMode.Polling)
+            {
+                HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Rising, -1));
+            }
 
             return _rxBufValid;
-        }
-
-        /// <summary>
-        /// Turns the receiver on if it not already on.  If there is a valid message
-        /// available, copy it to buf and return true  else return false.
-        /// If a message is copied,  (Caution, 0 length messages are permitted).
-        /// You should be sure to call this function frequently enough to not miss any messages
-        /// It is recommended that you call it in your main loop.
-        /// </summary>
-        /// <param name="buffer">buffer to copy the received message</param>
-        /// <returns>true if a valid message was copied to buffer</returns>
-        /// <exception cref="IndexOutOfRangeException"></exception>
-        public override bool Receive(out byte[] buffer)
-        {
-            if (!Available())
-            {
-                buffer = new byte[0];
-                return false;
-            }
-
-            buffer = new byte[_rxBufLen];
-            lock (RxLock)
-            {
-                Array.Copy(_rxBuf, buffer, _rxBufLen);
-                _rxBufValid = false; // Got the most recent message
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -598,7 +584,35 @@ namespace RadioHead.RhRf69
             if ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0)
                 return false;
 
-            HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Rising, 1));
+            HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.None, -1));
+            return true;
+        }
+
+        /// <summary>
+        /// Turns the receiver on if it not already on.  If there is a valid message
+        /// available, copy it to buf and return true  else return false.
+        /// If a message is copied,  (Caution, 0 length messages are permitted).
+        /// You should be sure to call this function frequently enough to not miss any messages
+        /// It is recommended that you call it in your main loop.
+        /// </summary>
+        /// <param name="buffer">buffer to copy the received message</param>
+        /// <returns>true if a valid message was copied to buffer</returns>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        public override bool Receive(out byte[] buffer)
+        {
+            if (!Available())
+            {
+                buffer = new byte[0];
+                return false;
+            }
+
+            buffer = new byte[_rxBufLen];
+            lock (RxLock)
+            {
+                Array.Copy(_rxBuf, buffer, _rxBufLen);
+                _rxBufValid = false; // Got the most recent message
+            }
+
             return true;
         }
 
@@ -670,7 +684,7 @@ namespace RadioHead.RhRf69
         
         private bool PollPacketSent()
         {
-            var args = new PinValueChangedEventArgs(PinEventTypes.Falling, -1);
+            var args = new PinValueChangedEventArgs(PinEventTypes.None, -1);
             HandleInterrupt(this, args);
             while (Mode == RhModes.Tx)
             {

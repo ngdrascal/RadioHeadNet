@@ -11,10 +11,10 @@ namespace Rf69SharedIot
         protected readonly Rf69 Radio;
         protected readonly RadioConfiguration RadioConfig;
         protected readonly Rf69RadioResetter Resetter;
-        protected readonly ILogger Logger;
+        protected readonly ILogger<Rf69> Logger;
 
         protected ApplicationBase(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
-            Rf69RadioResetter resetter, ILogger logger)
+            Rf69RadioResetter resetter, ILogger<Rf69> logger)
         {
             Radio = radio;
             RadioConfig = radioConfig.Value;

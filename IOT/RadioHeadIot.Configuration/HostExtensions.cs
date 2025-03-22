@@ -68,8 +68,6 @@ public static class HostExtensions
 
     public static HostApplicationBuilder AddIotServices(this HostApplicationBuilder builder)
     {
-        builder.Services.AddLogging(loggingBuilder => loggingBuilder.AddConsole());
-
         builder.Services.AddKeyedSingleton<Board>(HostDevices.Ftx232H, (_, _) =>
         {
             var allFtx232H = Ftx232HDevice.GetFtx232H();
@@ -168,6 +166,17 @@ public static class HostExtensions
             }
 
             return spiDevice;
+        });
+
+        return builder;
+    }
+
+    public static HostApplicationBuilder AddLogging(this HostApplicationBuilder builder)
+    {
+        builder.Services.AddLogging(loggingBuilder =>
+        {
+            loggingBuilder.ClearProviders();
+            loggingBuilder.AddConsole();
         });
 
         return builder;
