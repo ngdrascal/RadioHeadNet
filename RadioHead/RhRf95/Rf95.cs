@@ -1,4 +1,10 @@
-﻿// ReSharper disable RedundantExplicitArrayCreation
+﻿#pragma warning disable CA1825
+// // ReSharper disable RedundantNameQualifier
+// // ReSharper disable UseArrayEmptyMethod
+// // ReSharper disable UseCollectionExpression
+// // ReSharper disable ArrangeObjectCreationWhenTypeEvident
+// // ReSharper disable ChangeFieldTypeToSystemThreadingLock
+// // ReSharper disable MergeIntoPattern
 
 using System;
 using System.Device.Gpio;
@@ -12,7 +18,7 @@ namespace RadioHead.RhRf95
     {
         private static readonly object CriticalSection = new object();
 
-        private readonly ILogger<Rf95> _logger;
+        private readonly ILogger _logger;
 
         // Number of octets in the buffer
         private byte _bufLen;
@@ -48,7 +54,7 @@ namespace RadioHead.RhRf95
         /// Defaults to the standard Arduino hardware SPI interface
         /// </param>
         /// <param name="logger"></param>
-        public Rf95(GpioPin deviceSelectPin, SpiDevice spi, ILogger<Rf95> logger)
+        public Rf95(GpioPin deviceSelectPin, SpiDevice spi, ILogger logger)
             : base(deviceSelectPin, spi)
         {
             _logger = logger;

@@ -17,7 +17,7 @@ namespace RadioHead.RhRf69
 {
     public partial class Rf69 : RhSpiDriver
     {
-        private readonly ILogger<Rf69> _logger;
+        private readonly ILogger _logger;
 
         private static readonly object RxLock = new object();
         private static readonly object TxLock = new object();
@@ -60,7 +60,7 @@ namespace RadioHead.RhRf69
         /// <param name="changeDetectionMode"></param>
         /// <param name="logger"></param>
         public Rf69(GpioPin deviceSelectPin, SpiDevice spi, ChangeDetectionMode changeDetectionMode,
-            ILogger<Rf69> logger) : base(deviceSelectPin, spi)
+            ILogger logger) : base(deviceSelectPin, spi)
         {
             _changeDetectionMode = changeDetectionMode;
             _logger = logger;

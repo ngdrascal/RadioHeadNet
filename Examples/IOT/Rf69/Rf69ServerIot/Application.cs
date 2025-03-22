@@ -25,8 +25,20 @@ internal class Application : ApplicationBase
                 Console.WriteLine($"Server: received: {inStr}");
                 Console.WriteLine($"Server: RSSI: {Radio.LastRssi}");
 
+                Thread.Sleep(1000); // Wait a little bit to avoid collisions
+
                 // Send a reply
-                var outStr = inStr.ToUpper();
+                string outStr;
+                if (TimeOnly.TryParse(inStr, out var inTime))
+                {
+                    // add 12 hours
+                    var outTime = inTime.Add(new TimeSpan(12, 0, 0));
+                    outStr = outTime.ToString("HH:mm:ss");
+                }
+                else
+                {
+                    outStr = $"Invalid time: {inStr}";
+                }
                 var outBuffer = Encoding.UTF8.GetBytes(outStr);
                 Radio.Send(outBuffer);
                 Radio.WaitPacketSent();
