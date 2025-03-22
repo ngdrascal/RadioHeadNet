@@ -9,7 +9,7 @@ using Rf69SharedIot;
 
 namespace RadioHead.Examples.Rf69ClientIot;
 
-internal class Application : ApplicationBase
+internal class Application : ExampleApplicationBase
 {
     private readonly Stopwatch _stopwatch;
 
@@ -20,7 +20,7 @@ internal class Application : ApplicationBase
         _stopwatch.Start();
     }
 
-    protected override void Loop()
+    protected override Task LoopAsync()
     {
         if (_stopwatch.ElapsedMilliseconds >= 3000)
         {
@@ -54,5 +54,7 @@ internal class Application : ApplicationBase
         {
             // Console.WriteLine("Client: timed out waiting for response.");
         }
+
+        return Task.CompletedTask;
     }
 }

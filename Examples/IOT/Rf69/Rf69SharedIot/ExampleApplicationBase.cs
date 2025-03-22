@@ -6,14 +6,14 @@ using RadioHeadIot.Configuration;
 
 namespace Rf69SharedIot
 {
-    public abstract class ApplicationBase
+    public abstract class ExampleApplicationBase
     {
         protected readonly Rf69 Radio;
         protected readonly RadioConfiguration RadioConfig;
         protected readonly Rf69RadioResetter Resetter;
         protected readonly ILogger<Rf69> Logger;
 
-        protected ApplicationBase(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
+        protected ExampleApplicationBase(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
             Rf69RadioResetter resetter, ILogger<Rf69> logger)
         {
             Radio = radio;
@@ -22,16 +22,16 @@ namespace Rf69SharedIot
             Logger = logger;
         }
 
-        public void Run(CancellationToken cancellationToken)
+        public async Task RunAsync(CancellationToken cancellationToken)
         {
-            if (!Init())
+            if (!await InitAsync())
                 return;
 
             while (!cancellationToken.IsCancellationRequested)
-                Loop();
+                await LoopAsync();
         }
 
-        protected virtual bool Init()
+        protected virtual Task<bool> InitAsync()
         {
             Logger.LogDebug("Radio Configuration:");
             Logger.LogDebug(RadioConfig.Dump());
@@ -41,12 +41,12 @@ namespace Rf69SharedIot
             if (ConfigureRadio())
             {
                 Logger.LogDebug("Radio successfully configured.");
-                return true;
+                return Task.FromResult(true);
             }
             else
             {
                 Logger.LogDebug("Radio configuration failed.");
-                return false;
+                return Task.FromResult(false);
             }
         }
 
@@ -84,7 +84,6 @@ namespace Rf69SharedIot
             return true;
         }
 
-        protected abstract void Loop();
-
+        protected abstract Task LoopAsync();
     }
 }

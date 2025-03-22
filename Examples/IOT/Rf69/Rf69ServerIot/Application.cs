@@ -8,14 +8,14 @@ using Rf69SharedIot;
 
 namespace RadioHead.Examples.Rf69ServerIot;
 
-internal class Application : ApplicationBase
+internal class Application : ExampleApplicationBase
 {
     public Application(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
         Rf69RadioResetter resetter, ILogger<Rf69> logger) : base(radio, radioConfig, resetter, logger)
     {
     }
 
-    protected override void Loop()
+    protected override Task LoopAsync()
     {
         if (Radio.WaitAvailableTimeout(5000))
         {
@@ -53,5 +53,7 @@ internal class Application : ApplicationBase
         {
             Console.WriteLine("Server: timed out waiting for request.");
         }
+
+        return Task.CompletedTask;
     }
 }

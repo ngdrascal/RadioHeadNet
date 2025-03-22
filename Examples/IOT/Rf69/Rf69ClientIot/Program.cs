@@ -22,7 +22,7 @@ internal static class Program
         var ct = CancellationToken.None;
         try
         {
-            host.Services.GetRequiredService<Application>().Run(ct);
+            host.Services.GetRequiredService<Application>().RunAsync(ct);
         }
         catch (Exception e)
         {
