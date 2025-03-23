@@ -35,9 +35,6 @@ internal class Application : ExampleApplicationBase
             _stopwatch.Restart();
         }
 
-        // Now wait for a reply
-        // if (Radio.WaitAvailableTimeout(5000))
-
         if (Radio.Available())
         {
             if (Radio.Receive(out var inBuffer))
