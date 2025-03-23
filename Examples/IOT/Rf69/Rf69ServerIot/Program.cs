@@ -6,7 +6,7 @@ namespace RadioHead.Examples.Rf69ServerIot;
 
 internal static class Program
 {
-    internal static void Main(string[] args)
+    internal static async Task Main(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
 
@@ -22,7 +22,7 @@ internal static class Program
 
         try
         {
-            host.Services.GetRequiredService<Application>().RunAsync(ct);
+            await host.Services.GetRequiredService<Application>().RunAsync(ct);
         }
         catch (Exception e)
         {
