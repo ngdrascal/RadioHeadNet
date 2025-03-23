@@ -25,7 +25,7 @@ internal class Application : ExampleApplicationBase
                 Console.WriteLine($"Server: received: {inStr}");
                 Console.WriteLine($"Server: RSSI: {Radio.LastRssi}");
 
-                Thread.Sleep(1000); // Wait a little bit to avoid collisions
+                Thread.Sleep(500); // Wait a little bit to avoid collisions
 
                 // Send a reply
                 string outStr;
