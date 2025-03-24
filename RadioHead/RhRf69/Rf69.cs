@@ -144,11 +144,6 @@ namespace RadioHead.RhRf69
             // +13dBm, same as power-on default
             SetTxPower(13, false);
 
-            // if (_changeDetectionMode == ChangeDetectionMode.Polling)
-            // {
-            //     // Start a timer to check for interrupts every millisecond
-            //     _changePollingTimer.Change(0, 1);
-            // }
             _logger.LogTrace("<--- {0}()", nameof(Init));
 
             return true;
@@ -525,29 +520,6 @@ namespace RadioHead.RhRf69
 
             // Make sure we are receiving
             SetModeRx();
-
-            // if (_changeDetectionMode == ChangeDetectionMode.Interrupt)
-            //     return _rxBufValid;
-            //
-            // // We are in polling mode, so check if we have a valid message
-            // if (_rxBufValid)
-            //     return true;
-            //
-            // // Poll for received data
-            // var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
-            // if ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0)
-            //     return false;
-            //
-            // // A complete message has been received with good CRC
-            // // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
-            // LastRssi = (short)-(ReadFrom(REG_24_RssiValue) >> 1);
-            //
-            // LastPreambleTime = DateTime.UtcNow.Ticks;
-            //
-            // SetModeIdle();
-            //
-            // // save it in our buffer
-            // ReadFifo();
 
             if (_changeDetectionMode == ChangeDetectionMode.Polling)
             {

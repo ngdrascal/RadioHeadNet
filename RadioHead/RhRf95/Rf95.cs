@@ -1,11 +1,13 @@
 ﻿#pragma warning disable CA1825
-// // ReSharper disable RedundantNameQualifier
-// // ReSharper disable UseArrayEmptyMethod
-// // ReSharper disable UseCollectionExpression
-// // ReSharper disable ArrangeObjectCreationWhenTypeEvident
-// // ReSharper disable ChangeFieldTypeToSystemThreadingLock
-// // ReSharper disable MergeIntoPattern
+// ReSharper disable RedundantNameQualifier
+// ReSharper disable UseArrayEmptyMethod
+// ReSharper disable UseCollectionExpression
+// ReSharper disable ArrangeObjectCreationWhenTypeEvident
+// ReSharper disable ChangeFieldTypeToSystemThreadingLock
+// ReSharper disable MergeIntoPattern
+// ReSharper disable RedundantExplicitArrayCreation
 
+// ReSharper disable RedundantUsingDirective
 using System;
 using System.Device.Gpio;
 using System.Device.Spi;
@@ -18,6 +20,7 @@ namespace RadioHead.RhRf95
     {
         private static readonly object CriticalSection = new object();
 
+        private ChangeDetectionMode _changeDetectionMode;
         private readonly ILogger _logger;
 
         // Number of octets in the buffer
@@ -53,10 +56,12 @@ namespace RadioHead.RhRf95
         /// <param name="spi"> spi Pointer to the SPI interface object to use. 
         /// Defaults to the standard Arduino hardware SPI interface
         /// </param>
+        /// <param name="changeDetectionMode"></param>
         /// <param name="logger"></param>
-        public Rf95(GpioPin deviceSelectPin, SpiDevice spi, ILogger logger)
+        public Rf95(GpioPin deviceSelectPin, SpiDevice spi, ChangeDetectionMode changeDetectionMode, ILogger logger)
             : base(deviceSelectPin, spi)
         {
+            _changeDetectionMode = changeDetectionMode;
             _logger = logger;
             _enableCrc = true;
             _rxBufValid = false;
@@ -79,7 +84,10 @@ namespace RadioHead.RhRf95
 
             // Set sleep mode, so we can also set LORA mode:
             WriteTo(REG_01_OP_MODE, MODE_SLEEP | LONG_RANGE_MODE);
-            Thread.Sleep(10); // Wait for sleep mode to take over from say, CAD
+
+            // Wait for sleep mode to take over from say, CAD
+            Thread.Sleep(10);
+            
             // Check we are in sleep mode, with LORA set
             if (ReadFrom(REG_01_OP_MODE) != (MODE_SLEEP | LONG_RANGE_MODE))
             {
@@ -96,17 +104,19 @@ namespace RadioHead.RhRf95
             // Packet format is preamble + explicit-header + payload + crc
             // Explicit Header Mode
             // payload is TO + FROM + ID + FLAGS + message data
-            // RX mode is implmented with RXCONTINUOUS
+            // RX mode is implemented with RXCONTINUOUS
             // max message data length is 255 - 4 = 251 octets
 
             SetModeIdle();
 
             // Set up default configuration
-            // No Sync Words in LORA mode. ACTUALLY thats not correct, and for tehRF95, the default LoRaSync Word is 0x12
-            // (ie a private network) and it can be changed at REG_39_SYNC_WORD
+            // No Sync Words in LORA mode. ACTUALLY that's not correct, and for the RF95,
+            // the default LoRaSync Word is 0x12 (i.e. - a private network) and it can be
+            // changed at REG_39_SYNC_WORD
             SetModemConfig(ModemConfigChoice.Bw125Cr45Sf128); // Radio default
 
-            //    setModemConfig(Bw125Cr48Sf4096); // slow and reliable?
+            // setModemConfig(Bw125Cr48Sf4096); // slow and reliable?
+            
             SetPreambleLength(8); // Default is 8
 
             // An innocuous ISM frequency, same as RF22's
@@ -144,10 +154,10 @@ namespace RadioHead.RhRf95
         /// <returns>true if index is a valid choice.</returns>
         public bool SetModemConfig(ModemConfigChoice index)
         {
-            if ((byte)index >= _modemConfigTable.Length)
+            if ((byte)index >= ModemConfigTable.Length)
                 return false;
 
-            SetModemRegisters(_modemConfigTable[(byte)index]);
+            SetModemRegisters(ModemConfigTable[(byte)index]);
             return true;
         }
 
@@ -220,7 +230,9 @@ namespace RadioHead.RhRf95
             if (data.Length > MAX_MESSAGE_LEN)
                 return false;
 
-            WaitPacketSent(); // Make sure we dont interrupt an outgoing message
+            // Make sure we don't interrupt an outgoing message
+            WaitPacketSent();
+            
             SetModeIdle();
 
             if (!WaitCAD())
@@ -243,6 +255,36 @@ namespace RadioHead.RhRf95
             }
 
             // when Tx is done, interruptHandler will fire and radio mode will return to STANDBY
+            return true;
+        }
+
+        /// <summary>
+        /// Determines how the driver detects when the radio completed sending a packet.
+        /// If set to ChangeDetectionMode.Interrupt, the driver will wait for an interrupt to signal
+        /// the send operation is complete. If set to ChangeDetectionMode.Poll, the driver will
+        /// poll the device to determine if the send operation is complete.
+        /// </summary>
+        /// <param name="mode"></param>
+        public void SetChangeDetectionMode(ChangeDetectionMode mode)
+        {
+            _changeDetectionMode = mode;
+        }
+
+        public override bool WaitPacketSent()
+        {
+            return _changeDetectionMode == ChangeDetectionMode.Interrupt ?
+                base.WaitPacketSent() : PollPacketSent();
+        }
+
+        private bool PollPacketSent()
+        {
+            var args = new PinValueChangedEventArgs(PinEventTypes.None, -1);
+            HandleInterrupt(this, args);
+            while (Mode == RhModes.Tx)
+            {
+                RadioHead.Yield();
+                HandleInterrupt(this, args);
+            }
             return true;
         }
 
@@ -357,7 +399,8 @@ namespace RadioHead.RhRf95
                     power = 15;
                 if (power < 0)
                     power = 0;
-                // Set the MaxPower register to 0x7 => MaxPower = 10.8 + 0.6 * 7 = 15dBm
+
+                // Set the MaxPower register to 0x07 => MaxPower = 10.8 + 0.6 * 7 = 15dBm
                 // So Pout = Pmax - (15 - power) = 15 - 15 + power
                 WriteTo(REG_09_PA_CONFIG, (byte)(MAX_POWER | power));
                 WriteTo(REG_4D_PA_DAC, PA_DAC_DISABLE);
@@ -369,7 +412,7 @@ namespace RadioHead.RhRf95
                 if (power < 2)
                     power = 2;
 
-                // For PA_DAC_ENABLE, manual says '+20dBm on PA_BOOST when OutputPower=0xf'
+                // For PA_DAC_ENABLE, manual says '+20dBm on PA_BOOST when OutputPower=0x0F'
                 // PA_DAC_ENABLE actually adds about 3dBm to all power levels. We will use it
                 // for 8, 19 and 20dBm
                 if (power > 17)
@@ -445,7 +488,7 @@ namespace RadioHead.RhRf95
         /// </summary>
         /// <remarks>
         /// Caution: the TCXO model radios are not low power when in sleep (consuming
-        /// about ~600 uA, reported by Phang Moh Lim.
+        /// about ~600 uA, reported by Phang Moh Lim).
         /// </remarks>
         /// <remarks>
         /// Caution: if you enable TCXO and there is no external TCXO signal connected to the radio

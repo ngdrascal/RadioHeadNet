@@ -43,7 +43,7 @@
 
         // These are indexed by the values of ModemConfigChoice
         // Stored in flash (program) memory to save SRAM
-        private readonly ModemConfiguration[] _modemConfigTable =
+        internal readonly ModemConfiguration[] ModemConfigTable =
         {
             new ModemConfiguration
                 { Reg1D = 0x72, Reg1E = 0x74, Reg26 = 0x04 }, // Bw125Cr45Sf128 (the chip default), AGC enabled

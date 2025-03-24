@@ -9,16 +9,16 @@ namespace RadioHeadIot.Tests;
 internal class SpiDeviceFake : SpiDevice
 {
     private readonly SpiConnectionSettings _connectionSettings;
-    private readonly Rf69RegistersFake _rf69Registers;
+    private readonly RfRegistersFake _rfRegisters;
     private readonly GpioPin? _chipSelectPin;
     private readonly ILogger _logger;
 
     [ExcludeFromCodeCoverage]
     public SpiDeviceFake(SpiConnectionSettings connectionSettings, GpioController gpioController,
-        Rf69RegistersFake rf69Registers, ILoggerFactory loggerFactory)
+        RfRegistersFake rfRegisters, ILoggerFactory loggerFactory)
     {
         _connectionSettings = connectionSettings;
-        _rf69Registers = rf69Registers;
+        _rfRegisters = rfRegisters;
         _logger = loggerFactory.CreateLogger(nameof(SpiDeviceFake));
 
         if (_connectionSettings.ChipSelectLine != -1)
@@ -33,7 +33,7 @@ internal class SpiDeviceFake : SpiDevice
 
         for (var i = 0; i < buffer.Length; i++)
         {
-            buffer[i] = _rf69Registers.Read();
+            buffer[i] = _rfRegisters.Read();
         }
 
         DisableChipSelect();
@@ -52,7 +52,7 @@ internal class SpiDeviceFake : SpiDevice
 
         foreach (var b in buffer)
         {
-            _rf69Registers.Write(b);
+            _rfRegisters.Write(b);
         }
 
         DisableChipSelect();

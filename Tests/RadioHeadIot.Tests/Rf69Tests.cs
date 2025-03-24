@@ -11,8 +11,17 @@ namespace RadioHeadIot.Tests;
 [TestFixture, ExcludeFromCodeCoverage]
 public class Rf69Tests
 {
+    private readonly byte[] _initialRegValues =
+    [
+        //         0     1     2     3     4     5     6     7     8     9     A     B     C     D     E     F
+        /* 0 */ 0x00, 0x04, 0x00, 0x1A, 0x0B, 0x00, 0x52, 0xE4, 0xC0, 0x00, 0x41, 0x00, 0x02, 0x92, 0xF5, 0x20,
+        /* 1 */ 0x24, 0x9F, 0x09, 0x1A, 0x40, 0xB0, 0x7B, 0x9B, 0x08, 0x86, 0x8A, 0x40, 0x80, 0x06, 0x10, 0x00,
+        /* 2 */ 0x00, 0x00, 0x00, 0x02, 0xFF, 0x00, 0x05, 0x80, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x03, 0x98, 0x00,
+        /* 3 */ 0x10, 0x40, 0x00, 0x00, 0x00, 0x0F, 0x02, 0x00, 0x01, 0x00, 0x1B, 0x55, 0x70, 0x00, 0x00
+    ];
+
     private ILoggerFactory _loggerFactory;
-    private Rf69RegistersFake _registers;
+    private RfRegistersFake _registers;
     private Rf69 _radio;
     private GpioPin _interruptPin;
 
@@ -29,13 +38,13 @@ public class Rf69Tests
             {
                 builder.AddUnitTestLogger(config => config.ShowLogLevel = false);
                 builder.SetMinimumLevel(LogLevel.Trace);
-                builder.AddFilter(nameof(Rf69RegistersFake) + ".states", LogLevel.None);
+                builder.AddFilter(nameof(RfRegistersFake) + ".states", LogLevel.None);
             });
 
         var driver = new GpioDriverFake();
         var controller = new GpioController(PinNumberingScheme.Board, driver);
         var deviceSelectPin = controller.OpenPin(5);
-        _registers = new Rf69RegistersFake(deviceSelectPin, _loggerFactory);
+        _registers = new RfRegistersFake(_initialRegValues, deviceSelectPin, _loggerFactory);
         var spiConnSetting = new SpiConnectionSettings(0);
         var spiDevice = new SpiDeviceFake(spiConnSetting, controller, _registers, _loggerFactory);
         var logger = _loggerFactory.CreateLogger<Rf69>();
