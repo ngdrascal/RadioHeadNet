@@ -18,13 +18,13 @@
      </ItemGroup>
 
        <ItemGroup>
-    <None Update="appSettings.ftx232h.json">
+    <None Update="appsettings.ftx232h.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="appSettings.json">
+    <None Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="appSettings.rpi.json">
+    <None Update="appsettings.rpi.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

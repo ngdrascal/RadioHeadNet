@@ -17,19 +17,19 @@ public static class HostExtensions
     public static HostApplicationBuilder AddConfigurationSources(this HostApplicationBuilder builder)
     {
         builder.Configuration.Sources.Clear();
-        builder.Configuration.AddJsonFile("appSettings.json", false);
+        builder.Configuration.AddJsonFile("appsettings.json", false);
 
         var hostDevice = builder.Configuration["HostDevice"]?.ToLower();
         if (string.IsNullOrEmpty(hostDevice))
-            throw new ApplicationException("HostDevice must be specified in appSettings.json.");
+            throw new ApplicationException("HostDevice must be specified in appsettings.json.");
 
-        if (!hostDevice.Equals(HostDevices.Ftx232H.ToString(), StringComparison.CurrentCultureIgnoreCase) &&
-            !hostDevice.Equals(HostDevices.RPi.ToString(), StringComparison.InvariantCultureIgnoreCase))
+        if (!hostDevice.Equals(nameof(HostDevices.Ftx232H), StringComparison.CurrentCultureIgnoreCase) &&
+            !hostDevice.Equals(nameof(HostDevices.RPi), StringComparison.InvariantCultureIgnoreCase))
         {
             throw new ApplicationException("HostDevice must be either 'FTX232H' or 'RPi'.");
         }
 
-        builder.Configuration.AddJsonFile($"appSettings.{hostDevice}.json", false);
+        builder.Configuration.AddJsonFile($"appsettings.{hostDevice}.json", false);
 
         return builder;
     }
