@@ -23,7 +23,8 @@ internal static class Program
             MisoIndex = 5
         };
 
-        app.Run(fileStream, options);
+        var fileNameOnly = Path.GetFileName(fileName);
+        app.Run(fileNameOnly, fileStream, options);
     }
 }
 

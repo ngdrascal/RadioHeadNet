@@ -2,7 +2,7 @@
   "profiles": {
     "Rf69CaptureAnalyzer": {
       "commandName": "Project",
-      "commandLineArgs": "--file ..\\..\\..\\..\\TestData\\IOT_RF69+_Capture.csv"
+      "commandLineArgs": "--file ..\\..\\..\\..\\TestData\\NPacketRadio_RF69.csv"
     }
   }
 }

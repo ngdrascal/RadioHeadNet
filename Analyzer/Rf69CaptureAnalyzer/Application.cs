@@ -2,7 +2,7 @@
 
 internal class Application(Analyzer analyzer)
 {
-    public void Run(FileStream fileStream, ParseOptions options)
+    public void Run(string fileName, FileStream fileStream, ParseOptions options)
     {
         var fileData = CsvFileParser.Parse(fileStream, options);
 
@@ -11,6 +11,7 @@ internal class Application(Analyzer analyzer)
             analyzer.ProcessRecords(row.recordType, row.Mosi, row.Miso);
         }
 
+        Console.WriteLine($"#: {fileName}");
         foreach (var instruction in analyzer.Instructions)
         {
             Console.WriteLine(instruction.Print());

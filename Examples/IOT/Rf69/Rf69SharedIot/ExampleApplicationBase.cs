@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadioHead.RhRf69;
 using RadioHeadIot;
@@ -6,6 +7,7 @@ using RadioHeadIot.Configuration;
 
 namespace Rf69SharedIot
 {
+    [ExcludeFromCodeCoverage]
     public abstract class ExampleApplicationBase
     {
         protected readonly Rf69 Radio;
