@@ -19,6 +19,8 @@ internal static class Program
         var options = new ParseOptions
         {
             RecordTypeIndex = 1,
+            StartIndex = 2,
+            DurationIndex = 3,
             MosiIndex = 4,
             MisoIndex = 5
         };

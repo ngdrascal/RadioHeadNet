@@ -2,9 +2,9 @@
 
 internal class StartState(Analyzer analyzer) : State(analyzer)
 {
-    public override State ProcessRecord(RecordTypes recordTypes, byte? mosi, byte? miso)
+    public override State ProcessRecord(CaptureRecord record)
     {
-        return recordTypes == RecordTypes.Enabled ?
+        return record.RecordType == RecordTypes.Enabled ?
             new EnabledState(Analyzer, this) :
             this;
     }

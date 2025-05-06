@@ -2,15 +2,15 @@
 
 internal class EnabledState(Analyzer analyzer, State state) : State(analyzer, state)
 {
-    public override State ProcessRecord(RecordTypes recordTypes, byte? mosi, byte? miso)
+    public override State ProcessRecord(CaptureRecord record)
     {
-        switch (recordTypes)
+        switch (record.RecordType)
         {
             case RecordTypes.Result: // Start of a new instruction
-                if (!mosi.HasValue)
+                if (!record.Mosi.HasValue)
                     return new ErrorState(Analyzer, this);
 
-                Instructions.Add(new Instruction(mosi.Value));
+                Instructions.Add(new Instruction(Index++, record.Start, record.Mosi.Value));
                 return new ResultState(Analyzer, this);
 
             case RecordTypes.Disabled:

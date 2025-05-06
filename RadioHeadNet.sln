@@ -14,10 +14,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{0B01122C-57B5-404A-8931-89ABD515ED9C}"
 	ProjectSection(SolutionItems) = preProject
 		Analyzer\TestData\Arduino_RF69_Capture.csv = Analyzer\TestData\Arduino_RF69_Capture.csv
-		Analyzer\TestData\IOT_FT232H_Capture.csv = Analyzer\TestData\IOT_FT232H_Capture.csv
 		Analyzer\TestData\IOT_RF69_Capture.csv = Analyzer\TestData\IOT_RF69_Capture.csv
-		Analyzer\TestData\NF_Esp32_Feather_Capture.csv = Analyzer\TestData\NF_Esp32_Feather_Capture.csv
-		Analyzer\TestData\NF_FT232H_Capture.csv = Analyzer\TestData\NF_FT232H_Capture.csv
+		Analyzer\TestData\NF_RF69_Capture.csv = Analyzer\TestData\NF_RF69_Capture.csv
+		Analyzer\TestData\NF_RF69_Standalone_Capture.csv = Analyzer\TestData\NF_RF69_Standalone_Capture.csv
+		Analyzer\TestData\NPacketRadio_RF69.csv = Analyzer\TestData\NPacketRadio_RF69.csv
+		Analyzer\TestData\RadioHeadNet_RF69.csv = Analyzer\TestData\RadioHeadNet_RF69.csv
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{F1314E58-CC5B-4E15-A368-6148364F8546}"

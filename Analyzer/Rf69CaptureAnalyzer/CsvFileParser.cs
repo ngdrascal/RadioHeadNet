@@ -2,9 +2,9 @@
 
 internal static class CsvFileParser
 {
-    public static List<(RecordTypes recordType, byte? Mosi, byte? Miso)> Parse(FileStream fileStream, ParseOptions options)
+    public static List<CaptureRecord> Parse(FileStream fileStream, ParseOptions options)
     {
-        var data = new List<(RecordTypes RecordType, byte? Mosi, byte? Miso)>();
+        var data = new List<CaptureRecord>();
 
         using StreamReader sr = new(fileStream);
         if (!sr.EndOfStream)
@@ -13,22 +13,23 @@ internal static class CsvFileParser
         while (!sr.EndOfStream)
         {
             var line = sr.ReadLine() ?? string.Empty;
-            var (recordType, mosi, miso) = line.ParseLine(options);
-            data.Add((recordType, mosi, miso));
+            var record = line.ParseLine(options);
+            data.Add(record);
         }
 
         return data;
     }
 
-    private static (RecordTypes recordType, byte? Mosi, byte? Miso) ParseLine(this string line, ParseOptions options)
+    private static CaptureRecord ParseLine(this string line, ParseOptions options)
     {
         var parts = line.Split(',');
 
         var recordType = parts[options.RecordTypeIndex].ToRecordType();
+        var start = double.Parse(parts[options.StartIndex].Trim());
         var mosi = parts[options.MosiIndex].ToByteOrNull();
         var miso = parts[options.MisoIndex].ToByteOrNull();
 
-        return (recordType, mosi, miso);
+        return new CaptureRecord(recordType, start, mosi, miso);
     }
 
     private static byte? ToByteOrNull(this string str)

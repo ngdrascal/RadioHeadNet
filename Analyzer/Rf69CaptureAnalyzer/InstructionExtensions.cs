@@ -14,14 +14,16 @@ internal static class InstructionExtensions
         { Registers.IrqFlags2, [1, 1, 1, 1, 1, 1, 1, 1] },    // 0x28
         { Registers.SyncConfig, [1, 1, 3, 3] },               // 0x2E
         { Registers.PacketConfig1, [1, 2, 1, 1, 2, 1] },      // 0x37
-        { Registers.FifoThresh, [1, 7]},                      // 0x3c
+        { Registers.FifoThresh, [1, 7]},                      // 0x3C
         { Registers.PacketConfig2, [4, 1, 1, 1, 1]},          // 0x3D
     };
 
     public static string Print(this Instruction instruction)
     {
+        // var start = instruction.Start.ToString("#0.0000");
+        var index = instruction.Index.ToString("D5");
         var opMnemonic = instruction.Operation.ToString()[0];
-        var sb = new StringBuilder($"{opMnemonic}: {instruction.RegisterName,-14}");
+        var sb = new StringBuilder($"{index}  {opMnemonic}: {instruction.RegisterName,-14}");
 
         sb.Append(PrintData(instruction.Register, instruction.Data[0]));
 

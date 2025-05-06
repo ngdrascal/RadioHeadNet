@@ -9,9 +9,9 @@ internal class Analyzer
         _state = new StartState(this);
     }
 
-    public void ProcessRecords(RecordTypes recordTypes, byte? mosi, byte? miso)
+    public void ProcessRecords(CaptureRecord record)
     {
-        _state = _state.ProcessRecord(recordTypes, mosi, miso);
+        _state = _state.ProcessRecord(record);
     }
 
     public IEnumerable<Instruction> Instructions => _state.Instructions;
