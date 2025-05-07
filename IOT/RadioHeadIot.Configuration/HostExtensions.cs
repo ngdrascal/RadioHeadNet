@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadioHead;
 using RadioHead.RhRf69;
+using RadioHead.RhRf95;
 
 namespace RadioHeadIot.Configuration;
 
@@ -207,6 +208,36 @@ public static class HostExtensions
         {
             var resetPin = provider.GetRequiredKeyedService<GpioPin>("ResetPin");
             return new Rf69RadioResetter(resetPin);
+        });
+
+        return builder;
+    }
+
+    public static HostApplicationBuilder AddRf95Services(this HostApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton<Rf95>(provider =>
+        {
+            var radioConfig = provider.GetRequiredService<IOptions<RadioConfiguration>>().Value;
+
+            var spiDevice = provider.GetRequiredService<SpiDevice>();
+            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+            var logger = loggerFactory.CreateLogger<Rf95>();
+
+            var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
+            var radio = new Rf95(deviceSelectPin, spiDevice, radioConfig.ChangeDetectionMode, logger);
+
+            if (radioConfig.ChangeDetectionMode == ChangeDetectionMode.Polling)
+                return radio;
+
+            var interruptPin = provider.GetRequiredKeyedService<GpioPin>("InterruptPin");
+            interruptPin.ValueChanged += radio.HandleInterrupt;
+            return radio;
+        });
+
+        builder.Services.AddSingleton<Rf95RadioResetter>(provider =>
+        {
+            var resetPin = provider.GetRequiredKeyedService<GpioPin>("ResetPin");
+            return new Rf95RadioResetter(resetPin);
         });
 
         return builder;

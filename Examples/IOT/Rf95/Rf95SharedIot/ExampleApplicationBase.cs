@@ -3,20 +3,20 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RadioHeadIot;
 using RadioHeadIot.Configuration;
-using RadioHead.RhRf69;
+using RadioHead.RhRf95;
 
-namespace Rf69SharedIot
+namespace Rf95SharedIot
 {
     [ExcludeFromCodeCoverage]
     public abstract class ExampleApplicationBase
     {
-        protected readonly Rf69 Radio;
+        protected readonly Rf95 Radio;
         protected readonly RadioConfiguration RadioConfig;
-        protected readonly Rf69RadioResetter Resetter;
-        protected readonly ILogger<Rf69> Logger;
+        protected readonly Rf95RadioResetter Resetter;
+        protected readonly ILogger<Rf95> Logger;
 
-        protected ExampleApplicationBase(Rf69 radio, IOptions<RadioConfiguration> radioConfig,
-            Rf69RadioResetter resetter, ILogger<Rf69> logger)
+        protected ExampleApplicationBase(Rf95 radio, IOptions<RadioConfiguration> radioConfig,
+            Rf95RadioResetter resetter, ILogger<Rf95> logger)
         {
             Radio = radio;
             RadioConfig = radioConfig.Value;
@@ -72,14 +72,14 @@ namespace Rf69SharedIot
                 return false;
             }
 
-            // If you are using a high power RF69 e.g. - RFM69HW, you *must* set a Tx power with the
+            // If you are using a high power RF95 e.g. - RFM95HW, you *must* set a Tx power with the
             // isHighPowerModule flag set like this:
             Radio.SetTxPower(RadioConfig.PowerLevel, RadioConfig.IsHighPowered);
 
             // The encryption key has to be the same as the one in the server
-            var key = RadioConfig.EncryptionKey;
-            if (key.Length > 0)
-                Radio.SetEncryptionKey(key);
+            // var key = RadioConfig.EncryptionKey;
+            // if (key.Length > 0)
+            //     Radio.SetEncryptionKey(key);
 
             Radio.SetChangeDetectionMode(RadioConfig.ChangeDetectionMode);
 
