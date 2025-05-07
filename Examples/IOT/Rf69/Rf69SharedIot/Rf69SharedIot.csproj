@@ -7,8 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\IOT\Rf69\RadioHeadIot.Configuration\RadioHeadIot.Configuration.csproj" />
-    <ProjectReference Include="..\..\..\..\IOT\Rf69\RadioHeadIot\RadioHeadIot.csproj" />
+    <ProjectReference Include="..\..\..\..\IOT\RadioHeadIot.Configuration\RadioHeadIot.Configuration.csproj" />
   </ItemGroup>
 
 </Project>

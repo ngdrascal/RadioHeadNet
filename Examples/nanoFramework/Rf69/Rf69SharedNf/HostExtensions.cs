@@ -1,10 +1,9 @@
 ﻿using System.Device.Gpio;
 using System.Device.Spi;
-using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using nanoFramework.Hardware.Esp32;
-using nanoFramework.Hosting;
 using nanoFramework.Logging.Debug;
 
 namespace RadioHead.Examples.Rf69SharedNf

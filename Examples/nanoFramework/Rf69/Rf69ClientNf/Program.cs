@@ -1,6 +1,7 @@
 using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
-using nanoFramework.Hosting;
+using Microsoft.Extensions.Hosting;
+
 using RadioHead.Examples.Rf69SharedNf;
 
 namespace RadioHead.Examples.Rf69ClientNf
