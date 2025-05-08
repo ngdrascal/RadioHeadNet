@@ -99,7 +99,7 @@ namespace RadioHead
         /// <summary>
         /// Reads a single register from the SPI device
         /// </summary>
-        /// <param name="reg">Register number</param>
+        /// <param name="reg">Register n umber</param>
         /// <returns>The value of the register</returns>
         protected byte ReadFrom(byte reg)
         {

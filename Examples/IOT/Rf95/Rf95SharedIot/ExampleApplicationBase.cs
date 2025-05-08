@@ -47,7 +47,7 @@ namespace Rf95SharedIot
             }
             else
             {
-                Logger.LogDebug("Radio configuration failed.");
+                Logger.LogWarning("Radio configuration failed.");
                 return Task.FromResult(false);
             }
         }
@@ -56,7 +56,7 @@ namespace Rf95SharedIot
         {
             if (!Radio.Init())
             {
-                Logger.LogDebug("Radio initialization failed.");
+                Logger.LogWarning("Radio initialization failed.");
                 return false;
             }
 
@@ -68,7 +68,7 @@ namespace Rf95SharedIot
 
             if (!Radio.SetFrequency(RadioConfig.Frequency))
             {
-                Logger.LogDebug("SetFrequency failed");
+                Logger.LogWarning("SetFrequency failed");
                 return false;
             }
 

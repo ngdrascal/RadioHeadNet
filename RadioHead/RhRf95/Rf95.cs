@@ -87,7 +87,7 @@ namespace RadioHead.RhRf95
 
             // Wait for sleep mode to take over from say, CAD
             Thread.Sleep(10);
-            
+
             // Check we are in sleep mode, with LORA set
             if (ReadFrom(REG_01_OP_MODE) != (MODE_SLEEP | LONG_RANGE_MODE))
             {
@@ -116,7 +116,7 @@ namespace RadioHead.RhRf95
             SetModemConfig(ModemConfigChoice.Bw125Cr45Sf128); // Radio default
 
             // setModemConfig(Bw125Cr48Sf4096); // slow and reliable?
-            
+
             SetPreambleLength(8); // Default is 8
 
             // An innocuous ISM frequency, same as RF22's
@@ -232,7 +232,7 @@ namespace RadioHead.RhRf95
 
             // Make sure we don't interrupt an outgoing message
             WaitPacketSent();
-            
+
             SetModeIdle();
 
             if (!WaitCAD())

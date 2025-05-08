@@ -237,6 +237,7 @@ public static class HostExtensions
         builder.Services.AddSingleton<Rf95RadioResetter>(provider =>
         {
             var resetPin = provider.GetRequiredKeyedService<GpioPin>("ResetPin");
+            resetPin.Write(PinValue.High);
             return new Rf95RadioResetter(resetPin);
         });
 
