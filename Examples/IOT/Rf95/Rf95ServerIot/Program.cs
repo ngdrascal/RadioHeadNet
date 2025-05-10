@@ -13,13 +13,13 @@ internal static class Program
         var host = builder
             .AddConfigurationSources()
             .AddConfigurationOptions()
+            .AddLogging()
             .AddIotServices()
-            .AddRf69Services()
+            .AddRf95Services()
             .AddApplicationServices()
             .Build();
 
         var ct = CancellationToken.None;
-
         try
         {
             await host.Services.GetRequiredService<Application>().RunAsync(ct);
