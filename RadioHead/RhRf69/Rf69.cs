@@ -42,8 +42,6 @@ namespace RadioHead.RhRf69
 
         private ChangeDetectionMode _changeDetectionMode;
 
-        // private readonly System.Threading.Timer _changePollingTimer;
-
         // <summary>
         // Time in millis since the last preamble was received (and the last time the RSSI
         // was measured)
@@ -65,7 +63,6 @@ namespace RadioHead.RhRf69
             _changeDetectionMode = changeDetectionMode;
             _logger = logger;
             _idleMode = OPMODE_MODE_STDBY;
-            // _changePollingTimer = new System.Threading.Timer(PollIrqFlags2, null, -1, -1);
         }
 
         /// <summary>

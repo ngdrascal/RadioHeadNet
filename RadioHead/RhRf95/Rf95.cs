@@ -169,19 +169,35 @@ namespace RadioHead.RhRf95
         /// </summary>
         /// <returns>true if a new, complete, error-free uncollected message is available to be retrieved by Receive()
         /// </returns>
+        // public override bool Available()
+        // {
+        //     // Multithreading support
+        //     lock (CriticalSection)
+        //     {
+        //
+        //         if (Mode == RhModes.Tx)
+        //         {
+        //             return false;
+        //         }
+        //
+        //         SetModeRx();
+        //         return _rxBufValid;
+        //     } // Will be set by the interrupt handler when a good message is received
+        // }
         public override bool Available()
         {
-            lock (CriticalSection)
-            {
-                // Multithreading support
-                if (Mode == RhModes.Tx)
-                {
-                    return false;
-                }
+            if (Mode == RhModes.Tx)
+                return false;
 
-                SetModeRx();
-                return _rxBufValid;
-            } // Will be set by the interrupt handler when a good message is received
+            // Make sure we are receiving
+            SetModeRx();
+
+            if (_changeDetectionMode == ChangeDetectionMode.Polling)
+            {
+                HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Rising, -1));
+            }
+
+            return _rxBufValid;
         }
 
         /// <summary>
@@ -765,14 +781,14 @@ namespace RadioHead.RhRf95
 
                 // Read the interrupt register
                 var irqFlags = ReadFrom(REG_12_IRQ_FLAGS);
+                if (irqFlags == 0)
+                {
+                    return;
+                }
 
                 // Read the RegHopChannel register to check if CRC presence is signalled
                 // in the header. If not it might be a stray (noise) packet.*
                 var hopChannel = ReadFrom(REG_1C_HOP_CHANNEL);
-                //    Serial.println(irq_flags, HEX);
-                //    Serial.println(_mode, HEX);
-                //    Serial.println(hop_channel, HEX);
-                //    Serial.println(_enableCRC, HEX);
 
                 // ack all interrupts, 
                 // Sigh: on some processors, for some unknown reason, doing this only once does not actually
@@ -893,6 +909,5 @@ namespace RadioHead.RhRf95
         {
             return true;
         }
-
     };
 }
