@@ -29,6 +29,8 @@ namespace RadioHead.RhRf95
         // The receiver/transmitter buffer
         private byte[] _buf = new byte[MAX_PAYLOAD_LEN];
 
+        private readonly byte[] _emptyBuffer = Array.Empty<byte>();
+
         // True when there is a valid message in the buffer
         private bool _rxBufValid;
 
@@ -213,11 +215,12 @@ namespace RadioHead.RhRf95
         {
             if (!Available())
             {
-                buffer = new byte[0];
+                buffer = _emptyBuffer;
                 return false;
             }
 
-            buffer = new byte[MAX_PAYLOAD_LEN];
+            // buffer = new byte[MAX_PAYLOAD_LEN];
+            buffer = new byte[_bufLen];
 
             lock (CriticalSection)
             {
