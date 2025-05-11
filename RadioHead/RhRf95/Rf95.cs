@@ -9,6 +9,7 @@
 
 // ReSharper disable RedundantUsingDirective
 using System;
+using System.ComponentModel;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Threading;
@@ -29,7 +30,7 @@ namespace RadioHead.RhRf95
         // The receiver/transmitter buffer
         private byte[] _buf = new byte[MAX_PAYLOAD_LEN];
 
-        private readonly byte[] _emptyBuffer = Array.Empty<byte>();
+        private readonly byte[] _emptyBuffer = new byte[0];
 
         // True when there is a valid message in the buffer
         private bool _rxBufValid;

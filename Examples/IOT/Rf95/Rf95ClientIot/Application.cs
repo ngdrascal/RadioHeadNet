@@ -27,7 +27,7 @@ internal class Application : ExampleApplicationBase
             var outStr = TimeOnly.FromDateTime(DateTime.Now).ToString("HH:mm:ss");
             Console.WriteLine($"Client: sending {outStr}");
 
-            var data = Encoding.UTF8.GetBytes(outStr);
+            var data = Encoding.ASCII.GetBytes(outStr);
             Radio.Send(data);
 
             Radio.WaitPacketSent();
@@ -39,7 +39,9 @@ internal class Application : ExampleApplicationBase
         {
             if (Radio.Receive(out var inBuffer))
             {
-                var inStr = Encoding.UTF8.GetString(inBuffer);
+                var inData = new byte[inBuffer.Length - 4];
+                Array.Copy(inBuffer, 4, inData, 0, inBuffer.Length - 4);
+                var inStr = Encoding.ASCII.GetString(inBuffer);
                 Console.WriteLine($"Client: received: {inStr}");
             }
             else

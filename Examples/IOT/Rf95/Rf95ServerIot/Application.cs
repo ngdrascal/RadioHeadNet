@@ -21,7 +21,9 @@ internal class Application : ExampleApplicationBase
         {
             if (Radio.Receive(out var inBuffer))
             {
-                var inStr = Encoding.UTF8.GetString(inBuffer);
+                var inData = new byte[inBuffer.Length - 4];
+                Array.Copy(inBuffer, 4, inData, 0, inBuffer.Length - 4);
+                var inStr = Encoding.ASCII.GetString(inBuffer);
                 Console.WriteLine($"Server: received: {inStr}");
                 Console.WriteLine($"Server: RSSI: {Radio.LastRssi}");
 
