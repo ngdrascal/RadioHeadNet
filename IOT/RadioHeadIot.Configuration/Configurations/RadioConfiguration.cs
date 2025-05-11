@@ -8,6 +8,9 @@ public class RadioConfiguration
     public const string SectionName = "Radio";
 
     [Required]
+    public RadioModels Model { get; set; }
+
+    [Required]
     public float Frequency { get; set; } = 0.0f;
 
     [Required]
