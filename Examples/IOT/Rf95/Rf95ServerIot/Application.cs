@@ -21,17 +21,17 @@ internal class Application : ExampleApplicationBase
         {
             if (Radio.Receive(out var inBuffer))
             {
-                var inData = new byte[inBuffer.Length - 4];
-                Array.Copy(inBuffer, 4, inData, 0, inBuffer.Length - 4);
-                var inStr = Encoding.ASCII.GetString(inBuffer);
-                Console.WriteLine($"Server: received: {inStr}");
+                var dataOnly = new byte[inBuffer.Length - 4];
+                Array.Copy(inBuffer, 4, dataOnly, 0, inBuffer.Length - 4);
+                var dataStr = Encoding.ASCII.GetString(dataOnly);
+                Console.WriteLine($"Server: received: {dataStr}");
                 Console.WriteLine($"Server: RSSI: {Radio.LastRssi}");
 
                 Thread.Sleep(500); // Wait a little bit to avoid collisions
 
                 // Send a reply
                 string outStr;
-                if (TimeOnly.TryParse(inStr, out var inTime))
+                if (TimeOnly.TryParse(dataStr, out var inTime))
                 {
                     // add 12 hours
                     var outTime = inTime.Add(new TimeSpan(12, 0, 0));
@@ -39,7 +39,7 @@ internal class Application : ExampleApplicationBase
                 }
                 else
                 {
-                    outStr = $"Invalid time: {inStr}";
+                    outStr = $"Invalid time: {dataStr}";
                 }
                 var outBuffer = Encoding.UTF8.GetBytes(outStr);
                 Radio.Send(outBuffer);
