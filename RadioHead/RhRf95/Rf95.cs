@@ -17,10 +17,11 @@ using Microsoft.Extensions.Logging;
 
 namespace RadioHead.RhRf95
 {
-    public partial class Rf95 : RhSpiDriver
+    public partial class Rf95 : RhGenericDriver
     {
         private static readonly object CriticalSection = new object();
 
+        private readonly RhSpiDriver _spi;
         private ChangeDetectionMode _changeDetectionMode;
         private readonly ILogger _logger;
 
@@ -53,17 +54,14 @@ namespace RadioHead.RhRf95
         /// and the radio module. A maximum of 3 instances can co-exist on one processor, provided there are sufficient
         /// distinct interrupt lines, one for each instance.
         /// </summary>
-        /// <param name="deviceSelectPin">the Arduino pin number of the output to use to select the RH_RF22 before
-        /// accessing it. Defaults to the normal SS pin for your Arduino (D10 for Diecimila, Uno etc., D53 for Mega, D10 for Maple)
-        /// </param>
         /// <param name="spi"> spi Pointer to the SPI interface object to use. 
         /// Defaults to the standard Arduino hardware SPI interface
         /// </param>
         /// <param name="changeDetectionMode"></param>
         /// <param name="logger"></param>
-        public Rf95(GpioPin deviceSelectPin, SpiDevice spi, ChangeDetectionMode changeDetectionMode, ILogger logger)
-            : base(deviceSelectPin, spi)
+        public Rf95(RhSpiDriver spi, ChangeDetectionMode changeDetectionMode, ILogger logger)
         {
+            _spi = spi;
             _changeDetectionMode = changeDetectionMode;
             _logger = logger;
             _enableCrc = true;
@@ -86,13 +84,13 @@ namespace RadioHead.RhRf95
             // No way to check the device type :-(
 
             // Set sleep mode, so we can also set LORA mode:
-            WriteTo(REG_01_OP_MODE, MODE_SLEEP | LONG_RANGE_MODE);
+            _spi.WriteTo(REG_01_OP_MODE, MODE_SLEEP | LONG_RANGE_MODE);
 
             // Wait for sleep mode to take over from say, CAD
             Thread.Sleep(10);
 
             // Check we are in sleep mode, with LORA set
-            if (ReadFrom(REG_01_OP_MODE) != (MODE_SLEEP | LONG_RANGE_MODE))
+            if (_spi.ReadFrom(REG_01_OP_MODE) != (MODE_SLEEP | LONG_RANGE_MODE))
             {
                 //	Serial.println(spiRead(REG_01_OP_MODE), HEX);
                 return false; // No device present?
@@ -101,8 +99,8 @@ namespace RadioHead.RhRf95
             // Set up FIFO
             // We configure so that we can use the entire 256 byte FIFO for either receive
             // or transmit, but not both at the same time
-            WriteTo(REG_0E_FIFO_TX_BASE_ADDR, 0);
-            WriteTo(REG_0F_FIFO_RX_BASE_ADDR, 0);
+            _spi.WriteTo(REG_0E_FIFO_TX_BASE_ADDR, 0);
+            _spi.WriteTo(REG_0F_FIFO_RX_BASE_ADDR, 0);
 
             // Packet format is preamble + explicit-header + payload + crc
             // Explicit Header Mode
@@ -142,9 +140,9 @@ namespace RadioHead.RhRf95
         /// </param>
         public void SetModemRegisters(ModemConfiguration configuration)
         {
-            WriteTo(REG_1D_MODEM_CONFIG1, configuration.Reg1D);
-            WriteTo(REG_1E_MODEM_CONFIG2, configuration.Reg1E);
-            WriteTo(REG_26_MODEM_CONFIG3, configuration.Reg26);
+            _spi.WriteTo(REG_1D_MODEM_CONFIG1, configuration.Reg1D);
+            _spi.WriteTo(REG_1E_MODEM_CONFIG2, configuration.Reg1E);
+            _spi.WriteTo(REG_26_MODEM_CONFIG3, configuration.Reg26);
         }
 
         /// <summary>
@@ -259,15 +257,15 @@ namespace RadioHead.RhRf95
                 return false; // Check channel activity
 
             // Position at the beginning of the FIFO
-            WriteTo(REG_0D_FIFO_ADDR_PTR, 0);
+            _spi.WriteTo(REG_0D_FIFO_ADDR_PTR, 0);
             // The headers
-            WriteTo(REG_00_FIFO, TxHeaderTo);
-            WriteTo(REG_00_FIFO, TxHeaderFrom);
-            WriteTo(REG_00_FIFO, TxHeaderId);
-            WriteTo(REG_00_FIFO, TxHeaderFlags);
+            _spi.WriteTo(REG_00_FIFO, TxHeaderTo);
+            _spi.WriteTo(REG_00_FIFO, TxHeaderFrom);
+            _spi.WriteTo(REG_00_FIFO, TxHeaderId);
+            _spi.WriteTo(REG_00_FIFO, TxHeaderFlags);
             // The message data
-            BurstWriteTo(REG_00_FIFO, data);
-            WriteTo(REG_22_PAYLOAD_LENGTH, (byte)(data.Length + HEADER_LEN));
+            _spi.BurstWriteTo(REG_00_FIFO, data);
+            _spi.WriteTo(REG_22_PAYLOAD_LENGTH, (byte)(data.Length + HEADER_LEN));
 
             lock (CriticalSection)
             {
@@ -315,8 +313,8 @@ namespace RadioHead.RhRf95
         /// <param name="value">Preamble length in bytes.</param>
         public void SetPreambleLength(ushort value)
         {
-            WriteTo(REG_20_PREAMBLE_MSB, (byte)(value >> 8));
-            WriteTo(REG_21_PREAMBLE_LSB, (byte)(value & 0xFF));
+            _spi.WriteTo(REG_20_PREAMBLE_MSB, (byte)(value >> 8));
+            _spi.WriteTo(REG_21_PREAMBLE_LSB, (byte)(value & 0xFF));
         }
 
         /// <summary>
@@ -334,9 +332,9 @@ namespace RadioHead.RhRf95
         {
             // Frf = FRF / FSTEP
             var frf = (uint)((center * 1000000.0) / FSTEP);
-            WriteTo(REG_06_FRF_MSB, (byte)((frf >> 16) & 0xFF));
-            WriteTo(REG_07_FRF_MID, (byte)((frf >> 8) & 0xFF));
-            WriteTo(REG_08_FRF_LSB, (byte)(frf & 0xff));
+            _spi.WriteTo(REG_06_FRF_MSB, (byte)((frf >> 16) & 0xFF));
+            _spi.WriteTo(REG_07_FRF_MID, (byte)((frf >> 8) & 0xFF));
+            _spi.WriteTo(REG_08_FRF_LSB, (byte)(frf & 0xff));
             _usingHfPort = (center >= 779.0);
 
             return true;
@@ -351,7 +349,7 @@ namespace RadioHead.RhRf95
             if (Mode != RhModes.Idle)
             {
                 ModeWillChange(RhModes.Idle);
-                WriteTo(REG_01_OP_MODE, MODE_STDBY);
+                _spi.WriteTo(REG_01_OP_MODE, MODE_STDBY);
                 Mode = RhModes.Idle;
             }
         }
@@ -365,8 +363,8 @@ namespace RadioHead.RhRf95
             if (Mode != RhModes.Rx)
             {
                 ModeWillChange(RhModes.Rx);
-                WriteTo(REG_01_OP_MODE, MODE_RXCONTINUOUS);
-                WriteTo(REG_40_DIO_MAPPING1, 0x00); // Interrupt on RxDone
+                _spi.WriteTo(REG_01_OP_MODE, MODE_RXCONTINUOUS);
+                _spi.WriteTo(REG_40_DIO_MAPPING1, 0x00); // Interrupt on RxDone
                 Mode = RhModes.Rx;
             }
         }
@@ -380,8 +378,8 @@ namespace RadioHead.RhRf95
             if (Mode != RhModes.Tx)
             {
                 ModeWillChange(RhModes.Tx);
-                WriteTo(REG_01_OP_MODE, MODE_TX);
-                WriteTo(REG_40_DIO_MAPPING1, 0x40); // Interrupt on TxDone
+                _spi.WriteTo(REG_01_OP_MODE, MODE_TX);
+                _spi.WriteTo(REG_40_DIO_MAPPING1, 0x40); // Interrupt on TxDone
                 Mode = RhModes.Tx;
             }
         }
@@ -422,8 +420,8 @@ namespace RadioHead.RhRf95
 
                 // Set the MaxPower register to 0x07 => MaxPower = 10.8 + 0.6 * 7 = 15dBm
                 // So Pout = Pmax - (15 - power) = 15 - 15 + power
-                WriteTo(REG_09_PA_CONFIG, (byte)(MAX_POWER | power));
-                WriteTo(REG_4D_PA_DAC, PA_DAC_DISABLE);
+                _spi.WriteTo(REG_09_PA_CONFIG, (byte)(MAX_POWER | power));
+                _spi.WriteTo(REG_4D_PA_DAC, PA_DAC_DISABLE);
             }
             else
             {
@@ -437,18 +435,18 @@ namespace RadioHead.RhRf95
                 // for 8, 19 and 20dBm
                 if (power > 17)
                 {
-                    WriteTo(REG_4D_PA_DAC, PA_DAC_ENABLE);
+                    _spi.WriteTo(REG_4D_PA_DAC, PA_DAC_ENABLE);
                     power -= 3;
                 }
                 else
                 {
-                    WriteTo(REG_4D_PA_DAC, PA_DAC_DISABLE);
+                    _spi.WriteTo(REG_4D_PA_DAC, PA_DAC_DISABLE);
                 }
 
                 // RFM95/96/97/98 does not have RFO pins connected to anything. Only PA_BOOST
                 // pin is connected, so must use PA_BOOST
                 // Pout = 2 + OutputPower (+3dBm if DAC enabled)
-                WriteTo(REG_09_PA_CONFIG, (byte)(PA_SELECT | (power - 2)));
+                _spi.WriteTo(REG_09_PA_CONFIG, (byte)(PA_SELECT | (power - 2)));
             }
         }
 
@@ -465,7 +463,7 @@ namespace RadioHead.RhRf95
             if (Mode != RhModes.Sleep)
             {
                 ModeWillChange(RhModes.Sleep);
-                WriteTo(REG_01_OP_MODE, MODE_SLEEP);
+                _spi.WriteTo(REG_01_OP_MODE, MODE_SLEEP);
                 Mode = RhModes.Sleep;
             }
 
@@ -487,8 +485,8 @@ namespace RadioHead.RhRf95
             if (Mode != RhModes.Cad)
             {
                 ModeWillChange(RhModes.Cad);
-                WriteTo(REG_01_OP_MODE, MODE_CAD);
-                WriteTo(REG_40_DIO_MAPPING1, 0x80); // Interrupt on CadDone
+                _spi.WriteTo(REG_01_OP_MODE, MODE_CAD);
+                _spi.WriteTo(REG_40_DIO_MAPPING1, 0x80); // Interrupt on CadDone
                 Mode = RhModes.Cad;
             }
 
@@ -521,18 +519,18 @@ namespace RadioHead.RhRf95
         {
             if (on)
             {
-                while ((ReadFrom(REG_4B_TCXO) & TCXO_TCXO_INPUT_ON) != TCXO_TCXO_INPUT_ON)
+                while ((_spi.ReadFrom(REG_4B_TCXO) & TCXO_TCXO_INPUT_ON) != TCXO_TCXO_INPUT_ON)
                 {
                     Sleep();
-                    WriteTo(REG_4B_TCXO, (byte)(ReadFrom(REG_4B_TCXO) | TCXO_TCXO_INPUT_ON));
+                    _spi.WriteTo(REG_4B_TCXO, (byte)(_spi.ReadFrom(REG_4B_TCXO) | TCXO_TCXO_INPUT_ON));
                 }
             }
             else
             {
-                while ((ReadFrom(REG_4B_TCXO) & TCXO_TCXO_INPUT_ON) != 0)
+                while ((_spi.ReadFrom(REG_4B_TCXO) & TCXO_TCXO_INPUT_ON) != 0)
                 {
                     Sleep();
-                    WriteTo(REG_4B_TCXO, (byte)(ReadFrom(REG_4B_TCXO) & ~TCXO_TCXO_INPUT_ON));
+                    _spi.WriteTo(REG_4B_TCXO, (byte)(_spi.ReadFrom(REG_4B_TCXO) & ~TCXO_TCXO_INPUT_ON));
                 }
             }
         }
@@ -558,11 +556,11 @@ namespace RadioHead.RhRf95
             // Caution: some C compilers make errors with eg:
             // freqError = spiRead(REG_28_FEI_MSB) << 16
             // so we go more carefully.
-            int freqError = ReadFrom(REG_28_FEI_MSB);
+            int freqError = _spi.ReadFrom(REG_28_FEI_MSB);
             freqError <<= 8;
-            freqError |= ReadFrom(REG_29_FEI_MID);
+            freqError |= _spi.ReadFrom(REG_29_FEI_MID);
             freqError <<= 8;
-            freqError |= ReadFrom(REG_2A_FEI_LSB);
+            freqError |= _spi.ReadFrom(REG_2A_FEI_LSB);
 
             // Sign extension into top 3 nibbles
             if ((freqError & 0x80000) > 0)
@@ -570,7 +568,7 @@ namespace RadioHead.RhRf95
 
             var error = 0; // In hertz
             var bwTable = new float[] { 7.8f, 10.4f, 15.6f, 20.8f, 31.25f, 41.7f, 62.5f, 125, 250, 500 };
-            var bwIndex = (byte)(ReadFrom(REG_1D_MODEM_CONFIG1) >> 4);
+            var bwIndex = (byte)(_spi.ReadFrom(REG_1D_MODEM_CONFIG1) >> 4);
 
             if (bwIndex < bwTable.Length)
                 error = (int)(freqError * bwTable[bwIndex] * ((1L << 24) / FXOSC / 500.0f));
@@ -613,7 +611,7 @@ namespace RadioHead.RhRf95
                 sf = SPREADING_FACTOR_4096CPS;
 
             // set the new spreading factor
-            WriteTo(REG_1E_MODEM_CONFIG2, (byte)((ReadFrom(REG_1E_MODEM_CONFIG2) & ~SPREADING_FACTOR) | sf));
+            _spi.WriteTo(REG_1E_MODEM_CONFIG2, (byte)((_spi.ReadFrom(REG_1E_MODEM_CONFIG2) & ~SPREADING_FACTOR) | sf));
             // check if Low data Rate bit should be set or cleared
             SetLowDataRate();
         }
@@ -663,7 +661,7 @@ namespace RadioHead.RhRf95
                 bw = BW_500KHZ;
 
             // top 4 bits of reg 1D control bandwidth
-            WriteTo(REG_1D_MODEM_CONFIG1, (byte)((ReadFrom(REG_1D_MODEM_CONFIG1) & ~BW) | bw));
+            _spi.WriteTo(REG_1D_MODEM_CONFIG1, (byte)((_spi.ReadFrom(REG_1D_MODEM_CONFIG1) & ~BW) | bw));
 
             // check if low data rate bit should be set or cleared
             SetLowDataRate();
@@ -693,7 +691,7 @@ namespace RadioHead.RhRf95
                 cr = CODING_RATE_4_8;
 
             // CR is bits 3..1 of REG_1D_MODEM_CONFIG1
-            WriteTo(REG_1D_MODEM_CONFIG1, (byte)((ReadFrom(REG_1D_MODEM_CONFIG1) & ~CODING_RATE) | cr));
+            _spi.WriteTo(REG_1D_MODEM_CONFIG1, (byte)((_spi.ReadFrom(REG_1D_MODEM_CONFIG1) & ~CODING_RATE) | cr));
         }
 
         /// <summary>
@@ -711,8 +709,8 @@ namespace RadioHead.RhRf95
             // this  adds  a  small  overhead  to increase robustness to reference frequency variations over the timescale of the LoRa packet."
 
             // read current value for BW and SF
-            var bw = (byte)(ReadFrom(REG_1D_MODEM_CONFIG1) >> 4);    // bw is in bits 7..4
-            var sf = (byte)(ReadFrom(REG_1E_MODEM_CONFIG2) >> 4);    // sf is in bits 7..4
+            var bw = (byte)(_spi.ReadFrom(REG_1D_MODEM_CONFIG1) >> 4);    // bw is in bits 7..4
+            var sf = (byte)(_spi.ReadFrom(REG_1E_MODEM_CONFIG2) >> 4);    // sf is in bits 7..4
 
             // calculate symbol time (see Semtech AN1200.22 section 4)
             var bwTab = new float[] { 7800, 10400, 15600, 20800, 31250, 41700, 62500, 125000, 250000, 500000 };
@@ -729,11 +727,11 @@ namespace RadioHead.RhRf95
             // So the threshold used here is 16.0ms
 
             // the LDR is bit 3 of REG_26_MODEM_CONFIG3
-            var current = (byte)(ReadFrom(REG_26_MODEM_CONFIG3) & ~LOW_DATA_RATE_OPTIMIZE); // mask off the LDR bit
+            var current = (byte)(_spi.ReadFrom(REG_26_MODEM_CONFIG3) & ~LOW_DATA_RATE_OPTIMIZE); // mask off the LDR bit
             if (symbolTime > 16.0)
-                WriteTo(REG_26_MODEM_CONFIG3, (byte)(current | LOW_DATA_RATE_OPTIMIZE));
+                _spi.WriteTo(REG_26_MODEM_CONFIG3, (byte)(current | LOW_DATA_RATE_OPTIMIZE));
             else
-                WriteTo(REG_26_MODEM_CONFIG3, current);
+                _spi.WriteTo(REG_26_MODEM_CONFIG3, current);
         }
 
         /// <summary>
@@ -751,12 +749,12 @@ namespace RadioHead.RhRf95
         public void SetPayloadCrc(bool on)
         {
             // Payload CRC is bit 2 of register 1E
-            var current = (byte)(ReadFrom(REG_1E_MODEM_CONFIG2) & ~PAYLOAD_CRC_ON); // mask off the CRC
+            var current = (byte)(_spi.ReadFrom(REG_1E_MODEM_CONFIG2) & ~PAYLOAD_CRC_ON); // mask off the CRC
 
             if (on)
-                WriteTo(REG_1E_MODEM_CONFIG2, (byte)(current | PAYLOAD_CRC_ON));
+                _spi.WriteTo(REG_1E_MODEM_CONFIG2, (byte)(current | PAYLOAD_CRC_ON));
             else
-                WriteTo(REG_1E_MODEM_CONFIG2, current);
+                _spi.WriteTo(REG_1E_MODEM_CONFIG2, current);
             _enableCrc = on;
         }
 
@@ -767,7 +765,7 @@ namespace RadioHead.RhRf95
         /// <returns>The version of the device</returns> 
         public byte GetDeviceVersion()
         {
-            _deviceVersion = ReadFrom(REG_42_VERSION);
+            _deviceVersion = _spi.ReadFrom(REG_42_VERSION);
             return _deviceVersion;
         }
 
@@ -784,7 +782,7 @@ namespace RadioHead.RhRf95
                 // https://github.com/geeksville/Meshtastic-esp32/commit/78470ed3f59f5c84fbd1325bcff1fd95b2b20183
 
                 // Read the interrupt register
-                var irqFlags = ReadFrom(REG_12_IRQ_FLAGS);
+                var irqFlags = _spi.ReadFrom(REG_12_IRQ_FLAGS);
                 if (irqFlags == 0)
                 {
                     return;
@@ -792,7 +790,7 @@ namespace RadioHead.RhRf95
 
                 // Read the RegHopChannel register to check if CRC presence is signalled
                 // in the header. If not it might be a stray (noise) packet.*
-                var hopChannel = ReadFrom(REG_1C_HOP_CHANNEL);
+                var hopChannel = _spi.ReadFrom(REG_1C_HOP_CHANNEL);
 
                 // ack all interrupts, 
                 // Sigh: on some processors, for some unknown reason, doing this only once does not actually
@@ -803,7 +801,7 @@ namespace RadioHead.RhRf95
                 // our ISR will be re-invoked to handle that case)
                 // kevinh: turn this off until root cause is known, because it can cause missed interrupts!
                 // WriteTo(REG_12_IRQ_FLAGS, 0xFF); // Clear all IRQ flags
-                WriteTo(REG_12_IRQ_FLAGS, 0xFF); // Clear all IRQ flags
+                _spi.WriteTo(REG_12_IRQ_FLAGS, 0xFF); // Clear all IRQ flags
 
                 // error if:
                 //    - timeout
@@ -824,21 +822,21 @@ namespace RadioHead.RhRf95
                     // Packet received, no CRC error
                     //	Serial.println("R");
                     // Have received a packet
-                    var len = ReadFrom(REG_13_RX_NB_BYTES);
+                    var len = _spi.ReadFrom(REG_13_RX_NB_BYTES);
 
                     // Reset the fifo read ptr to the beginning of the packet
-                    WriteTo(REG_0D_FIFO_ADDR_PTR, ReadFrom(REG_10_FIFO_RX_CURRENT_ADDR));
-                    BurstReadFrom(REG_00_FIFO, out _buf, len);
+                    _spi.WriteTo(REG_0D_FIFO_ADDR_PTR, _spi.ReadFrom(REG_10_FIFO_RX_CURRENT_ADDR));
+                    _spi.BurstReadFrom(REG_00_FIFO, out _buf, len);
                     _bufLen = len;
 
                     // Remember the last signal-to-noise ratio, LORA mode
                     // Per page 111, SX1276/77/78/79 datasheet
-                    LastSnr = (sbyte)(ReadFrom(REG_19_PKT_SNR_VALUE) / 4);
+                    LastSnr = (sbyte)(_spi.ReadFrom(REG_19_PKT_SNR_VALUE) / 4);
 
                     // Remember the RSSI of this packet, LORA mode
                     // this is according to the doc, but is it really correct?
                     // weakest receivable signals are reported RSSI at about -66
-                    LastRssi = ReadFrom(REG_1A_PKT_RSSI_VALUE);
+                    LastRssi = _spi.ReadFrom(REG_1A_PKT_RSSI_VALUE);
 
                     // Adjust the RSSI, datasheet page 87
                     if (LastSnr < 0)
@@ -874,8 +872,8 @@ namespace RadioHead.RhRf95
 
                 // Sigh: on some processors, for some unknown reason, doing this only once does not actually
                 // clear the radio's interrupt flag. So we do it twice. Why?
-                WriteTo(REG_12_IRQ_FLAGS, 0xff); // Clear all IRQ flags
-                WriteTo(REG_12_IRQ_FLAGS, 0xff); // Clear all IRQ flags
+                _spi.WriteTo(REG_12_IRQ_FLAGS, 0xff); // Clear all IRQ flags
+                _spi.WriteTo(REG_12_IRQ_FLAGS, 0xff); // Clear all IRQ flags
             }
         }
 

@@ -9,13 +9,12 @@
 // ReSharper disable once RedundantUsingDirective
 using System;
 using System.Device.Gpio;
-using System.Device.Spi;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace RadioHead.RhRf69
 {
-    public partial class Rf69 : RhSpiDriver
+    public partial class Rf69 : RhGenericDriver
     {
         private readonly ILogger _logger;
 
@@ -40,6 +39,7 @@ namespace RadioHead.RhRf69
         // True when there is a valid message in the Rx buffer
         private bool _rxBufValid;
 
+        private readonly RhSpiDriver _spi;
         private ChangeDetectionMode _changeDetectionMode;
 
         // <summary>
@@ -53,13 +53,12 @@ namespace RadioHead.RhRf69
         /// interrupt and device select pin. After constructing, you must call Init() to
         /// initialise the interface and the radio module.
         /// </summary>
-        /// <param name="deviceSelectPin"></param>
         /// <param name="spi"></param>
         /// <param name="changeDetectionMode"></param>
         /// <param name="logger"></param>
-        public Rf69(GpioPin deviceSelectPin, SpiDevice spi, ChangeDetectionMode changeDetectionMode,
-            ILogger logger) : base(deviceSelectPin, spi)
+        public Rf69(RhSpiDriver spi, ChangeDetectionMode changeDetectionMode, ILogger logger)
         {
+            _spi = spi;
             _changeDetectionMode = changeDetectionMode;
             _logger = logger;
             _idleMode = OPMODE_MODE_STDBY;
@@ -80,12 +79,12 @@ namespace RadioHead.RhRf69
         {
             _logger.LogTrace("---> {0}()", nameof(Init));
 
-            if (!base.Init())
+            if (!_spi.Init())
                 return false;
 
             // Get the device type and check it. This also tests whether we are really
             // connected to a device.  My test devices return 0x24.
-            _deviceType = ReadFrom(REG_10_Version);
+            _deviceType = _spi.ReadFrom(REG_10_Version);
             if (_deviceType == 0x00 || _deviceType == 0xFF)
                 return false;
 
@@ -103,7 +102,7 @@ namespace RadioHead.RhRf69
             // headers to the beginning of the RH_RF69 payload
 
             // thresh 15 is default
-            WriteTo(REG_3C_FifoThresh, FIFOTHRESH_TXSTARTCONDITION_NOTEMPTY | 0x0F);
+            _spi.WriteTo(REG_3C_FifoThresh, FIFOTHRESH_TXSTARTCONDITION_NOTEMPTY | 0x0F);
 
             // RSSITHRESH is default
             // WriteTo(REG_29_RssiThresh, 220); // -110 dbM
@@ -115,11 +114,11 @@ namespace RadioHead.RhRf69
             // WriteTo(REG_38_PayloadLength, RH_RF69_FIFO_SIZE); // max size only for RX
 
             // PACKETCONFIG 2 is default
-            WriteTo(REG_6F_TestDagc, TESTDAGC_CONTINUOUSDAGC_IMPROVED_LOWBETAOFF);
+            _spi.WriteTo(REG_6F_TestDagc, TESTDAGC_CONTINUOUSDAGC_IMPROVED_LOWBETAOFF);
 
             // If high power boost set previously, disable it
-            WriteTo(REG_5A_TestPa1, TESTPA1_NORMAL);
-            WriteTo(REG_5C_TestPa2, TESTPA2_NORMAL);
+            _spi.WriteTo(REG_5A_TestPa1, TESTPA1_NORMAL);
+            _spi.WriteTo(REG_5C_TestPa2, TESTPA2_NORMAL);
 
             // The following can be changed later by the user if necessary.
             // Set up default configuration
@@ -156,7 +155,7 @@ namespace RadioHead.RhRf69
         public void HandleInterrupt(object sender, PinValueChangedEventArgs args)
         {
             // Get the interrupt cause
-            var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
+            var irqFlags2 = _spi.ReadFrom(REG_28_IrqFlags2);
 
             _logger.LogTrace("-->{0}(): mode={1}, IrqFlags2={2}", nameof(HandleInterrupt),
                 Mode.ToString(), irqFlags2.ToString());
@@ -174,7 +173,7 @@ namespace RadioHead.RhRf69
             {
                 // A complete message has been received with good CRC
                 // Absolute value of the RSSI in dBm, 0.5dB steps.  RSSI = -RssiValue/2 [dBm]
-                LastRssi = (short)-(ReadFrom(REG_24_RssiValue) >> 1);
+                LastRssi = (short)-(_spi.ReadFrom(REG_24_RssiValue) >> 1);
 
                 LastPreambleTime = DateTime.UtcNow.Ticks;
 
@@ -205,32 +204,32 @@ namespace RadioHead.RhRf69
         {
             lock (RxLock)
             {
-                SelectDevice();
-                WriteByte(REG_00_Fifo); // Send the start address with the write mask off
-                var payloadLen = ReadByte(); // First byte is payload len (counting the headers)
+                _spi.SelectDevice();
+                _spi.WriteByte(REG_00_Fifo); // Send the start address with the write mask off
+                var payloadLen = _spi.ReadByte(); // First byte is payload len (counting the headers)
                 if (payloadLen <= MAX_ENCRYPTABLE_PAYLOAD_LEN && payloadLen >= HEADER_LEN)
                 {
-                    RxHeaderTo = ReadByte();
+                    RxHeaderTo = _spi.ReadByte();
                     // check the address
                     if (Promiscuous ||
                         RxHeaderTo == ThisAddress ||
                         RxHeaderTo == RadioHead.BroadcastAddress)
                     {
                         // get the rest of the headers
-                        RxHeaderFrom = ReadByte();
-                        RxHeaderId = ReadByte();
-                        RxHeaderFlags = ReadByte();
+                        RxHeaderFrom = _spi.ReadByte();
+                        RxHeaderId = _spi.ReadByte();
+                        RxHeaderFlags = _spi.ReadByte();
 
                         // and now the real payload
                         for (_rxBufLen = 0; _rxBufLen < (payloadLen - HEADER_LEN); _rxBufLen++)
-                            _rxBuf[_rxBufLen] = ReadByte();
+                            _rxBuf[_rxBufLen] = _spi.ReadByte();
 
                         RxGood++;
                         _rxBufValid = true;
                     }
                 }
 
-                DeselectDevice();
+                _spi.DeselectDevice();
             }
 
             // NOTE: Any junk remaining in the FIFO will be cleared next time we go to
@@ -248,16 +247,16 @@ namespace RadioHead.RhRf69
         {
             // Caution: must be ins standby.
             // setModeIdle();
-            WriteTo(REG_4E_Temp1, TEMP1_TEMPMEASSTART); // Start the measurement
+            _spi.WriteTo(REG_4E_Temp1, TEMP1_TEMPMEASSTART); // Start the measurement
 
             // Wait for the measurement to complete
-            var reg4E = ReadFrom(REG_4E_Temp1);
+            var reg4E = _spi.ReadFrom(REG_4E_Temp1);
             while ((reg4E & TEMP1_TEMPMEASRUNNING) != 0) // wait for bit 4 to equal 0
             {
-                reg4E = ReadFrom(REG_4E_Temp1);
+                reg4E = _spi.ReadFrom(REG_4E_Temp1);
             }
 
-            return (sbyte)(166 - ReadFrom(REG_4F_Temp2)); // Very approximate, based on observation
+            return (sbyte)(166 - _spi.ReadFrom(REG_4F_Temp2)); // Very approximate, based on observation
         }
 
         /// <summary>
@@ -271,9 +270,9 @@ namespace RadioHead.RhRf69
         {
             // FRF = FRF / FSTEP
             var frf = (uint)((center * 1000000.0) / FSTEP);
-            WriteTo(REG_07_FrfMsb, (byte)((frf >> 16) & 0xFF));
-            WriteTo(REG_08_FrfMid, (byte)((frf >> 8) & 0xFF));
-            WriteTo(REG_09_FrfLsb, (byte)(frf & 0xFF));
+            _spi.WriteTo(REG_07_FrfMsb, (byte)((frf >> 16) & 0xFF));
+            _spi.WriteTo(REG_08_FrfMid, (byte)((frf >> 8) & 0xFF));
+            _spi.WriteTo(REG_09_FrfLsb, (byte)(frf & 0xFF));
 
             return true;
         }
@@ -291,7 +290,7 @@ namespace RadioHead.RhRf69
             // spiWrite(REG_23_RssiConfig, RSSICONFIG_RSSISTART);
             // while (!(spiRead(REG_23_RssiConfig) & RSSICONFIG_RSSIDONE)) {}
 
-            return (sbyte)-(ReadFrom(REG_24_RssiValue) >> 1);
+            return (sbyte)-(_spi.ReadFrom(REG_24_RssiValue) >> 1);
         }
 
         /// <summary>
@@ -306,13 +305,13 @@ namespace RadioHead.RhRf69
 
             var clrMask = InvertByte(OPMODE_MODE);
 
-            var curValue = ReadFrom(REG_01_OpMode);
+            var curValue = _spi.ReadFrom(REG_01_OpMode);
             var newValue = (byte)(curValue & clrMask);
             newValue |= (byte)(mode & OPMODE_MODE);
-            WriteTo(REG_01_OpMode, newValue);
+            _spi.WriteTo(REG_01_OpMode, newValue);
 
             // Wait for Mode to change.
-            while ((ReadFrom(REG_27_IrqFlags1) & IRQFLAGS1_MODEREADY) == 0)
+            while ((_spi.ReadFrom(REG_27_IrqFlags1) & IRQFLAGS1_MODEREADY) == 0)
             {
             }
         }
@@ -337,8 +336,8 @@ namespace RadioHead.RhRf69
                 if (_power >= 18)
                 {
                     // If high power boost, return power amp to receive Mode
-                    WriteTo(REG_5A_TestPa1, TESTPA1_NORMAL);
-                    WriteTo(REG_5C_TestPa2, TESTPA2_NORMAL);
+                    _spi.WriteTo(REG_5A_TestPa1, TESTPA1_NORMAL);
+                    _spi.WriteTo(REG_5C_TestPa2, TESTPA2_NORMAL);
                 }
 
                 SetOpMode(_idleMode);
@@ -358,12 +357,12 @@ namespace RadioHead.RhRf69
                 if (_power >= 18)
                 {
                     // If high power boost, return power amp to receive Mode
-                    WriteTo(REG_5A_TestPa1, TESTPA1_NORMAL);
-                    WriteTo(REG_5C_TestPa2, TESTPA2_NORMAL);
+                    _spi.WriteTo(REG_5A_TestPa1, TESTPA1_NORMAL);
+                    _spi.WriteTo(REG_5C_TestPa2, TESTPA2_NORMAL);
                 }
 
                 // Set interrupt line 0 PAYLOADREADY
-                WriteTo(REG_25_DioMapping1, DIOMAPPING1_DIO0MAPPING_01);
+                _spi.WriteTo(REG_25_DioMapping1, DIOMAPPING1_DIO0MAPPING_01);
 
                 SetOpMode(OPMODE_MODE_RX); // Clears FIFO
                 Mode = RhModes.Rx;
@@ -383,12 +382,12 @@ namespace RadioHead.RhRf69
                 {
                     // Set high power boost Mode
                     // Note that OCP defaults to ON so no need to change that.
-                    WriteTo(REG_5A_TestPa1, TESTPA1_BOOST);
-                    WriteTo(REG_5C_TestPa2, TESTPA2_BOOST);
+                    _spi.WriteTo(REG_5A_TestPa1, TESTPA1_BOOST);
+                    _spi.WriteTo(REG_5C_TestPa2, TESTPA2_BOOST);
                 }
 
                 // Set interrupt line 0 PACKETSENT
-                WriteTo(REG_25_DioMapping1, DIOMAPPING1_DIO0MAPPING_00);
+                _spi.WriteTo(REG_25_DioMapping1, DIOMAPPING1_DIO0MAPPING_00);
 
                 SetOpMode(OPMODE_MODE_TX); // Clears FIFO
                 Mode = RhModes.Tx;
@@ -455,7 +454,7 @@ namespace RadioHead.RhRf69
                 paLevel = (byte)(PALEVEL_PA0ON | ((_power + 18) & PALEVEL_OUTPUTPOWER));
             }
 
-            WriteTo(REG_11_PaLevel, paLevel);
+            _spi.WriteTo(REG_11_PaLevel, paLevel);
         }
 
         /// <summary>
@@ -469,12 +468,12 @@ namespace RadioHead.RhRf69
         {
             _logger.LogTrace("{0}()", nameof(SetModemRegisters));
 
-            BurstWriteTo(REG_02_DataModul,
+            _spi.BurstWriteTo(REG_02_DataModul,
                 new[] { config.Reg02, config.Reg03, config.Reg04, config.Reg05, config.Reg06 });
 
-            BurstWriteTo(REG_19_RxBw, new[] { config.Reg19, config.Reg1A });
+            _spi.BurstWriteTo(REG_19_RxBw, new[] { config.Reg19, config.Reg1A });
 
-            WriteTo(REG_37_PacketConfig1, config.Reg37);
+            _spi.WriteTo(REG_37_PacketConfig1, config.Reg37);
         }
 
         /// <summary>
@@ -499,7 +498,7 @@ namespace RadioHead.RhRf69
         public void PollChanges()
         {
             var args = new PinValueChangedEventArgs(PinEventTypes.Rising, -1);
-            
+
             HandleInterrupt(this, args);
         }
 
@@ -542,10 +541,10 @@ namespace RadioHead.RhRf69
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var irqFlags2 = ReadFrom(REG_28_IrqFlags2);
+            var irqFlags2 = _spi.ReadFrom(REG_28_IrqFlags2);
             while ((irqFlags2 & IRQFLAGS2_PAYLOADREADY) == 0 && stopwatch.ElapsedMilliseconds < timeout)
             {
-                irqFlags2 = ReadFrom(REG_28_IrqFlags2);
+                irqFlags2 = _spi.ReadFrom(REG_28_IrqFlags2);
             }
 
             stopwatch.Stop();
@@ -608,25 +607,25 @@ namespace RadioHead.RhRf69
 
             lock (TxLock)
             {
-                SelectDevice();
+                _spi.SelectDevice();
 
                 // Send the start address with the write mask on
-                WriteByte(REG_00_Fifo | SPI_WRITE_MASK);
+                _spi.WriteByte(REG_00_Fifo | SPI_WRITE_MASK);
 
                 // Include length of headers
-                WriteByte((byte)(data.Length + HEADER_LEN));
+                _spi.WriteByte((byte)(data.Length + HEADER_LEN));
 
                 // First the 4 headers
-                WriteByte(TxHeaderTo);
-                WriteByte(TxHeaderFrom);
-                WriteByte(TxHeaderId);
-                WriteByte(TxHeaderFlags);
+                _spi.WriteByte(TxHeaderTo);
+                _spi.WriteByte(TxHeaderFrom);
+                _spi.WriteByte(TxHeaderId);
+                _spi.WriteByte(TxHeaderFlags);
 
                 // Now the payload
                 foreach (var d in data)
-                    WriteByte(d);
+                    _spi.WriteByte(d);
 
-                DeselectDevice();
+                _spi.DeselectDevice();
             }
 
             SetModeTx(); // Start the transmitter
@@ -650,7 +649,12 @@ namespace RadioHead.RhRf69
             return _changeDetectionMode == ChangeDetectionMode.Interrupt ?
                 base.WaitPacketSent() : PollPacketSent();
         }
-        
+
+        public override bool IsChannelActive()
+        {
+            throw new NotImplementedException();
+        }
+
         private bool PollPacketSent()
         {
             var args = new PinValueChangedEventArgs(PinEventTypes.None, -1);
@@ -671,8 +675,8 @@ namespace RadioHead.RhRf69
         /// <param name="length">Preamble length in bytes</param>
         public void SetPreambleLength(ushort length)
         {
-            WriteTo(REG_2C_PreambleMsb, (byte)(length >> 8));
-            WriteTo(REG_2D_PreambleLsb, (byte)(length & 0xFF));
+            _spi.WriteTo(REG_2C_PreambleMsb, (byte)(length >> 8));
+            _spi.WriteTo(REG_2D_PreambleLsb, (byte)(length & 0xFF));
         }
 
         /// <summary>
@@ -693,10 +697,10 @@ namespace RadioHead.RhRf69
             if (syncWords.Length > 4)
                 throw new ArgumentException($"{nameof(SetSyncWords)}: syncWords must be 1 to 4 octets long.");
 
-            var syncConfig = ReadFrom(REG_2E_SyncConfig);
+            var syncConfig = _spi.ReadFrom(REG_2E_SyncConfig);
             if (syncWords.Length >= 1 && syncWords.Length <= 4)
             {
-                BurstWriteTo(REG_2F_SyncValue1, syncWords);
+                _spi.BurstWriteTo(REG_2F_SyncValue1, syncWords);
                 syncConfig |= SYNCCONFIG_SYNCON;
             }
             else
@@ -704,7 +708,7 @@ namespace RadioHead.RhRf69
 
             syncConfig &= InvertByte(SYNCCONFIG_SYNCSIZE);
             syncConfig |= (byte)((syncWords.Length - 1) << 3);
-            WriteTo(REG_2E_SyncConfig, syncConfig);
+            _spi.WriteTo(REG_2E_SyncConfig, syncConfig);
         }
 
         /// <summary>
@@ -718,13 +722,13 @@ namespace RadioHead.RhRf69
         {
             if (key.Length == 16)
             {
-                BurstWriteTo(REG_3E_AesKey1, key);
+                _spi.BurstWriteTo(REG_3E_AesKey1, key);
 
-                WriteTo(REG_3D_PacketConfig2, (byte)(ReadFrom(REG_3D_PacketConfig2) | PACKETCONFIG2_AESON));
+                _spi.WriteTo(REG_3D_PacketConfig2, (byte)(_spi.ReadFrom(REG_3D_PacketConfig2) | PACKETCONFIG2_AESON));
             }
             else if (key.Length == 0)
             {
-                WriteTo(REG_3D_PacketConfig2, (byte)(ReadFrom(REG_3D_PacketConfig2) & ~PACKETCONFIG2_AESON));
+                _spi.WriteTo(REG_3D_PacketConfig2, (byte)(_spi.ReadFrom(REG_3D_PacketConfig2) & ~PACKETCONFIG2_AESON));
             }
             else
             {
@@ -761,7 +765,7 @@ namespace RadioHead.RhRf69
         {
             if (Mode != RhModes.Sleep)
             {
-                WriteTo(REG_01_OpMode, OPMODE_MODE_SLEEP);
+                _spi.WriteTo(REG_01_OpMode, OPMODE_MODE_SLEEP);
                 Mode = RhModes.Sleep;
             }
 

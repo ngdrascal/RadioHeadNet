@@ -26,7 +26,7 @@ namespace RadioHead
     /// Application developers are not expected to instantiate this class directly: 
     /// it is for the use of Driver developers.</para>
     /// </summary>
-    public abstract class RhSpiDriver : RhGenericDriver
+    public class RhSpiDriver
     {
         private static readonly object CriticalSection = new object();
 
@@ -48,7 +48,7 @@ namespace RadioHead
         /// <param name="spi">Reference to the SPI interface to use. The default is to use a
         /// default built-in Hardware interface.
         /// </param>
-        protected RhSpiDriver(GpioPin deviceSelectPin, SpiDevice spi)
+        public RhSpiDriver(GpioPin deviceSelectPin, SpiDevice spi)
         {
             _deviceSelectPin = deviceSelectPin;
             _spi = spi;
@@ -59,11 +59,8 @@ namespace RadioHead
         /// Make sure the Driver is properly configured before calling Init().
         /// </summary>
         /// <returns>true if initialisation succeeded.</returns>
-        public override bool Init()
+        public bool Init()
         {
-            if (!base.Init())
-                return false;
-
             DeselectDevice();
 
             return true;
@@ -73,7 +70,7 @@ namespace RadioHead
         /// Reads a byte from the SPI device.
         /// </summary>
         /// <returns>A byte read from the SPI device.</returns>
-        protected byte ReadByte()
+        public byte ReadByte()
         {
             byte value;
             lock (CriticalSection)
@@ -88,7 +85,7 @@ namespace RadioHead
         /// Writes a byte to the SPI device.
         /// </summary>
         /// <param name="value">The byte to be written to the SPI device.</param>
-        protected void WriteByte(byte value)
+        public void WriteByte(byte value)
         {
             lock (CriticalSection)
             {
@@ -101,7 +98,7 @@ namespace RadioHead
         /// </summary>
         /// <param name="reg">Register n umber</param>
         /// <returns>The value of the register</returns>
-        protected byte ReadFrom(byte reg)
+        public byte ReadFrom(byte reg)
         {
             byte value;
             lock (CriticalSection)
@@ -125,7 +122,7 @@ namespace RadioHead
         /// byte is returned.  It may or may not be meaningful depending on the type of
         /// device being accessed.
         /// </returns>
-        protected void WriteTo(byte reg, byte value)
+        public void WriteTo(byte reg, byte value)
         {
             lock (CriticalSection)
             {
@@ -148,7 +145,7 @@ namespace RadioHead
         /// byte is returned.  It may or may not be meaningful depending on the type of
         /// device being accessed.
         /// </returns>
-        protected byte BurstReadFrom(byte reg, out byte[] dest, byte len)
+        public byte BurstReadFrom(byte reg, out byte[] dest, byte len)
         {
             const byte status = 0;
             dest = new byte[len];
@@ -169,7 +166,7 @@ namespace RadioHead
         /// </summary>
         /// <param name="reg">Register number of the first register</param>
         /// <param name="buffer">Array of new register values to write.</param>
-        protected void BurstWriteTo(byte reg, byte[] buffer)
+        public void BurstWriteTo(byte reg, byte[] buffer)
         {
             lock (CriticalSection)
             {
@@ -185,7 +182,7 @@ namespace RadioHead
         /// Override this if you need an unusual way of selecting the slave before SPI
         /// transactions.
         /// </summary>
-        protected virtual void SelectDevice()
+        public virtual void SelectDevice()
         {
             _deviceSelectPin.Write(PinValue.Low);
         }
@@ -194,7 +191,7 @@ namespace RadioHead
         /// Override this if you need an unusual way of selecting the slave before SPI
         /// transactions.
         /// </summary>
-        protected virtual void DeselectDevice()
+        public virtual void DeselectDevice()
         {
             _deviceSelectPin.Write(PinValue.High);
         }

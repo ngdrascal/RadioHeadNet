@@ -57,11 +57,10 @@ namespace RadioHeadNF.TestDriver
             services.AddSingleton(typeof(Rf69), provider =>
             {
                 var gpioController = (GpioController)provider.GetRequiredService(typeof(GpioController));
-                var deviceSelectPin = gpioController.OpenPin(DeviceSelectPinNum, PinMode.Output);
-                var spiDevice = (SpiDevice)provider.GetRequiredService(typeof(SpiDevice));
                 var loggerFactory = (ILoggerFactory)provider.GetRequiredService(typeof(ILoggerFactory));
                 var logger = loggerFactory.CreateLogger("Rf69");
-                var radio = new Rf69(deviceSelectPin, spiDevice, ChangeDetectionMode.Interrupt, logger);
+                var rhSpiDriver = (RhSpiDriver)provider.GetRequiredService(typeof(RhSpiDriver));
+                var radio = new Rf69(rhSpiDriver, ChangeDetectionMode.Interrupt, logger);
                 var interruptPin = gpioController.OpenPin(InterruptPinNum, PinMode.InputPullUp);
                 interruptPin.ValueChanged += radio.HandleInterrupt;
                 return radio;

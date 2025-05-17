@@ -1,11 +1,9 @@
-﻿using System;
-using System.Device.Gpio;
+﻿using System.Device.Gpio;
 using System.Device.Spi;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using RadioHead;
 using RadioHead.RhRf95;
-using UnitsNet;
 using UnitTestLogger;
 
 namespace RadioHeadIot.Tests;
@@ -49,8 +47,9 @@ public class Rf95Tests
         _registers = new RfRegistersFake(_initialRegValues, deviceSelectPin, _loggerFactory);
         var spiConnSetting = new SpiConnectionSettings(0);
         var spiDevice = new SpiDeviceFake(spiConnSetting, controller, _registers, _loggerFactory);
+        var spiDriver = new RhSpiDriver(deviceSelectPin, spiDevice);
         var logger = _loggerFactory.CreateLogger<Rf95>();
-        _radio = new Rf95(deviceSelectPin, spiDevice, ChangeDetectionMode.Interrupt, logger);
+        _radio = new Rf95(spiDriver, ChangeDetectionMode.Interrupt, logger);
 
         _interruptPin = controller.OpenPin(6);
         _interruptPin.ValueChanged += _radio.HandleInterrupt;
@@ -72,7 +71,7 @@ public class Rf95Tests
     {
         // ARRANGE:
         _registers.DoAfterWrite(Rf95.REG_01_OP_MODE, 
-                                i => _registers.Poke(Rf95.REG_01_OP_MODE, Rf95.MODE_TX));
+                                _ => _registers.Poke(Rf95.REG_01_OP_MODE, Rf95.MODE_TX));
 
         // ACT:
         var actual = _radio.Init();

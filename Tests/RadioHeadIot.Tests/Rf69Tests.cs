@@ -47,8 +47,9 @@ public class Rf69Tests
         _registers = new RfRegistersFake(_initialRegValues, deviceSelectPin, _loggerFactory);
         var spiConnSetting = new SpiConnectionSettings(0);
         var spiDevice = new SpiDeviceFake(spiConnSetting, controller, _registers, _loggerFactory);
+        var spiDriver = new RhSpiDriver(deviceSelectPin, spiDevice);
         var logger = _loggerFactory.CreateLogger<Rf69>();
-        _radio = new Rf69(deviceSelectPin, spiDevice, ChangeDetectionMode.Interrupt, logger);
+        _radio = new Rf69(spiDriver, ChangeDetectionMode.Interrupt, logger);
 
         _interruptPin = controller.OpenPin(6);
         _interruptPin.ValueChanged += _radio.HandleInterrupt;

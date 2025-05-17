@@ -107,7 +107,7 @@ public static class HostExtensions
             var gpioConfig = provider.GetRequiredService<IOptions<GpioConfiguration>>().Value;
 
             var gpioController = provider.GetRequiredService<GpioController>();
-            var deviceSelectPin = spiConfig.ChipSelectLine == RPiChipSelectLines.Disabled ? 
+            var deviceSelectPin = spiConfig.ChipSelectLine == RPiChipSelectLines.Disabled ?
                 gpioConfig.DeviceSelectPin : 27;
 
             var pin = gpioController.OpenPin(deviceSelectPin, PinMode.Output, PinValue.High);
@@ -169,6 +169,13 @@ public static class HostExtensions
             return spiDevice;
         });
 
+        builder.Services.AddSingleton<RhSpiDriver>(provider =>
+        {
+            var spiDevice = provider.GetRequiredService<SpiDevice>();
+            var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
+            return new RhSpiDriver(deviceSelectPin, spiDevice);
+        });
+
         return builder;
     }
 
@@ -189,12 +196,11 @@ public static class HostExtensions
         {
             var radioConfig = provider.GetRequiredService<IOptions<RadioConfiguration>>().Value;
 
-            var spiDevice = provider.GetRequiredService<SpiDevice>();
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<Rf69>();
 
-            var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
-            var radio = new Rf69(deviceSelectPin, spiDevice, radioConfig.ChangeDetectionMode, logger);
+            var rhSpiDriver = provider.GetRequiredService<RhSpiDriver>();
+            var radio = new Rf69(rhSpiDriver, radioConfig.ChangeDetectionMode, logger);
 
             if (radioConfig.ChangeDetectionMode == ChangeDetectionMode.Polling)
                 return radio;
@@ -219,12 +225,11 @@ public static class HostExtensions
         {
             var radioConfig = provider.GetRequiredService<IOptions<RadioConfiguration>>().Value;
 
-            var spiDevice = provider.GetRequiredService<SpiDevice>();
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             var logger = loggerFactory.CreateLogger<Rf95>();
 
-            var deviceSelectPin = provider.GetRequiredKeyedService<GpioPin>("DeviceSelectPin");
-            var radio = new Rf95(deviceSelectPin, spiDevice, radioConfig.ChangeDetectionMode, logger);
+            var rhSpiDriver = provider.GetRequiredService<RhSpiDriver>();
+            var radio = new Rf95(rhSpiDriver, radioConfig.ChangeDetectionMode, logger);
 
             if (radioConfig.ChangeDetectionMode == ChangeDetectionMode.Polling)
                 return radio;

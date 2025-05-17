@@ -1,10 +1,4 @@
-﻿// ReSharper disable RedundantUsingDirective
-// ReSharper disable InconsistentNaming
-
-using System;
-using System.Device;
-using System.Diagnostics;
-using System.Threading;
+﻿/*using System.Diagnostics;
 
 namespace RadioHead
 {
@@ -28,22 +22,14 @@ namespace RadioHead
     /// -FLAGS A bitmask of flags. The most significant 4 bits are reserved for use by RadioHead. The least
     /// significant 4 bits are reserved for applications.
     /// </summary>
-    public abstract class RhGenericDriver
+    public abstract class DriverBase
     {
-        private readonly object _criticalSection = new object();
+        private readonly object _modeLock = new();
         private RhModes _mode;
+        private readonly object _txGoodLock = new();
         private ushort _txGood;
 
-        // Defines bits of the FLAGS header reserved for use by the RadioHead library and 
-        // the flags Available for use by applications
-        protected const byte RH_FLAGS_RESERVED = 0xf0;
-        protected const byte RH_FLAGS_APPLICATION_SPECIFIC = 0x0F;
-        protected const byte RH_FLAGS_NONE = 0;
-
-        // Default timeout for WaitCAD() in ms
-        protected const int RH_CAD_DEFAULT_TIMEOUT = 10000;
-
-        protected RhGenericDriver()
+        protected DriverBase()
         {
             Mode = RhModes.Initialising;
             ThisAddress = RadioHead.BroadcastAddress;
@@ -63,17 +49,14 @@ namespace RadioHead
         /// Make sure the Driver is properly configured before calling Init().
         /// <return>true if initialisation succeeded.</return>
         /// </summary>
-        public virtual bool Init()
-        {
-            return true;
-        }
+        public abstract bool Init();
 
         /// <summary>
         /// Tests whether a new message is Available
         /// from the Driver. 
         /// On most drivers, if there is an uncollected received message, and there is no message
-        /// currently bing transmitted, this will also put the Driver into RhModes.Rx Mode until
-        /// a message is actually received by the transport, when it will be returned to RhModes.Idle.
+        /// currently bing transmitted, this will also put the Driver into DriverModes.Rx Mode until
+        /// a message is actually received by the transport, when it will be returned to DriverModes.Idle.
         /// This can be called multiple times in a timeout loop.
         /// </summary>
         /// <return>true if a new, complete, error-free uncollected message is Available to be
@@ -125,7 +108,7 @@ namespace RadioHead
         {
             while (!Available())
             {
-                RadioHead.Yield();
+                Thread.Sleep(0);
                 if (pollDelay != 0)
                 {
                     Thread.Sleep(pollDelay);
@@ -139,7 +122,10 @@ namespace RadioHead
         public virtual bool WaitPacketSent()
         {
             while (Mode == RhModes.Tx)
-                RadioHead.Yield();
+            {
+                Thread.Sleep(0);
+            }
+
             return true;
         }
 
@@ -157,11 +143,13 @@ namespace RadioHead
             stopwatch.Start();
             while (Mode == RhModes.Tx && stopwatch.ElapsedMilliseconds < timeout)
             {
-                RadioHead.Yield();
+                Thread.Sleep(0);
             }
+            stopwatch.Stop();
 
             return Mode != RhModes.Tx;
         }
+
         /// <summary>
         /// Starts the receiver and blocks until a received message is Available or a timeout.
         /// Default implementation calls Available() repeatedly until it returns true;
@@ -183,7 +171,7 @@ namespace RadioHead
                     return true;
                 }
 
-                RadioHead.Yield();
+                Thread.Sleep(0);
 
                 if (pollDelay != 0)
                 {
@@ -216,7 +204,7 @@ namespace RadioHead
         /// the channel is clear within the timeout period (or the timeout period is 0), else
         /// returns false.
         /// </returns>
-        public virtual bool WaitCAD()
+        protected virtual bool WaitCad()
         {
             if (CadTimeout == 0)
                 return true;
@@ -257,10 +245,7 @@ namespace RadioHead
         /// IsChannelActive()) shows the current radio channel as active, else false. If
         /// there is no radio-specific CAD, returns false.
         /// </returns>
-        public virtual bool IsChannelActive()
-        {
-            return false;
-        }
+        public abstract bool IsChannelActive();
 
         /// <summary>
         /// Sets the address of this node. Defaults to 0xFF. Subclasses or the user may want
@@ -313,14 +298,14 @@ namespace RadioHead
         {
             get
             {
-                lock (_criticalSection)
+                lock (_modeLock)
                 {
                     return _mode;
                 }
             }
             set
             {
-                lock (_criticalSection)
+                lock (_modeLock)
                 {
                     _mode = value;
                 }
@@ -337,10 +322,7 @@ namespace RadioHead
         /// driver, and if Sleep Mode was successfully entered. If Sleep Mode is not
         /// supported, return false.
         /// </returns>
-        public virtual bool Sleep()
-        {
-            return false;
-        }
+        public abstract bool Sleep();
 
         /// <summary>
         /// The count of the number of bad received packets (ie packets with bad lengths,
@@ -361,14 +343,14 @@ namespace RadioHead
         {
             get
             {
-                lock (_criticalSection)
+                lock (_txGoodLock)
                 {
                     return _txGood;
                 }
             }
             protected set
             {
-                lock (_criticalSection)
+                lock (_txGoodLock)
                 {
                     _txGood = value;
                 }
@@ -376,3 +358,4 @@ namespace RadioHead
         }
     }
 }
+*/
