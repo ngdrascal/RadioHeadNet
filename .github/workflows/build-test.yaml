@@ -18,14 +18,17 @@ jobs:
       with:
         dotnet-version: 9.0.x
     
-    - name: Restore dependencies
-      run: dotnet restore RadioHeadNet.sln
+    # - name: Restore dependencies
+    #   run: dotnet restore RadioHeadNet.sln
       
-    - name: Build Configuration Library
-      run: dotnet build ${{github.workspace}}/Tests/RadioHeadIot.Configuration.Tests/RadioHeadIot.Configuration.Tests.csproj --no-restore
+    # - name: Build Configuration Library
+    #   run: dotnet build ${{github.workspace}}/Tests/RadioHeadIot.Configuration.Tests/RadioHeadIot.Configuration.Tests.csproj --no-restore
 
-    - name: Build Core Library
-      run: dotnet build ${{github.workspace}}/Tests/RadioHeadIot.Tests/RadioHeadIot.Tests.csproj --no-restore
+    # - name: Build Core Library
+    #   run: dotnet build ${{github.workspace}}/Tests/RadioHeadIot.Tests/RadioHeadIot.Tests.csproj --no-restore
     
-    - name: Test
+    - name: test Core Library
+      run: dotnet test ${{github.workspace}}/Tests/RadioHeadIot.Tests/RadioHeadIot.Tests.csproj --verbosity normal
+
+    - name: Test Configuration Library
       run: dotnet test ${{github.workspace}}/Tests/RadioHeadIot.Configuration.Tests/RadioHeadIot.Configuration.Tests.csproj --verbosity normal
