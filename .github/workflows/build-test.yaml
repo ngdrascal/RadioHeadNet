@@ -32,4 +32,4 @@ jobs:
     needs: build
     steps:
     - name: Test
-      run: dotnet test ${{github.workspace}}/Tests/RadioHeadIot.Configuration.Tests/RadioHeadIot.Configuration.Tests.csproj --no-build --verbosity normal
+      run: dotnet test ${{github.workspace}}/Tests/RadioHeadIot.Configuration.Tests/RadioHeadIot.Configuration.Tests.csproj --verbosity normal
