@@ -1,3 +1,5 @@
+[![Build and Test](https://github.com/ngdrascal/RadioHeadNet/actions/workflows/build-test.yaml/badge.svg)](https://github.com/ngdrascal/RadioHeadNet/actions/workflows/build-test.yaml)
+
 # RadioHeadNet
 This is a port of the RadioHead library to .NET nanoFramework and .NET IOT. It is not a 100% port, but it has been tested with the following devices:
 
