@@ -22,8 +22,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore RadioHeadNet.sln
       
-    - name: Build
+    - name: Build Configuration Library
       run: dotnet build ${{github.workspace}}/Tests/RadioHeadIot.Configuration.Tests/RadioHeadIot.Configuration.Tests.csproj --no-restore
+
+    - name: Build Core Library
+      run: dotnet build ${{github.workspace}}/Tests/RadioHeadIot.Tests/RadioHeadIot.Tests.csproj --no-restore
     
     # - name: Test
     #   run: dotnet test NPacketRadios.sln --no-build --verbosity normal
