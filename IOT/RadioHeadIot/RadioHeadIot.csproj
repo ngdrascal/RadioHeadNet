@@ -15,7 +15,6 @@
       <PackageReference Include="System.Text.Json" Version="9.0.4" />
    </ItemGroup>
 
-
    <Import Project="..\..\RadioHead\RadioHead.projitems" Label="Shared" />
 
 </Project>

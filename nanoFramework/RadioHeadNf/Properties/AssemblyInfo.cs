@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("RadioHeadNF")]
-[assembly: AssemblyDescription(".NET nanoframework port of the RadioHead library")]
+[assembly: AssemblyTitle("CSharp.TestApplication")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("RadioHeadNet")]
-[assembly: AssemblyCopyright("Copyright ©Richard Dodd 2025")]
+[assembly: AssemblyProduct("CSharp.TestApplication")]
+[assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
