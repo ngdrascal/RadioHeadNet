@@ -219,11 +219,11 @@ namespace RadioHead.RhRf95
             }
 
             // buffer = new byte[MAX_PAYLOAD_LEN];
-            buffer = new byte[_bufLen];
+            buffer = new byte[_bufLen - HEADER_LEN];
 
             lock (CriticalSection)
             {
-                Array.Copy(_buf, buffer, _bufLen);
+                Array.Copy(_buf, HEADER_LEN, buffer, 0, _bufLen - HEADER_LEN);
 
                 ClearRxBuf(); // This message accepted and cleared
             }

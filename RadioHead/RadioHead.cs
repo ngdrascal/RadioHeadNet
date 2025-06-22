@@ -4,7 +4,7 @@ using System.Device;
 
 namespace RadioHead
 {
-    internal static class RadioHead
+    public static class RadioHead
     {
         public const byte BroadcastAddress = 0xFF;
 
