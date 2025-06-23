@@ -60,26 +60,13 @@ namespace Rf95SharedIot
                 return false;
             }
 
-            // Defaults after init are
-            //    - frequency: 434.0MHz
-            //    - modulation: GFSK_Rb250Fd250
-            //    - power: +13dbM (for low power module)
-            //    - encryption: none
-
             if (!Radio.SetFrequency(RadioConfig.Frequency))
             {
                 Logger.LogWarning("SetFrequency failed");
                 return false;
             }
 
-            // If you are using a high power RF95 e.g. - RFM95HW, you *must* set a Tx power with the
-            // isHighPowerModule flag set like this:
             Radio.SetTxPower(RadioConfig.PowerLevel, RadioConfig.IsHighPowered);
-
-            // The encryption key has to be the same as the one in the server
-            // var key = RadioConfig.EncryptionKey;
-            // if (key.Length > 0)
-            //     Radio.SetEncryptionKey(key);
 
             Radio.SetChangeDetectionMode(RadioConfig.ChangeDetectionMode);
 

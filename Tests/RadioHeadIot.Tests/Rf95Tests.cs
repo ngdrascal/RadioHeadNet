@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using RadioHead;
 using RadioHead.RhRf95;
+using UnitsNet;
 using UnitTestLogger;
 
 namespace RadioHeadIot.Tests;
@@ -58,11 +59,6 @@ public class Rf95Tests
         packet.AddRange(data);
 
         return packet.ToArray();
-    }
-
-    private static byte InvertByte(byte input)
-    {
-        return (byte)~input;
     }
 
     [SetUp]
@@ -416,5 +412,34 @@ public class Rf95Tests
 
         // ASSERT:
         Assert.That(actual, Is.True);
+    }
+
+    // GIVEN: an initialized instance of the Rf95 class
+    // WHEN: SetTxPower() is called
+    // THEN: returns true
+    [TestCase(true, 16, 0x7F, Rf95.PA_DAC_DISABLE)]
+    [TestCase(true, 15, 0x7F, Rf95.PA_DAC_DISABLE)]
+    [TestCase(true, 0, 0x70, Rf95.PA_DAC_DISABLE)]
+    [TestCase(true, -1, 0x70, Rf95.PA_DAC_DISABLE)]
+
+    [TestCase(false, 21, 0x8F, Rf95.PA_DAC_ENABLE)]
+    [TestCase(false, 20, 0x8F, Rf95.PA_DAC_ENABLE)]
+    [TestCase(false, 18, 0x8D, Rf95.PA_DAC_ENABLE)]
+    [TestCase(false, 2,  0x80, Rf95.PA_DAC_DISABLE)]
+    [TestCase(false, 1,  0x80, Rf95.PA_DAC_DISABLE)]
+
+    public void SetTxPower(bool useRfo, sbyte powerLevel, byte expectedConfig, byte expectedDac)
+    {
+        // ARRANGE:
+        _radio.Init();
+        _registers.Poke(Rf95.REG_09_PA_CONFIG, 0xFF); // reset PA config register
+        _registers.Poke(Rf95.REG_4D_PA_DAC, Rf95.PA_DAC_DISABLE); // reset PA DAC register
+
+        // ACT:
+        _radio.SetTxPower(powerLevel, useRfo);
+
+        // ASSERT:
+        Assert.That(_registers.Peek(Rf95.REG_09_PA_CONFIG), Is.EqualTo(expectedConfig));
+        Assert.That(_registers.Peek(Rf95.REG_4D_PA_DAC), Is.EqualTo(expectedDac));
     }
 }

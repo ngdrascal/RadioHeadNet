@@ -432,7 +432,7 @@ namespace RadioHead.RhRf95
 
                 // For PA_DAC_ENABLE, manual says '+20dBm on PA_BOOST when OutputPower=0x0F'
                 // PA_DAC_ENABLE actually adds about 3dBm to all power levels. We will use it
-                // for 8, 19 and 20dBm
+                // for 18, 19 and 20dBm
                 if (power > 17)
                 {
                     _spi.WriteTo(REG_4D_PA_DAC, PA_DAC_ENABLE);

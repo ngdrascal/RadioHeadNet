@@ -3,12 +3,9 @@ using RadioHead;
 
 namespace RadioHeadIot.Configuration;
 
-public class RadioConfiguration
+public class Rf95Configuration
 {
     public const string SectionName = "Radio";
-
-    [Required]
-    public RadioModels Model { get; set; }
 
     [Required]
     public float Frequency { get; set; } = 0.0f;
@@ -21,7 +18,4 @@ public class RadioConfiguration
 
     [Required]
     public ChangeDetectionMode ChangeDetectionMode { get; set; } = ChangeDetectionMode.Polling;
-
-    [MaxLength(16)]
-    public byte[] EncryptionKey { get; set; } = [];
 }
