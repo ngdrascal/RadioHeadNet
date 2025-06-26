@@ -137,6 +137,11 @@ internal class RfRegistersFake
         _registers[regIndex].Value = value;
     }
 
+    public void Poke(byte regIndex, sbyte value)
+    {
+        _registers[regIndex].Value = (byte)value;
+    }
+
     public void DoOnRead(byte regIndex, Action<int> action)
     {
         _registers[regIndex].OnReadAction = action;

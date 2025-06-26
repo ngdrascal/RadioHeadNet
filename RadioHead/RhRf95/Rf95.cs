@@ -814,14 +814,11 @@ namespace RadioHead.RhRf95
                     RxBad++;
                     ClearRxBuf();
                 }
-
                 // It is possible to get RX_DONE and CRC_ERROR and VALID_HEADER all at once
                 // so this must be an else
                 else if (Mode == RhModes.Rx && ((irqFlags & RX_DONE) != 0))
                 {
                     // Packet received, no CRC error
-                    //	Serial.println("R");
-                    // Have received a packet
                     var len = _spi.ReadFrom(REG_13_RX_NB_BYTES);
 
                     // Reset the fifo read ptr to the beginning of the packet
@@ -831,7 +828,7 @@ namespace RadioHead.RhRf95
 
                     // Remember the last signal-to-noise ratio, LORA mode
                     // Per page 111, SX1276/77/78/79 datasheet
-                    LastSnr = (sbyte)(_spi.ReadFrom(REG_19_PKT_SNR_VALUE) / 4);
+                    LastSnr = (sbyte)((sbyte)_spi.ReadFrom(REG_19_PKT_SNR_VALUE) / 4);
 
                     // Remember the RSSI of this packet, LORA mode
                     // this is according to the doc, but is it really correct?
@@ -855,13 +852,11 @@ namespace RadioHead.RhRf95
                 }
                 else if (Mode == RhModes.Tx && ((irqFlags & TX_DONE) != 0))
                 {
-                    //	Serial.println("T");
                     TxGood++;
                     SetModeIdle();
                 }
                 else if (Mode == RhModes.Cad && ((irqFlags & CAD_DONE) != 0))
                 {
-                    //	Serial.println("C");
                     Cad = (irqFlags & CAD_DETECTED) != 0;
                     SetModeIdle();
                 }
@@ -872,8 +867,8 @@ namespace RadioHead.RhRf95
 
                 // Sigh: on some processors, for some unknown reason, doing this only once does not actually
                 // clear the radio's interrupt flag. So we do it twice. Why?
-                _spi.WriteTo(REG_12_IRQ_FLAGS, 0xff); // Clear all IRQ flags
-                _spi.WriteTo(REG_12_IRQ_FLAGS, 0xff); // Clear all IRQ flags
+                _spi.WriteTo(REG_12_IRQ_FLAGS, 0xFF); // Clear all IRQ flags
+                _spi.WriteTo(REG_12_IRQ_FLAGS, 0xFF); // Clear all IRQ flags
             }
         }
 

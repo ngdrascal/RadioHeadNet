@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using RadioHead;
 using RadioHead.RhRf95;
-using UnitsNet;
 using UnitTestLogger;
 
 namespace RadioHeadIot.Tests;
@@ -416,7 +415,8 @@ public class Rf95Tests
 
     // GIVEN: an initialized instance of the Rf95 class
     // WHEN: SetTxPower() is called
-    // THEN: returns true
+    // THEN: the PA config register is set correctly
+    //       AND the PA DAC register is set correctly
     [TestCase(true, 16, 0x7F, Rf95.PA_DAC_DISABLE)]
     [TestCase(true, 15, 0x7F, Rf95.PA_DAC_DISABLE)]
     [TestCase(true, 0, 0x70, Rf95.PA_DAC_DISABLE)]
@@ -425,9 +425,8 @@ public class Rf95Tests
     [TestCase(false, 21, 0x8F, Rf95.PA_DAC_ENABLE)]
     [TestCase(false, 20, 0x8F, Rf95.PA_DAC_ENABLE)]
     [TestCase(false, 18, 0x8D, Rf95.PA_DAC_ENABLE)]
-    [TestCase(false, 2,  0x80, Rf95.PA_DAC_DISABLE)]
-    [TestCase(false, 1,  0x80, Rf95.PA_DAC_DISABLE)]
-
+    [TestCase(false, 2, 0x80, Rf95.PA_DAC_DISABLE)]
+    [TestCase(false, 1, 0x80, Rf95.PA_DAC_DISABLE)]
     public void SetTxPower(bool useRfo, sbyte powerLevel, byte expectedConfig, byte expectedDac)
     {
         // ARRANGE:
@@ -441,5 +440,40 @@ public class Rf95Tests
         // ASSERT:
         Assert.That(_registers.Peek(Rf95.REG_09_PA_CONFIG), Is.EqualTo(expectedConfig));
         Assert.That(_registers.Peek(Rf95.REG_4D_PA_DAC), Is.EqualTo(expectedDac));
+    }
+
+    // GIVEN: an initialized instance of the Rf95 class
+    // WHEN: the InterruptHandler() method is triggered by a received data packet
+    // THEN: register REG_12_IRQ_FLAGS equals 0xFF
+    //       AND register REG_0D_FIFO_ADDR_PTR equals the start address of the data buffer
+    //       AND the LastSnr property is set to the correct value
+    //       AND the LastRssi property is set to the correct value
+    [TestCase(-64, -16, 60, -120)]
+    public void InterruptHandlerOnRx(sbyte snrReg, sbyte expectedSnr, byte rssiReg, short expectedRssi)
+    {
+        // ARRANGE:
+        _radio.Init();
+        
+        byte[] expected = [1, 2, 3, 4];
+        var packet = BuildPacket(expected);
+        MockReceiveData(packet);
+
+        // set the start address of the data buffer
+        const byte addrReg = 0x80;
+        _registers.Poke(Rf95.REG_10_FIFO_RX_CURRENT_ADDR, addrReg);
+        _registers.Poke(Rf95.REG_19_PKT_SNR_VALUE, snrReg);
+        _registers.Poke(Rf95.REG_1A_PKT_RSSI_VALUE, rssiReg);
+
+        _radio.SetModeRx();
+
+        // ACT:
+        _radio.HandleInterrupt(this, new PinValueChangedEventArgs(PinEventTypes.Falling, 1));
+
+        // ASSERT:
+        Assert.That(_registers.Peek(Rf95.REG_12_IRQ_FLAGS), Is.EqualTo((byte)0xFF));
+        Assert.That(_registers.Peek(Rf95.REG_0D_FIFO_ADDR_PTR), Is.EqualTo(addrReg));
+        Assert.That(_radio.LastSnr, Is.EqualTo(expectedSnr));
+        Assert.That(_radio.LastRssi, Is.EqualTo(expectedRssi));
+        Assert.That(_radio.RxGood, Is.EqualTo(1));
     }
 }
